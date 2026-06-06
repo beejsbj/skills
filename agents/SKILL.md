@@ -1,18 +1,18 @@
 ---
 name: agents
-description: Choose and spawn Claude or Codex agents as ephemeral helpers or durable root sessions. Use when the user says use an agent, use claude, use codex, use opus, ask sonnet, ask haiku, spawn a parent/root session, resume an agent session, fork a session, create an ephemeral helper, or hand work to another Claude or Codex agent.
+description: Choose and spawn agents or sessions as ephemeral helpers or durable root sessions. Use when the user says use an agent, start a session, spawn a parent/root session, resume an agent session, fork a session, create an ephemeral helper, hand work to another agent, use claude, use codex, use opus, ask sonnet, or ask haiku.
 ---
 
 # Agents
 
-Use one simple topology:
+Use one simple topology for agents and sessions:
 
 - **Ephemeral helper**: a bounded agent call that returns an answer here and does not need durable history.
 - **Root session**: a parent agent session with durable history that can be resumed, forked, attached to, or inspected later.
 
 Everything else is a modifier:
 
-- **Provider**: Claude or Codex.
+- **Provider**: the CLI or harness used to run the agent.
 - **Lineage**: fresh, resumed, or forked.
 - **Body**: current checkout, worktree, sandbox, or another working directory.
 - **Intent**: ask, review, do, monitor, or coordinate.
@@ -24,9 +24,9 @@ Do not treat worktree, ask, review, or do as topology modes. Worktree is where t
 - Use an **ephemeral helper** for quick ask/review/summarize/classify/debug-hypothesis work where only the returned result matters.
 - Use a **root session** for work the user may want to see, resume, fork, attach to, or hand off later.
 - Use a worktree/body modifier when independent edits may collide with the current checkout.
-- Use the provider the user named. If unnamed, choose the provider whose strengths fit the task, or stay in the current agent for small work.
+- Use the provider the user named. If unnamed, choose the provider whose strengths fit the task, or stay in the current session for small work.
 
-## Claude CLI
+## Claude CLI Examples
 
 ```bash
 # Ephemeral helper
@@ -56,7 +56,7 @@ claude --worktree feature-auth --bg --name "feature-auth" \
   "Implement this bounded change and report verification."
 ```
 
-## Codex CLI
+## Codex CLI Examples
 
 ```bash
 # Ephemeral helper
