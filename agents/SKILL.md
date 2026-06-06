@@ -15,6 +15,7 @@ Everything else is a modifier:
 - **Provider**: the CLI or harness used to run the agent.
 - **Lineage**: fresh, resumed, or forked.
 - **Body**: current checkout, worktree, sandbox, or another working directory.
+- **Run configuration**: model, effort/thinking level, output format, permissions, and tool access.
 - **Intent**: ask, review, do, monitor, or coordinate.
 
 Do not treat worktree, ask, review, or do as topology modes. Worktree is where the agent acts. Ask/do is what the agent is asked to do.
@@ -26,19 +27,29 @@ Do not treat worktree, ask, review, or do as topology modes. Worktree is where t
 - Use a worktree/body modifier when independent edits may collide with the current checkout.
 - Use the provider the user named. If unnamed, choose the provider whose strengths fit the task, or stay in the current session for small work.
 
+## Model And Effort
+
+- Use the user's named model or effort exactly when provided.
+- Use stronger models and higher effort for architecture, security, ambiguous bugs, code review with real risk, and handoffs that may guide implementation.
+- Use faster/cheaper models and lower effort for extraction, summarization, classification, simple checks, and disposable helper passes.
+- Prefer native CLI flags when available, such as Claude `--model` and `--effort`.
+- For Codex, use `--model` when the user names a Codex model. Use config overrides only when the local Codex CLI/provider documents the relevant setting.
+- Keep effort lower for ephemeral helpers unless disagreement or uncertainty would be expensive.
+- Increase effort for durable root sessions that will become a source of truth for later work.
+
 ## Claude CLI Examples
 
 ```bash
 # Ephemeral helper
-claude -p --no-session-persistence --model sonnet \
+claude -p --no-session-persistence --model sonnet --effort medium \
   "Review this plan. Return findings only."
 
 # Root session in print mode
-claude -p --name "auth-review" --model opus \
+claude -p --name "auth-review" --model opus --effort high \
   "Review this architecture and keep the session available for follow-up."
 
 # Managed/background root session
-claude --bg --name "auth-review" \
+claude --bg --name "auth-review" --model opus --effort high \
   "Review this architecture and keep working until you have findings."
 
 # Resume/fork root session
@@ -66,6 +77,8 @@ codex exec --cd "$PWD" --sandbox read-only --ephemeral \
 # Root session
 codex exec --cd "$PWD" --sandbox read-only \
   "Review this architecture and keep the session available for follow-up."
+
+# Add --model <model> when the user names a Codex model.
 
 # Resume root session
 codex exec resume <thread-id> \
