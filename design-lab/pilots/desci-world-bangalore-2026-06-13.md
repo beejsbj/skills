@@ -16,7 +16,7 @@ Use Design Lab on `/Users/burooj/Projects/desci-world-bangalore` as a real-proje
 
 The code / live style-guide finish line has a clear winning attempt.
 
-The Figma Design System File finish line is still blocked. User selected `Burooj's Figma`, but `create_new_file` rejected the exact `whoami` plan key and the local Figma app did not respond through Computer Use.
+The Figma Design System File finish line now has a completed bj Starter-compatible v1. The original `Burooj's Figma` plan key failed, the user redirected the target to `bj`, and the Figma file was created and populated there.
 
 ## Attempt Matrix
 
@@ -25,8 +25,9 @@ The Figma Design System File finish line is still blocked. User selected `Burooj
 | code/style-guide | GPT 5.5 low | `/Users/burooj/Projects/desci-world-bangalore-code-gptlow`, branch `design-lab-code-gptlow`, commit `d787697` | shallow proof; useful but not winner | 7 changed files, `pages/style-guide.vue`, partial `docs/design-lab` artifacts; build not verified because deps were missing |
 | code/style-guide | GPT 5.5 high | `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`, branch `design-lab-code-gpthigh`, head `9fd5054` | winner | full artifact set, `EventRow.vue` extraction, `Footer.vue` proof prop, day/night theme correction, verified build/browser |
 | code/style-guide | Minimax M3 | `/Users/burooj/Projects/desci-world-bangalore-code-minimax`, branch `design-lab-code-minimax` | failed/incomplete; useful failure signal | dirty partial extraction plus unwanted `package.json` package-manager field; no style guide, docs, verification, or commit |
-| Figma DSF | GPT 5.5 low | native subagent plan | plan only | no Figma file created; originally blocked by team choice, now blocked by connector/UI file-creation failure |
-| Figma DSF | GPT 5.5 high | native subagent plan | stronger plan only | no Figma file created; originally blocked by team choice, now blocked by connector/UI file-creation failure |
+| Figma DSF | GPT 5.5 low | native subagent plan | plan only | no Figma file created in that attempt |
+| Figma DSF | GPT 5.5 high | native subagent plan | stronger plan only | informed final build scope and taxonomy |
+| Figma DSF | Main Codex + Figma plugin | `bj`, file `z4ROGt453f8rB0wz24MerQ` | completed Starter-compatible v1 | created DSF pages, 39 variables, five text styles, and verified screenshots |
 | Figma DSF | Minimax M3 | opencode session `ses_13dd0a90dffeBbRv9le3lQ8TQo` | concrete plan only | session title `Design-lab Figma finish-line plan`; no files changed; no Figma file created |
 
 ## Winning Code Attempt
@@ -120,7 +121,7 @@ Useful lesson:
 
 ## Figma Track
 
-Figma auth is available, but actual file creation is blocked by connector/UI behavior.
+Figma auth is available. The original selected team was not usable through the connector, but the user redirected the target to `bj` and the DSF was created there.
 
 Known accessible plans from Figma auth:
 
@@ -130,29 +131,54 @@ Known accessible plans from Figma auth:
 - `bj`
 - `Burooj's Starter team` is view-only
 
-User selected `Burooj's Figma`.
+Final selected target:
+
+- `bj`
+- plan key: `team::1376350914758657423`
+
+Created file:
+
+- name: `World of DeSci Bengaluru - Design Lab System`
+- file key: `z4ROGt453f8rB0wz24MerQ`
+- URL: `https://www.figma.com/design/z4ROGt453f8rB0wz24MerQ`
 
 Creation attempts:
 
 - `create_new_file` with `planKey=team::1374441460972845906` failed with `Invalid planKey`.
 - `create_new_file` with single-colon `team:1374441460972845906` failed schema validation because the connector requires double-colon keys.
 - Computer Use against local Figma timed out while reading app state; the Figma process remained busy and did not expose an actionable window.
+- `create_new_file` with `planKey=team::1376350914758657423` for `bj` succeeded.
 
-Until a blank design file URL is provided or Chrome fallback is explicitly approved, the Figma attempts remain planning evidence only.
+Starter-plan constraints encountered:
 
-Prepared creation packet:
+- `bj` allows only three pages, so the original seven generated-system pages were compressed into three pages.
+- `bj` allows only one local variable mode, so day/night are represented as explicit `/day` and `/night` variables and visual swatches instead of Figma variable modes.
 
-- `design-lab/pilots/desci-world-bangalore-figma-build-packet-2026-06-13.md`
+Created page structure:
 
-Recommended first file structure once the gate is opened:
+- `00 Design Map`: visual methodology mirror, doctrine compass, taxonomy loop, gates/audits, code map, ownership boundary, Starter adaptation note.
+- `01 Foundations`: compressed Source Map plus token page with day/night palette, spacing scale, type voices, geometry, and motion boundaries.
+- `02 Artifacts`: primitives, unique specimens, compounds, compositions, and inline Anatomy cards.
 
-- `00 Design Map`
-- `01 Source Map`
-- `02 Tokens`
-- `03 Primitives`
-- `04 Unique Specimens`
-- `05 Compounds`
-- `06 Compositions`
+Figma structure proof from Plugin API:
+
+- pages: `00 Design Map` root `6:2` at 1440 x 1260, `01 Foundations` root `7:2` at 1440 x 1395, `02 Artifacts` root `9:2` at 1440 x 2290.
+- variable collections: `Color` 15 vars, `Spacing` 18 vars, `Geometry` 3 vars, `Motion` 3 vars.
+- local variables: 39 total.
+- text styles: `Voice/Booming Poster`, `Voice/Loud Section`, `Voice/Firm Label`, `Voice/Notice Body`, `Voice/Micro Meta`.
+
+Visual proof:
+
+- Screenshot checks were performed for all three root frames and inspected locally.
+- `00 Design Map` was rebuilt after the first screenshot found clipped text.
+- `02 Artifacts` was polished after the first screenshot found narrow-card wrapping in compound titles.
+- Final inspected roots: `6:2`, `7:2`, `9:2`.
+
+Known remaining Figma-side limitation:
+
+- The code font families `Unbounded` and `Space Grotesk` are available in Figma.
+- The current DSF text styles are named as voice roles, but the style/font upgrade from Inter to those code fonts was blocked by bj Starter's MCP tool-call limit after the DSF was already built.
+- This is a typography-fidelity gate for a future Figma touch-up, not a code implementation blocker.
 
 Important boundary:
 
@@ -169,20 +195,20 @@ Important boundary:
 | run multiple model attempts | partial | low/high code done; Minimax code attempted but failed/incomplete |
 | compare attempts | done in this report | Attempt Matrix |
 | produce code/live style-guide finish line | done pending user Finish Gate | `/style-guide` on high branch |
-| produce Figma finish line | not done | blocked by Figma create tool plan-key rejection and local Figma Computer Use timeout |
+| produce Figma finish line | done for Starter-compatible v1 with font-fidelity gate | bj file `z4ROGt453f8rB0wz24MerQ`; tool-call limit blocked final font-family upgrade |
 | verify winning implementation | done | build plus browser checks |
-| call whole goal complete | not yet | Figma finish line still gated; user acceptance pending |
+| call whole goal complete | pending user Finish Gate | code and Figma tracks have implementation proof; user acceptance still needed |
 
 ## Recommended Next Moves
 
-1. User either creates a blank Figma design file in `Burooj's Figma` and provides the URL, or explicitly approves Chrome fallback for file creation.
-2. Create/populate the Figma Design System File using `desci-world-bangalore-figma-build-packet-2026-06-13.md`.
-3. Use the high code branch as the implementation baseline.
-4. Decide whether to merge/apply `design-lab-code-gpthigh` into the main repo.
+1. User reviews the bj Figma file and either accepts the DSF v1, asks for a visual revision, or asks for a richer non-Starter rebuild elsewhere.
+2. Use the high code branch as the implementation baseline.
+3. Decide whether to merge/apply `design-lab-code-gpthigh` into the main repo.
+4. When the Figma MCP limit resets or a non-Starter target is available, update Figma text styles from Inter to `Unbounded` and `Space Grotesk`.
 5. Either clean or discard the dirty Minimax worktree after preserving this report.
 
 ## Finish Gate State
 
-Current gate decision: `continue`
+Current gate decision: `review`
 
-Reason: code/style-guide proof is strong enough to accept, but full original pilot goal included a Figma finish-line attempt, and no Figma file exists yet.
+Reason: code/style-guide proof and Figma DSF v1 now both exist. The remaining decision is whether the user accepts the Starter-compatible Figma file, with the recorded font-fidelity gate, and the high code branch as the pilot finish line.

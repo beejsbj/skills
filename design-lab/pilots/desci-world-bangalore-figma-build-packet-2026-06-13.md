@@ -4,17 +4,17 @@ Date: 2026-06-13
 
 ## Purpose
 
-This packet prepares the Figma Design System File (DSF) creation step for the Design Lab pilot on `/Users/burooj/Projects/desci-world-bangalore`.
+This packet prepares and records the Figma Design System File (DSF) creation step for the Design Lab pilot on `/Users/burooj/Projects/desci-world-bangalore`.
 
-It is not the DSF itself. The user selected `Burooj's Figma`, but connector file creation is currently blocked by plan-key rejection.
+It is not the DSF itself. It captures the intended full DSF plan, the actual bj Starter-compatible adaptation, and the verification proof for the file that was created.
 
 Recommended file name:
 
 - `World of DeSci Bengaluru - Design Lab System`
 
-## Blocked Creation Gate
+## Creation Gate And Result
 
-Figma auth returned multiple plans. The user selected `Burooj's Figma`.
+Figma auth returned multiple plans. The user first selected `Burooj's Figma`; that plan key failed. The user then instructed not to use `Burooj's Figma` and to use `bj`.
 
 Writable-looking choices:
 
@@ -27,7 +27,7 @@ View-only:
 
 - `Burooj's Starter team`
 
-Selected target:
+Failed target:
 
 - `Burooj's Figma`
 - returned key: `team::1374441460972845906`
@@ -37,11 +37,55 @@ Creation attempts:
 - `create_new_file` with `team::1374441460972845906` failed as `Invalid planKey`.
 - `create_new_file` with `team:1374441460972845906` failed schema validation because the tool requires `team::...`.
 - Local Figma app Computer Use fallback timed out while reading app state.
+- `create_new_file` with `team::1376350914758657423` for `bj` succeeded.
 
-Current unblock options:
+Final target:
 
-- User creates a blank Figma design file in `Burooj's Figma` and provides the file URL.
-- User explicitly approves Chrome fallback for Figma file creation.
+- team: `bj`
+- plan key: `team::1376350914758657423`
+- file key: `z4ROGt453f8rB0wz24MerQ`
+- file URL: `https://www.figma.com/design/z4ROGt453f8rB0wz24MerQ`
+
+Starter-plan adaptations:
+
+- `bj` allows only three pages, so the generated system was compressed into three pages.
+- `bj` allows only one local variable mode, so day/night theme modes are represented as explicit `/day` and `/night` variables and swatches.
+- The original seven-page plan remains below as the full-shape target for a non-Starter file.
+
+Final created pages:
+
+1. `00 Design Map`
+2. `01 Foundations`
+3. `02 Artifacts`
+
+Root frames:
+
+| Page | Root Frame | Size | Role |
+|---|---|---:|---|
+| `00 Design Map` | `6:2` | 1440 x 1260 | methodology mirror, doctrine, gates/audits, code map, ownership boundary |
+| `01 Foundations` | `7:2` | 1440 x 1395 | compressed Source Map plus tokens |
+| `02 Artifacts` | `9:2` | 1440 x 2290 | primitives, unique specimens, compounds, compositions, inline Anatomy |
+
+Created Figma foundations:
+
+| Kind | Count / Names |
+|---|---|
+| variable collections | `Color` 15 vars, `Spacing` 18 vars, `Geometry` 3 vars, `Motion` 3 vars |
+| local variables | 39 |
+| text styles | `Voice/Booming Poster`, `Voice/Loud Section`, `Voice/Firm Label`, `Voice/Notice Body`, `Voice/Micro Meta` |
+
+Visual verification:
+
+- Screenshots were taken and inspected for all root frames.
+- `00 Design Map` was rebuilt after first-pass clipping.
+- `02 Artifacts` was polished after first-pass narrow-card wrapping.
+- Final inspected root frame IDs: `6:2`, `7:2`, `9:2`.
+
+Known remaining Figma-side limitation:
+
+- `Unbounded` and `Space Grotesk` are available in the Figma font list.
+- The DSF text styles were created as voice-role styles, but the final font-family upgrade from Inter to the code fonts failed because bj reached its Starter MCP tool-call limit.
+- Treat this as a future typography-fidelity touch-up. Code remains the runtime typography source of truth.
 
 ## Source Inputs
 
@@ -94,9 +138,9 @@ Before any tool calls:
 
 Use `use_figma` incrementally. Do not build the whole DSF in one script.
 
-## Figma File Page Structure
+## Intended Full Figma File Page Structure
 
-Use this exact page order:
+Use this exact page order in a file that supports the full page count:
 
 1. `00 Design Map`
 2. `01 Source Map`
@@ -107,6 +151,12 @@ Use this exact page order:
 7. `06 Compositions`
 
 Anatomy lives inline beside the artifact it explains. Do not create a separate Anatomy page.
+
+In the bj Starter-compatible result, the same structure is compressed as:
+
+- `00 Design Map`: `00 Design Map`.
+- `01 Foundations`: `01 Source Map` plus `02 Tokens`.
+- `02 Artifacts`: `03 Primitives`, `04 Unique Specimens`, `05 Compounds`, and `06 Compositions`.
 
 ## DSF Ownership Boundary
 
@@ -528,29 +578,31 @@ Expected composition feedback loop:
 
 ## Finish Proof For Figma Track
 
-Figma track is complete only when the Finish Gate names:
+Figma track is complete for the bj Starter-compatible v1 when the Finish Gate names:
 
 - DSF URL
 - file key
 - created page names
 - variable collection counts
-- component names and variant counts
+- artifact groups and Anatomy coverage
 - Source Map coverage
 - behavior boundaries
 - implementation pass status
 - unresolved gates
 
-Minimum v1 acceptance:
+Current v1 proof:
 
-- all seven pages exist
-- `02 Tokens` has color, spacing, type, geometry/effect docs
-- `03 Primitives` covers button, text link, toggle, arrow, pattern fields
-- `04 Unique Specimens` marks lotus/splash/chakra/star/hero assets as singular
-- `05 Compounds` covers EventRow, SpeakerCard, Header, RegisterNow, Footer
-- `06 Compositions` shows final page regions
-- `00 Design Map` mirrors the Design Lab doctrine and ownership boundary
+- DSF URL: `https://www.figma.com/design/z4ROGt453f8rB0wz24MerQ`
+- file key: `z4ROGt453f8rB0wz24MerQ`
+- pages: `00 Design Map`, `01 Foundations`, `02 Artifacts`
+- root frames: `6:2`, `7:2`, `9:2`
+- `01 Foundations` has Source Map evidence plus color, spacing, type, geometry/effect, and motion-boundary docs
+- `02 Artifacts` covers button, text link, toggle, arrow, pattern fields, lotus/splash/chakra/star/hero media, EventRow, SpeakerCard, Header, RegisterNow, Footer, and home-page composition
+- `00 Design Map` mirrors the Design Lab doctrine, ownership boundary, gates/audits, code map, and Starter adaptation
 - orange/day and neon/night are both represented as canonical theme modes
 - individual lotus-city assets are not accidentally promoted into reusable primitive families
+- behavior boundaries are called out inline for ToggleLight, SpashAnimation, HeroLanding/Fitty, button hover sweep, and pattern data URIs
+- typography font-family fidelity is gate-parked behind bj MCP tool-call availability
 
 ## First Tool Calls After User Chooses Team
 
@@ -568,3 +620,5 @@ Minimum v1 acceptance:
    - write state ledger
 
 Stop after page skeleton and ask for checkpoint approval before variable creation.
+
+This section is retained as the reusable procedure. For this pilot, those calls have already happened against `bj`, with the Starter-compatible result recorded above.
