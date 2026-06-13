@@ -72,6 +72,8 @@ The Live Style Guide should prove the implemented system with real components:
 
 Choose the closest repo command by reading `package.json`, README docs, existing Storybook/style-guide scripts, or prior repo convention. Record it in `REPOSITORY_CONVENTIONS.md`.
 
+Verification should not create dependency or manifest churn. Before installing or running a package manager command, identify the repo's current package manager and lockfile, use no-autopin/no-save behavior when the tool supports it, and record any generated output or manifest changes. Do not keep changes to `package.json`, lockfiles, package-manager fields, `.npmrc`, `.yarnrc`, or equivalent dependency metadata unless dependency scope was explicitly accepted by the user.
+
 Before Finish Gate:
 
 - run the verification command when feasible
