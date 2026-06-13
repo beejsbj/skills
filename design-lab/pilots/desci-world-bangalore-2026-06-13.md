@@ -25,7 +25,7 @@ The Figma Design System File finish line has a completed bj Starter-compatible v
 | Track | Attempt | Workspace / Session | Result | Evidence |
 |---|---|---|---|---|
 | code/style-guide | GPT 5.5 low | `/Users/burooj/Projects/desci-world-bangalore-code-gptlow`, branch `design-lab-code-gptlow`, commit `d787697` | shallow proof; useful but not winner | 7 changed files, `pages/style-guide.vue`, partial `docs/design-lab` artifacts; build not verified because deps were missing |
-| code/style-guide | GPT 5.5 high | `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`, branch `design-lab-code-gpthigh`, head `fa990bc` | winner | full artifact set, `EventRow.vue` extraction, `Footer.vue` proof prop, day/night theme correction, verified build/browser, live finish-gate record |
+| code/style-guide | GPT 5.5 high | `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`, branch `design-lab-code-gpthigh`, head `39a6b59` | winner | full artifact set, `EventRow.vue` extraction, `Footer.vue` proof prop, day/night theme correction, visible style guide fix, verified build/browser, live finish-gate record |
 | code/style-guide | Minimax M3 | `/Users/burooj/Projects/desci-world-bangalore-code-minimax`, branch `design-lab-code-minimax` | failed/incomplete; useful failure signal | dirty partial extraction plus unwanted `package.json` package-manager field; no style guide, docs, verification, or commit |
 | Figma DSF | GPT 5.5 low | native subagent plan | plan only | no Figma file created in that attempt |
 | Figma DSF | GPT 5.5 high | native subagent plan | stronger plan only | informed final build scope and taxonomy |
@@ -38,11 +38,12 @@ Recommended baseline:
 
 - `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
 - branch `design-lab-code-gpthigh`
-- head `fa990bc Record post-restart style guide visual proof`
+- head `39a6b59 Scope splash hide styles to active runs`
 - implementation commit `71e10c3 Add Design Lab style guide proof`
 - finish-gate commit `399d1eb Record live style guide finish gate`
 - operational note commit `29a9fc2 Document style guide dev restart note`
 - visual proof commit `fa990bc Record post-restart style guide visual proof`
+- white-screen fix commit `39a6b59 Scope splash hide styles to active runs`
 - route `http://127.0.0.1:3005/style-guide`
 - LAN route while dev server is running: `http://192.168.0.37:3005/style-guide`
 
@@ -87,7 +88,14 @@ Fresh code/style-guide proof after the user asked for the style-guide version an
   - no visible out-of-bounds candidates
   - no console errors or warnings
 
-Current completion-audit pass at `fa990bc`:
+White-screen correction:
+
+- Browser inspection found the style-guide DOM and text were present, but the visible viewport was blank because `SpashAnimation.vue` global CSS set `main, header { opacity: 0 }` even when the footer rendered with `showSplash=false`.
+- `components/SpashAnimation.vue` now scopes those hide styles behind `body.splash-active`, adding/removing the class only while the splash is mounted.
+- Style-guide reload proof: `main` computed opacity is `1`, body overflow is visible, required sections are present, no horizontal overflow exists, and no console issues were logged.
+- Homepage splash regression check: after splash completion, body class is cleared, overflow returns `auto`, header/main opacity is `1`, the wrapper is removed, and no console issues were logged.
+
+Current completion-audit pass at `39a6b59`:
 
 - Winning worktree `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh` is clean on branch `design-lab-code-gpthigh`.
 - `curl -I http://127.0.0.1:3005/style-guide` returned 200.
@@ -100,12 +108,12 @@ Current winning head:
 
 - `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
 - branch `design-lab-code-gpthigh`
-- head `fa990bc`
+- head `39a6b59`
 
 Readiness checks:
 
-- `git diff --check master..design-lab-code-gpthigh` passed at `fa990bc`.
-- `git merge-tree $(git merge-base master design-lab-code-gpthigh) master design-lab-code-gpthigh` showed no conflict markers or both-sides conflicts at `fa990bc`.
+- `git diff --check master..design-lab-code-gpthigh` passed at `39a6b59`.
+- `git merge-tree $(git merge-base master design-lab-code-gpthigh) master design-lab-code-gpthigh` showed no conflict markers or both-sides conflicts at `39a6b59`.
 - `COREPACK_ENABLE_AUTO_PIN=0 yarn build` passed from the high worktree after the day/night theme correction.
 - Post-build dev-server staleness is documented: restart `desci-style-guide` after `yarn build` before phone/LAN review.
 - Main repo state remains `master` with only pre-existing untracked `dist 2`.
@@ -236,7 +244,7 @@ Parked finish line:
 | Requirement | Status | Evidence / Missing Proof |
 |---|---|---|
 | get Design Lab skill to finish line | done for current iteration | skill validates; commits through `e4921d9` |
-| test it on real project | done for code/style-guide track | `desci-world-bangalore-code-gpthigh` at `fa990bc` |
+| test it on real project | done for code/style-guide track | `desci-world-bangalore-code-gpthigh` at `39a6b59` |
 | run multiple model attempts | partial | low/high code done; Minimax code attempted but failed/incomplete |
 | compare attempts | done in this report | Attempt Matrix |
 | produce code/live style-guide finish line | done pending user Finish Gate | `/style-guide` on high branch |
