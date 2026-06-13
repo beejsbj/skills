@@ -6,7 +6,7 @@ Date: 2026-06-13
 
 This packet prepares the Figma Design System File (DSF) creation step for the Design Lab pilot on `/Users/burooj/Projects/desci-world-bangalore`.
 
-It is not the DSF itself. The DSF still needs a Figma team/project choice before `create_new_file` can be called.
+It is not the DSF itself. The user selected `Burooj's Figma`, but connector file creation is currently blocked by plan-key rejection.
 
 Recommended file name:
 
@@ -14,7 +14,7 @@ Recommended file name:
 
 ## Blocked Creation Gate
 
-Figma auth returned multiple plans, so the Figma create-file skill requires the user to choose the target team/project before file creation.
+Figma auth returned multiple plans. The user selected `Burooj's Figma`.
 
 Writable-looking choices:
 
@@ -27,9 +27,21 @@ View-only:
 
 - `Burooj's Starter team`
 
-Recommendation:
+Selected target:
 
-- Use `Burooj's Figma` unless the file belongs in a specific project/team.
+- `Burooj's Figma`
+- returned key: `team::1374441460972845906`
+
+Creation attempts:
+
+- `create_new_file` with `team::1374441460972845906` failed as `Invalid planKey`.
+- `create_new_file` with `team:1374441460972845906` failed schema validation because the tool requires `team::...`.
+- Local Figma app Computer Use fallback timed out while reading app state.
+
+Current unblock options:
+
+- User creates a blank Figma design file in `Burooj's Figma` and provides the file URL.
+- User explicitly approves Chrome fallback for Figma file creation.
 
 ## Source Inputs
 
@@ -37,9 +49,10 @@ Winning code/style-guide branch:
 
 - worktree: `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
 - branch: `design-lab-code-gpthigh`
-- head: `f82c0ec Record Design Lab verification side effects`
+- head: `9fd5054 Represent day-night theme contract`
 - implementation commit: `71e10c3 Add Design Lab style guide proof`
 - proof route: `http://127.0.0.1:3005/style-guide`
+- LAN proof route while dev server is running: `http://192.168.0.37:3005/style-guide`
 
 Key source files:
 
@@ -125,8 +138,8 @@ Before creating nodes:
 - inspect the new blank file
 - create or reconstruct a state ledger
 - lock v1 scope to the focused pilot scope
-- do not import neon lotus-city material as canonical design truth
-- keep neon lotus-city material on `01 Source Map` as deferred Taste Gate material
+- treat orange/day and neon/night as one canonical theme system
+- keep individual lotus/city assets on `01 Source Map` until classified as unique specimens or composition material
 
 State ledger:
 
@@ -258,7 +271,7 @@ User checkpoint:
 Create page skeleton:
 
 - `00 Design Map`: Doctrine Compass, taxonomy loop, ownership boundary
-- `01 Source Map`: repo source cards, style-guide proof screenshot slot, assets, deferred material
+- `01 Source Map`: repo source cards, style-guide proof screenshot slot, day/night assets, source-map material
 - `02 Tokens`: color swatches, spacing bars, type voice rows, geometry/effect notes
 - `03 Primitives`: button, text link, theme toggle, right arrow, pattern fields
 - `04 Unique Specimens`: lotus path, splash behavior boundary, chakra, star, hero/city assets
@@ -269,7 +282,7 @@ Each page should have a compact top strip:
 
 - layer name
 - source-of-truth statement
-- accepted / deferred / code-probe badges
+- accepted / theme-source / code-probe badges
 
 ## Phase 3: Primitives
 
@@ -361,7 +374,7 @@ Cards:
 - `ChakraDecoration`
 - `StarDecoration`
 - `Hero image artifacts`
-- `Deferred neon lotus-city material`
+- `Night-mode lotus-city source material`
 
 Each card includes:
 
@@ -536,7 +549,8 @@ Minimum v1 acceptance:
 - `05 Compounds` covers EventRow, SpeakerCard, Header, RegisterNow, Footer
 - `06 Compositions` shows final page regions
 - `00 Design Map` mirrors the Design Lab doctrine and ownership boundary
-- no deferred neon lotus-city material is accidentally promoted into canonical visual truth
+- orange/day and neon/night are both represented as canonical theme modes
+- individual lotus-city assets are not accidentally promoted into reusable primitive families
 
 ## First Tool Calls After User Chooses Team
 
