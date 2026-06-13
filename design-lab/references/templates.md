@@ -10,6 +10,12 @@ Use these when creating durable Design Lab methodology artifacts in a repo. Thes
 ## Run Spine
 - ...
 
+## Artifact Mode
+- chat-only audit | light durable handoff | full workflow
+
+## Artifact Location
+- ...
+
 ## Doctrine Compass
 | Axis | Law | Pattern | Forbidden Move | Evidence |
 |---|---|---|---|---|
@@ -102,12 +108,14 @@ Use these when creating durable Design Lab methodology artifacts in a repo. Thes
 ## Figma Availability
 - wanted: yes/no
 - accessible: yes/no
+- tool callable: yes/no/unknown
+- authenticated/edit access: yes/no/unknown
 - file/project: existing / create / unavailable
 
 ## Recommended First Extraction Surface
 Design System File / no-Figma code workflow
 
-## Generated Design System Surface
+## Visual Source-Of-Truth Surface
 - ...
 
 ## Implementation Proof Surface
@@ -117,6 +125,9 @@ Design System File / no-Figma code workflow
 - DESIGN_MAP.md
 - DESIGN_LOG.md
 - audits and gate packets
+
+## Recommendation
+- ...
 
 ## Alternatives Rejected
 - ...
@@ -129,12 +140,17 @@ Design System File / no-Figma code workflow
 
 ## Unblocks
 - ...
+
+## Gate Decision
+accepted / continue / pause
 ```
 
-## STYLE_GUIDE_SCHEMA.md
+## TAXONOMY_SCHEMA.md
 
 ```markdown
-# Style Guide Schema
+# Taxonomy Schema
+
+This is not the Live Style Guide. It maps taxonomy, ownership, and source-of-truth decisions; rendered component truth lives in the Design System File, repo components, or Live Style Guide according to Surface Gate.
 
 ## Tokens
 - ...
@@ -195,6 +211,20 @@ Design System File / no-Figma code workflow
 
 ## Verification Command
 - ...
+
+## Branch And Worktree State
+- branch: ...
+- dirty files: ...
+- untracked files: ...
+
+## Edit Ownership
+- user-owned changes to preserve: ...
+- files safe to edit: ...
+- files not safe to edit: ...
+
+## Checkpoint Plan
+- commit/checkpoint cadence: ...
+- rollback handholds: ...
 
 ## Naming Case And File Pattern
 - ...
@@ -328,6 +358,8 @@ Fill only the section for the layer being closed.
 |---|---|---|---|---|---:|
 | ... | Promotion Gate / Taxonomy Gate / Taste Gate | ... | YYYY-MM-DD | ... | yes/no |
 
+Gate-parked decisions marked `May Advance: yes` permit next-layer work. They do not count as complete unless the item is out of scope or explicitly accepted as deferred at Finish Gate.
+
 ## Handoff To Next Layer
 | Next layer may build from | Next layer must not assume yet | Proof | Linked Artifacts |
 |---|---|---|---|
@@ -354,7 +386,7 @@ ready / continue / pause
 ## Anatomy Requirements
 | Artifact | Layer | Anatomy Location | Needed For |
 |---|---|---|---|
-| ... | token / primitive / unique specimen / compound / composition | Design System File / markdown summary / none | extraction / taste / handoff |
+| ... | primitive / unique specimen / compound / composition | Design System File / markdown summary / none | extraction / taste / handoff |
 
 ## Behavior Fidelity Boundaries
 | Artifact | Behavior | Figma Enough? | Code Probe Needed? |
@@ -623,4 +655,7 @@ Append one row whenever a gate decision is made or reopened.
 
 ## Unblocks
 - ...
+
+## Gate Decision
+accepted / continue / pause
 ```

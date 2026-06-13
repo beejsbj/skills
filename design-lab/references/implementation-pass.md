@@ -26,14 +26,15 @@ When no Design System File is used, repo tokens/components and the Live Style Gu
 ## Pass Order
 
 1. Confirm Repository Conventions Gate: token source, component locations, style-guide route, verification command.
-2. Map accepted design artifacts to code targets in `DESIGN_MAP.md` Code Map.
-3. Implement or update token sources first.
-4. Implement primitives before unique specimens or compounds that depend on them.
-5. Implement unique specimens with singular-role markers and without standard reusable variant axes.
-6. Implement compounds by composing primitives and/or unique specimens.
-7. Implement composition views only after their lower-layer dependencies are accepted or gate-parked.
-8. Update Live Style Guide surfaces to import real source-of-truth components.
-9. Run residue proof and verification.
+2. Confirm branch, dirty files, untracked files, user-owned changes, safe edit scope, and checkpoint plan.
+3. Map accepted design artifacts to code targets in `DESIGN_MAP.md` Code Map.
+4. Implement or update token sources first.
+5. Implement primitives before unique specimens or compounds that depend on them.
+6. Implement unique specimens with singular-role markers and without standard reusable variant axes.
+7. Implement compounds by composing primitives and/or unique specimens.
+8. Implement composition views only after their lower-layer dependencies are accepted or gate-parked with `May Advance: yes`.
+9. Update Live Style Guide surfaces to import real source-of-truth components.
+10. Run residue proof and verification.
 
 ## Code Probe Rule
 

@@ -31,7 +31,7 @@ Use these layers unless a repo already has a stronger local convention. `Specime
 
 ### Tokens
 
-Values, semantic aliases, constraints, and named low-level patterns that do not render as standalone UI. Examples:
+Values, semantic aliases, constraints, and named low-level recipes that do not render as standalone UI. Examples:
 
 - color roles and semantic aliases
 - type scale and type role shorthands
@@ -120,7 +120,7 @@ Shell rule:
 
 Ideate inside the current layer.
 
-- Token ideation produces token groups, patterns, maps, constraints, and semantic aliases.
+- Token ideation produces token groups, low-level recipes, maps, constraints, and semantic aliases.
 - Primitive ideation produces primitive families, anatomy, state matrices, variants, and API ideas.
 - Unique specimen ideation preserves singular artifacts and clarifies why they are not reusable families.
 - Compound ideation produces stable assemblies and child-component contracts.
@@ -136,6 +136,10 @@ Ideation procedure:
 4. Declare what is not in this layer and where it will be handled.
 5. For ambiguous candidates, write a Promotion Gate or Taxonomy Gate before implementation.
 6. Hold the Taxonomy Gate before moving artifacts across layers.
+
+Cross-layer discovery rule:
+
+If work in a higher layer reveals a missing lower-layer idea, pause the current layer, record the candidate in `RAW_RECIPE_INVENTORY.md`, open the needed Promotion or Taxonomy Gate, update the lower layer, then resume. Do not keep building the higher layer on unnamed grammar.
 
 Layer-specific prompts:
 
@@ -216,6 +220,9 @@ Why not higher:
 Alternatives rejected:
 - ...
 
+Recommendation:
+- ...
+
 Unresolved risk:
 - ...
 
@@ -224,6 +231,9 @@ Decision needed:
 
 Unblocks:
 - ...
+
+Gate Decision:
+- accepted | continue | pause
 ```
 
 If the user decides differently, update names/files/schema to match the decision.

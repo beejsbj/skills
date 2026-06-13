@@ -4,6 +4,15 @@ Use this reference when Figma is wanted and accessible, or when the run already 
 
 When using Figma tools, first load the relevant Figma skill instructions for the tool being called. Do not call Figma tools from memory.
 
+Typical routing:
+
+- Create a new file: load `figma:figma-create-new-file`, then the required Figma tool instructions.
+- Read or edit an existing file: load `figma:figma-use`.
+- Generate or update a component library/design system from source material: load `figma:figma-generate-library` when available.
+- Translate app pages/views into Figma: load `figma:figma-generate-design` when available.
+
+If the needed Figma tool is not callable, authenticated, or authorized for the target file, Surface Gate should recommend the no-Figma code workflow or pause for access repair.
+
 ## Surface Rule
 
 Run the Surface Gate before choosing the first extraction surface.
@@ -34,6 +43,28 @@ Use this page order unless an existing file has a stronger convention:
 7. `06 Compositions`: final screens, regions, or states that prove the grammar in context.
 
 Anatomy lives inline beside the object it explains. Do not create a separate Anatomy page unless the user explicitly asks.
+
+## Create Or Update Decision
+
+Use an existing Design System File when:
+
+- the user provides one
+- the repo already references one
+- the file already contains relevant tokens/components/source material
+
+Create a new Design System File when:
+
+- Figma is accessible
+- no existing file is provided or discoverable
+- Scope Gate confirms a durable Figma-backed run
+
+Stay in no-Figma workflow when:
+
+- Figma is unavailable
+- the user does not want Figma for this run
+- the task is only a chat-only audit or quick code implementation
+
+Proof of update must include the file URL/id and the page/frame/component names created or changed.
 
 ## Artifact Rules
 
@@ -71,11 +102,13 @@ Anatomy:
 1. Create or update `DESIGN_MAP.md`.
 2. Run Surface Gate and record the decision.
 3. Build or update the Design System File Source Map from raw material.
-4. Create the layer currently in scope: tokens, primitives, unique specimens, compounds, or compositions.
-5. Add inline Anatomy where the object needs explanation or extraction support.
-6. Run raw recipe inventory and promote/prune/keep-local decisions as the file reveals new grammar.
-7. Close the layer with `LAYER_CLOSURE.md`.
-8. Move accepted artifacts into the Implementation Pass when code or a Live Style Guide is in scope.
+4. Create the initial `RAW_RECIPE_INVENTORY.md` from the Source Map and source files before layer extraction starts.
+5. Classify candidates and scope the current layer.
+6. Create the layer currently in scope: tokens, primitives, unique specimens, compounds, or compositions.
+7. Add inline Anatomy where the object needs explanation or extraction support.
+8. Update the raw recipe inventory and promote/prune/keep-local decisions as the file reveals new grammar.
+9. Close the layer with `LAYER_CLOSURE.md`.
+10. Move accepted artifacts into the Implementation Pass when code or a Live Style Guide is in scope.
 
 ## Finish Proof
 

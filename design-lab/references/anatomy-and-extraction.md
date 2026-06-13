@@ -53,8 +53,9 @@ token dependencies by part
 state matrix
   rest, hover, focus, active, selected, disabled, loading, reduced-motion where relevant
 
-variant axes
-  size, density, tone, geometry, content mode, motion mode, data mode
+variant or local variation axes
+  primitives/compounds use standard reusable axes such as size, density, tone, geometry, content mode, motion mode, or data mode
+  unique specimens use local variation notes, not standard reusable variant axes
 
 child dependencies
   lower-level components imported or required
@@ -69,6 +70,8 @@ promotion items
 If an artifact cannot fill this schema, do not force it. Reclassify it, split it, or mark it as drift/unique specimen.
 
 Inspiring example from Emotitone `Sticker.vue`:
+
+Note: Emotitone currently uses the repo-local spelling `primatives`; preserve repo-local path spelling when citing source files.
 
 ```markdown
 ## Anatomy: Sticker Primitive

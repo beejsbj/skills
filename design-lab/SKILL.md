@@ -22,6 +22,7 @@ Glossary:
 - `Anatomy`: visual formalization artifact with faces, poses, parts, dependencies, states, rules, and open decisions. Anatomy is not a taxonomy layer.
 - `unique specimen`: singular preserved artifact that matters to the system but should not become a reusable family.
 - `style-guide surface`: code or Figma surface that demonstrates, inspects, or proves the system without becoming source of truth.
+- `visual source-of-truth surface`: the surface that owns visual design truth for this run, usually a Design System File when Figma is available or repo tokens/components when it is not.
 
 ## Operating Model
 
@@ -36,11 +37,19 @@ material -> archaeology <-> interview -> raw recipe inventory -> doctrine
 
 Archaeology and interview can iterate; use read-first evidence to ask better questions, then let answers redirect the archaeology.
 
+Preflight order:
+
+1. Run read-only recon.
+2. If Figma is mentioned, wanted, or already part of the project, check Figma availability and run Surface Gate.
+3. Run Scope Gate.
+4. Run Intent and Doctrine gates.
+5. Run Repository Conventions Gate before edits, implementation, route moves, file moves, or Figma writes.
+
 See `references/taxonomy-and-doctrine.md` for the layer-scoped ideation procedure. See `references/anatomy-and-extraction.md` for anatomy, extraction, recipe-gap, and residue-proof procedure.
 
 The taxonomy layers are:
 
-- `tokens`: values, patterns, constraints, semantic aliases.
+- `tokens`: values, low-level recipes, constraints, semantic aliases.
 - `primitives`: smallest named renderable ideas.
 - `unique specimens`: singular preserved artifacts that may be complex, may appear directly in compositions or inside compounds, and do not become reusable families.
 - `compounds`: stable assemblies of primitives and/or unique specimens that travel together.
@@ -69,10 +78,10 @@ Read only as much reference as the current entry point needs:
 | words, metaphors, moodboards, screenshots, old sites, repos | `references/intake-and-interview.md` |
 | taxonomy, doctrine, layer boundaries, layer ideation, closure | `references/taxonomy-and-doctrine.md` |
 | existing components, style guides, anatomy, extraction, recipe gaps, residue | `references/anatomy-and-extraction.md` |
-| Figma wanted/available or a Design System File exists | `references/figma-design-system-file.md` |
+| existing style guide, kitchen sink, partial components, midstream app integration | `references/intake-and-interview.md`, `references/taxonomy-and-doctrine.md`, then `references/anatomy-and-extraction.md` |
+| Figma wanted/available or a Design System File exists | `references/intake-and-interview.md`, then `references/figma-design-system-file.md` |
 | accepted Design System File needs code/live style guide | `references/implementation-pass.md` |
 | durable workflow artifacts | `references/templates.md` |
-| midstream style-guide/app integration | `references/intake-and-interview.md`, then `references/anatomy-and-extraction.md` |
 
 ## User Gates
 
@@ -80,8 +89,8 @@ Keep the user involved at decision points. Ask concise, evidence-tied questions 
 
 Required gates:
 
-- `Scope Gate`: before deciding how far the run must go.
 - `Surface Gate`: before deciding whether the run starts in a Design System File or uses the current no-Figma code workflow.
+- `Scope Gate`: before deciding how far the run must go.
 - `Intent Gate`: before turning impressions into doctrine.
 - `Doctrine Gate`: before treating rules as law.
 - `Repository Conventions Gate`: before extraction changes where tokens, components, style-guide surfaces, Figma pages, or routes live.
@@ -92,16 +101,22 @@ Required gates:
 
 If the user asks for autonomous execution, still preserve gates by making concrete assumptions explicit and marking unresolved decisions in the output.
 
-Every gate needs a decision packet with: evidence, recommendation, alternatives rejected, unresolved risk, and what unblocks the next step. After the decision is recorded, append a row to `DESIGN_LOG.md`. Do not treat a named gate as complete if it only restates preferences.
+Every gate needs a decision packet with: evidence, recommendation, alternatives rejected, unresolved risk, decision, and what unblocks the next step. After the decision is recorded, append a row to `DESIGN_LOG.md` when a durable log exists. Do not treat a named gate as complete if it only restates preferences.
 
 A layer cannot close while any artifact in that layer has an unresolved promote/prune/keep-local decision, unless that decision is explicitly parked behind a named user gate.
+
+Gate-parked does not mean complete. It can mean:
+
+- `may advance`: next-layer work may continue because the unresolved item is bounded and marked `May Advance: yes`.
+- `paused`: work should stop at the gate until the user or external state resolves it.
+- `complete`: only allowed at Finish Gate when unresolved items are out of scope or explicitly accepted as deferred.
 
 For long-running or resumed work, append gate decisions to `DESIGN_LOG.md` with date, gate name, decision, and artifact link.
 
 Gate-to-loop mapping:
 
-- `Scope Gate`: after intake/recon, before doctrine or implementation.
-- `Surface Gate`: after Figma availability and finish depth are known, before first extraction surface is chosen.
+- `Surface Gate`: after read-only recon and Figma availability check, before first extraction surface is chosen.
+- `Scope Gate`: after Surface Gate when Figma is relevant; otherwise after intake/recon and before doctrine or implementation.
 - `Intent Gate`: after interview, before doctrine.
 - `Doctrine Gate`: after doctrine draft, before classification becomes law.
 - `Repository Conventions Gate`: before extraction edits or route/file moves.
@@ -137,7 +152,7 @@ Example brief:
 ```text
 Subagent: recipe-gap-hunter
 Read-only: yes
-Inputs: components/**, current RAW_RECIPE_INVENTORY.md, current STYLE_GUIDE_SCHEMA.md
+Inputs: components/**, current RAW_RECIPE_INVENTORY.md, current TAXONOMY_SCHEMA.md
 Output schema: "## Recipe Gaps: <artifact>" from anatomy-and-extraction.md
 Do not: propose promotions, edit files, close gates
 Return: filled output, plus candidates that do not fit the schema
@@ -160,18 +175,33 @@ A Design Lab run is complete only when the requested finish line is met. For a f
 - `RESIDUE_PROOF.md` records checked patterns such as raw hex colors, raw px values, raw durations/easings, repeated clip-paths, duplicated component internals, and unmarked unique specimens. Each hit must be zero or justified.
 - Coverage audit maps every meaningful source artifact to a layer and resolution state, with no empty `Resolution` cells.
 - Unresolved residue is zero or parked behind a named gate with owner, date, and unblock condition.
+- Gate-parked work is not counted as complete unless it is out of scope or the user explicitly accepts it as deferred at Finish Gate.
 - Remaining open decisions are listed as gates, not hidden in implementation.
 - User explicitly accepts, continues, or pauses at the Finish Gate.
 
 ## Output Shape
 
-Prefer durable repo artifacts over long chat-only analysis when the user wants the workflow to carry forward.
+Prefer durable repo artifacts over long chat-only analysis only after Scope Gate confirms that durable workflow files are wanted.
 
-Always for multi-step runs:
+Choose an artifact mode:
+
+- `chat-only audit`: no repo artifacts; use for scouting, comparing approaches, or testing the skill on a project without changing it.
+- `light durable handoff`: create only the minimum handoff artifacts needed to resume safely.
+- `full workflow`: create the full artifact set and update it throughout the run.
+
+Default to `chat-only audit` for first contact with an unfamiliar repo. Upgrade to `light durable handoff` or `full workflow` only after Scope Gate names the artifact location.
+
+Artifact location:
+
+- Use an existing project planning/docs convention when one is clear.
+- If no convention exists, recommend `docs/design-lab/` for durable methodology artifacts and record the decision in Repository Conventions Gate.
+- Do not scatter methodology artifacts across the repo root unless the user or existing repo convention calls for that.
+
+Full workflow artifacts:
 
 - `DESIGN_MAP.md`: canonical methodology map for the run.
 - `DESIGN_LOG.md`: append-only gate decisions for resumed work.
-- `STYLE_GUIDE_SCHEMA.md`: current taxonomy and source-of-truth map.
+- `TAXONOMY_SCHEMA.md`: current taxonomy and source-of-truth map. This is not the Live Style Guide and does not own rendered component truth.
 - `REPOSITORY_CONVENTIONS.md`: paths, naming, route/entry, and verification command.
 - `COVERAGE_AUDIT.md`: per-source artifact mapping.
 

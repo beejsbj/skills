@@ -92,7 +92,7 @@ Use this when the user enters with an existing style guide, kitchen sink, Design
 
 Read first:
 
-- existing `STYLE_GUIDE_SCHEMA.md`, `COVERAGE_AUDIT.md`, `PROMOTION_AUDIT.md`, `RESIDUE_PROOF.md`, and `LAYER_CLOSURE.md`
+- existing `TAXONOMY_SCHEMA.md`, `COVERAGE_AUDIT.md`, `PROMOTION_AUDIT.md`, `RESIDUE_PROOF.md`, and `LAYER_CLOSURE.md`
 - current style-guide route/page, Design System File, and anatomy/style-guide helpers
 - source-of-truth component folders, token files, and app entry points
 - recent git history for extracted components, deleted preview files, and token changes
@@ -115,7 +115,7 @@ Midstream output should name the current layer, the last trustworthy gate, the n
 
 ## Scope Gate
 
-Run this after initial intake and before doctrine or implementation. The goal is to prevent the workflow from silently expanding or stopping early.
+Run this after initial intake, and after Surface Gate when Figma is relevant, before doctrine or implementation. The goal is to prevent the workflow from silently expanding or stopping early.
 
 Required outputs:
 
@@ -125,6 +125,8 @@ Required outputs:
 - `expected layer depth`: tokens only, tokens+primitives, through compounds, through compositions, or full style-guide completion.
 - `completion proof`: concrete artifact that will demonstrate done-ness, such as a running style guide, schema, component extraction PR, or coverage audit.
 - `allowed autonomy`: what the agent may decide without asking, and what needs user taste/check approval.
+- `artifact mode`: chat-only audit, light durable handoff, or full workflow.
+- `artifact location`: where durable methodology files should live if artifacts are created.
 
 Scope gate packet:
 
@@ -149,6 +151,12 @@ Scope gate packet:
 ### Completion Proof
 - ...
 
+### Artifact Mode
+- chat-only audit | light durable handoff | full workflow
+
+### Artifact Location
+- ...
+
 ### Recommendation
 - ...
 
@@ -170,6 +178,9 @@ Scope gate packet:
 
 ### Unblocks
 - ...
+
+### Gate Decision
+- accepted | continue | pause
 ```
 
 Cannot define scope branch:
@@ -186,9 +197,18 @@ Required outputs:
 
 - `Figma Availability`: whether the user wants Figma used and whether the agent can create/edit the Design System File.
 - `first extraction surface`: Design System File when Figma is wanted and accessible; otherwise the current no-Figma code workflow.
-- `generated design system surface`: where visual truth will live.
+- `visual source-of-truth surface`: where visual truth will live.
 - `implementation proof surface`: Live Style Guide, reusable components, composition views, or code probes when implementation is in scope.
 - `methodology artifacts`: `DESIGN_MAP.md`, gates, audits, and logs that support the run without becoming design artifacts.
+
+Figma is accessible only when all are true:
+
+- the user wants Figma for this run
+- the relevant Figma tool is callable in the current environment
+- authentication/access permits creating or editing the target file
+- the target file exists or the agent can create it
+
+If any condition fails, recommend the no-Figma code workflow unless the user wants to pause and fix Figma access.
 
 Surface gate packet:
 
@@ -201,18 +221,23 @@ Surface gate packet:
 ### Figma Availability
 - wanted: yes/no
 - accessible: yes/no
+- tool callable: yes/no/unknown
+- authenticated/edit access: yes/no/unknown
 - file/project: existing | create | unavailable
 
 ### Recommended First Extraction Surface
 - Design System File | no-Figma code workflow
 
-### Generated Design System Surface
+### Visual Source-Of-Truth Surface
 - ...
 
 ### Implementation Proof Surface
 - ...
 
 ### Methodology Artifacts
+- ...
+
+### Recommendation
 - ...
 
 ### Alternatives Rejected
@@ -226,6 +251,9 @@ Surface gate packet:
 
 ### Unblocks
 - ...
+
+### Gate Decision
+- accepted | continue | pause
 ```
 
 ## Repository Conventions Gate
@@ -261,6 +289,20 @@ Resolve verification by reading `package.json` scripts, README docs, existing st
 ### Verification Command
 - ...
 
+### Branch And Worktree State
+- branch: ...
+- dirty files: ...
+- untracked files: ...
+
+### Edit Ownership
+- user-owned changes to preserve: ...
+- files safe to edit: ...
+- files not safe to edit: ...
+
+### Checkpoint Plan
+- commit/checkpoint cadence: ...
+- rollback handholds: ...
+
 ### Naming Case And File Pattern
 - ...
 
@@ -278,6 +320,9 @@ Resolve verification by reading `package.json` scripts, README docs, existing st
 
 ### Unblocks
 - ...
+
+### Gate Decision
+- accepted | continue | pause
 ```
 
 ## Interview Questions
@@ -336,6 +381,9 @@ Intent gate packet:
 
 ### Unblocks
 - ...
+
+### Gate Decision
+- accepted | continue | pause
 ```
 
 ## Gate Packets
@@ -369,6 +417,9 @@ After the decision for any gate is accepted, continued, paused, or reopened, app
 
 ### Unblocks
 - ...
+
+### Gate Decision
+- accepted | continue | pause
 ```
 
 ### Promotion Gate
@@ -402,6 +453,9 @@ After the decision for any gate is accepted, continued, paused, or reopened, app
 
 ### Unblocks
 - ...
+
+### Gate Decision
+- accepted | continue | pause
 ```
 
 ### Finish Gate
@@ -441,6 +495,9 @@ After the decision for any gate is accepted, continued, paused, or reopened, app
 
 ### Unblocks
 - ...
+
+### Gate Decision
+- accepted | continue | pause
 ```
 
 ## Taste Gate
@@ -477,6 +534,9 @@ Taste gate output:
 
 ### Unblocks
 - ...
+
+### Gate Decision
+- accepted | continue | pause
 ```
 
 When the user reacts, update the doctrine or taxonomy rather than treating the reaction as loose preference.
