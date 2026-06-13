@@ -25,7 +25,7 @@ The Figma Design System File finish line has a completed bj Starter-compatible v
 | Track | Attempt | Workspace / Session | Result | Evidence |
 |---|---|---|---|---|
 | code/style-guide | GPT 5.5 low | `/Users/burooj/Projects/desci-world-bangalore-code-gptlow`, branch `design-lab-code-gptlow`, commit `d787697` | shallow proof; useful but not winner | 7 changed files, `pages/style-guide.vue`, partial `docs/design-lab` artifacts; build not verified because deps were missing |
-| code/style-guide | GPT 5.5 high | `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`, branch `design-lab-code-gpthigh`, head `399d1eb` | winner | full artifact set, `EventRow.vue` extraction, `Footer.vue` proof prop, day/night theme correction, verified build/browser, live finish-gate record |
+| code/style-guide | GPT 5.5 high | `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`, branch `design-lab-code-gpthigh`, head `29a9fc2` | winner | full artifact set, `EventRow.vue` extraction, `Footer.vue` proof prop, day/night theme correction, verified build/browser, live finish-gate record |
 | code/style-guide | Minimax M3 | `/Users/burooj/Projects/desci-world-bangalore-code-minimax`, branch `design-lab-code-minimax` | failed/incomplete; useful failure signal | dirty partial extraction plus unwanted `package.json` package-manager field; no style guide, docs, verification, or commit |
 | Figma DSF | GPT 5.5 low | native subagent plan | plan only | no Figma file created in that attempt |
 | Figma DSF | GPT 5.5 high | native subagent plan | stronger plan only | informed final build scope and taxonomy |
@@ -38,9 +38,10 @@ Recommended baseline:
 
 - `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
 - branch `design-lab-code-gpthigh`
-- head `399d1eb Record live style guide finish gate`
+- head `29a9fc2 Document style guide dev restart note`
 - implementation commit `71e10c3 Add Design Lab style guide proof`
 - finish-gate commit `399d1eb Record live style guide finish gate`
+- operational note commit `29a9fc2 Document style guide dev restart note`
 - route `http://127.0.0.1:3005/style-guide`
 - LAN route while dev server is running: `http://192.168.0.37:3005/style-guide`
 
@@ -91,7 +92,7 @@ Current winning head:
 
 - `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
 - branch `design-lab-code-gpthigh`
-- head `399d1eb`
+- head `29a9fc2`
 
 Readiness checks:
 
@@ -226,7 +227,7 @@ Parked finish line:
 | Requirement | Status | Evidence / Missing Proof |
 |---|---|---|
 | get Design Lab skill to finish line | done for current iteration | skill validates; commits through `e4921d9` |
-| test it on real project | done for code/style-guide track | `desci-world-bangalore-code-gpthigh` at `399d1eb` |
+| test it on real project | done for code/style-guide track | `desci-world-bangalore-code-gpthigh` at `29a9fc2` |
 | run multiple model attempts | partial | low/high code done; Minimax code attempted but failed/incomplete |
 | compare attempts | done in this report | Attempt Matrix |
 | produce code/live style-guide finish line | done pending user Finish Gate | `/style-guide` on high branch |
