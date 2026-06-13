@@ -59,6 +59,32 @@ Main-thread spot check repeated the route after restarting stale Nuxt dev state:
 - `curl -I http://127.0.0.1:3005/style-guide` returned 200.
 - Browser check found `EventRow` and `Footer`, no mounted splash proof behavior, no horizontal overflow, and no console errors.
 
+## Merge Readiness
+
+Current winning head:
+
+- `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
+- branch `design-lab-code-gpthigh`
+- head `f82c0ec`
+
+Readiness checks:
+
+- `git diff --check master..design-lab-code-gpthigh` passed.
+- `git merge-tree $(git merge-base master design-lab-code-gpthigh) master design-lab-code-gpthigh` showed no conflict markers or both-sides conflicts.
+- `COREPACK_ENABLE_AUTO_PIN=0 yarn build` passed from the high worktree after the verification-side-effect doc update.
+- Main repo state remains `master` with only pre-existing untracked `dist 2`.
+
+Build warnings still present:
+
+- Node `DEP0180` fs.Stats deprecation warning.
+- Browserslist `caniuse-lite` is outdated.
+- Vite CSS warning for existing `align-items: start`.
+- Nuxt Content JSON-array warnings for `content/events.json` and `content/speakers.json`.
+
+Merge gate:
+
+- Do not merge automatically. User should accept the code/style-guide Finish Gate or ask to apply the high branch to main.
+
 ## Low Code Attempt
 
 The low attempt demonstrated that the workflow can get a live proof page quickly, but it did not reach the same finish-line standard:
