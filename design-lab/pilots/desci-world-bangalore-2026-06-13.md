@@ -23,7 +23,7 @@ The Figma Design System File finish line is not complete because file creation i
 | Track | Attempt | Workspace / Session | Result | Evidence |
 |---|---|---|---|---|
 | code/style-guide | GPT 5.5 low | `/Users/burooj/Projects/desci-world-bangalore-code-gptlow`, branch `design-lab-code-gptlow`, commit `d787697` | shallow proof; useful but not winner | 7 changed files, `pages/style-guide.vue`, partial `docs/design-lab` artifacts; build not verified because deps were missing |
-| code/style-guide | GPT 5.5 high | `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`, branch `design-lab-code-gpthigh`, commit `71e10c3` | winner | 18 changed files, full artifact set, `EventRow.vue` extraction, `Footer.vue` proof prop, verified build/browser |
+| code/style-guide | GPT 5.5 high | `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`, branch `design-lab-code-gpthigh`, head `f82c0ec` | winner | 18 changed files, full artifact set, `EventRow.vue` extraction, `Footer.vue` proof prop, verified build/browser |
 | code/style-guide | Minimax M3 | `/Users/burooj/Projects/desci-world-bangalore-code-minimax`, branch `design-lab-code-minimax` | failed/incomplete; useful failure signal | dirty partial extraction plus unwanted `package.json` package-manager field; no style guide, docs, verification, or commit |
 | Figma DSF | GPT 5.5 low | native subagent plan | plan only | no Figma file created; blocked by Surface Gate team choice |
 | Figma DSF | GPT 5.5 high | native subagent plan | stronger plan only | no Figma file created; blocked by Surface Gate team choice |
@@ -35,7 +35,8 @@ Recommended baseline:
 
 - `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
 - branch `design-lab-code-gpthigh`
-- commit `71e10c3 Add Design Lab style guide proof`
+- head `f82c0ec Record Design Lab verification side effects`
+- implementation commit `71e10c3 Add Design Lab style guide proof`
 - route `http://127.0.0.1:3005/style-guide`
 
 What it did:
@@ -127,7 +128,7 @@ Important boundary:
 | Requirement | Status | Evidence / Missing Proof |
 |---|---|---|
 | get Design Lab skill to finish line | done for current iteration | skill validates; commits through `e4921d9` |
-| test it on real project | done for code/style-guide track | `desci-world-bangalore-code-gpthigh` |
+| test it on real project | done for code/style-guide track | `desci-world-bangalore-code-gpthigh` at `f82c0ec` |
 | run multiple model attempts | partial | low/high code done; Minimax code attempted but failed/incomplete |
 | compare attempts | done in this report | Attempt Matrix |
 | produce code/live style-guide finish line | done pending user Finish Gate | `/style-guide` on high branch |

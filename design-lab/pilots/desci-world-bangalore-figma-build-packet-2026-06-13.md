@@ -37,7 +37,8 @@ Winning code/style-guide branch:
 
 - worktree: `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
 - branch: `design-lab-code-gpthigh`
-- commit: `71e10c3 Add Design Lab style guide proof`
+- head: `f82c0ec Record Design Lab verification side effects`
+- implementation commit: `71e10c3 Add Design Lab style guide proof`
 - proof route: `http://127.0.0.1:3005/style-guide`
 
 Key source files:
