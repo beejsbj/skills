@@ -87,6 +87,13 @@ Fresh code/style-guide proof after the user asked for the style-guide version an
   - no visible out-of-bounds candidates
   - no console errors or warnings
 
+Current completion-audit pass at `fa990bc`:
+
+- Winning worktree `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh` is clean on branch `design-lab-code-gpthigh`.
+- `curl -I http://127.0.0.1:3005/style-guide` returned 200.
+- `curl -I http://192.168.0.37:3005/style-guide` returned 200.
+- Post-restart browser proof is recorded in `docs/design-lab/RESIDUE_PROOF.md`: desktop and phone-sized render checks found required sections, no horizontal overflow, no out-of-bounds elements, and no console issues.
+
 ## Merge Readiness
 
 Current winning head:
@@ -97,9 +104,10 @@ Current winning head:
 
 Readiness checks:
 
-- `git diff --check master..design-lab-code-gpthigh` passed.
-- `git merge-tree $(git merge-base master design-lab-code-gpthigh) master design-lab-code-gpthigh` showed no conflict markers or both-sides conflicts.
+- `git diff --check master..design-lab-code-gpthigh` passed at `fa990bc`.
+- `git merge-tree $(git merge-base master design-lab-code-gpthigh) master design-lab-code-gpthigh` showed no conflict markers or both-sides conflicts at `fa990bc`.
 - `COREPACK_ENABLE_AUTO_PIN=0 yarn build` passed from the high worktree after the day/night theme correction.
+- Post-build dev-server staleness is documented: restart `desci-style-guide` after `yarn build` before phone/LAN review.
 - Main repo state remains `master` with only pre-existing untracked `dist 2`.
 
 Build warnings still present:
