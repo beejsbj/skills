@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Lab"
+  short_description: "Turn ambiguous design material into a decomposed design system."
+  default_prompt: "Use design-lab to turn the provided repo, Figma file, references, moodboards, screenshots, words, partial components, or midstream style-guide work into a formal design system with tokens, primitives, unique specimens, compounds, compositions, anatomy, and an implementation proof when needed."
