@@ -102,6 +102,10 @@ Known accessible plans from Figma auth:
 
 Because more than one writable plan exists, Figma file creation must wait for the user to choose the team/project. Until then, the Figma attempts are planning evidence only.
 
+Prepared creation packet:
+
+- `design-lab/pilots/desci-world-bangalore-figma-build-packet-2026-06-13.md`
+
 Recommended first file structure once the gate is opened:
 
 - `00 Design Map`
@@ -134,7 +138,7 @@ Important boundary:
 ## Recommended Next Moves
 
 1. User chooses a Figma team/project.
-2. Create the Figma Design System File using the recommended page structure.
+2. Create the Figma Design System File using `desci-world-bangalore-figma-build-packet-2026-06-13.md`.
 3. Use the high code branch as the implementation baseline.
 4. Decide whether to merge/apply `design-lab-code-gpthigh` into the main repo.
 5. Either clean or discard the dirty Minimax worktree after preserving this report.
