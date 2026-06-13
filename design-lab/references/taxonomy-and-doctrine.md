@@ -41,6 +41,8 @@ Values, semantic aliases, constraints, and named low-level recipes that do not r
 
 Decision test: "Could this be replaced by reading variables/constants?" If yes, it is token-layer.
 
+Expressive utility classes such as `firm-voice`, `loud-voice`, or `points` are usually token-layer role utilities or doctrine shorthand, not primitives. Promote them to primitives only when they own a renderable identity with anatomy, states, slots, or behavior beyond applying a named recipe.
+
 ### Primitives
 
 Smallest named renderable ideas. They may be visual, control, or container primitives.

@@ -40,7 +40,7 @@ Archaeology and interview can iterate; use read-first evidence to ask better que
 Preflight order:
 
 1. Run read-only recon.
-2. If Figma is mentioned, wanted, or already part of the project, check Figma availability and run Surface Gate.
+2. If Figma is mentioned, wanted, or already part of the project, run Surface Gate. If the user explicitly forbids Figma for this run, record `wanted: no`, skip Figma tool checks, and choose the no-Figma workflow.
 3. Run Scope Gate.
 4. Run Intent and Doctrine gates.
 5. Run Repository Conventions Gate before edits, implementation, route moves, file moves, or Figma writes.
@@ -65,6 +65,7 @@ Before executing, route the request by entry point:
 
 - Raw words, metaphors, moodboards, screenshots: run intake and interview first.
 - Existing repo or old site: run archaeology before proposing doctrine.
+- Existing repo with generated output: read `.gitignore` and exclude ignored build/cache folders from source archaeology unless the user names them as evidence.
 - Claude Design HTML or static preview files: preserve visual intent, then decompose.
 - Existing style guide or kitchen sink: audit taxonomy and recipe gaps.
 - Existing component extraction: run raw recipe inventory first, then formalize the component while enforcing promote/prune decisions.
@@ -159,6 +160,8 @@ Return: filled output, plus candidates that do not fit the schema
 ```
 
 Parallelize reconnaissance. Rejoin before decisions.
+
+For pilots or environments without callable subagents, run the roles as labeled read-only passes in the main session and say they are simulated. Do not let a simulated role pass gates or close layers.
 
 ## Completion Definition
 

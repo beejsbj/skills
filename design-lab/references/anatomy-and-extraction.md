@@ -155,6 +155,12 @@ Use the canonical loop in `SKILL.md`. This reference covers the extraction segme
 raw recipe inventory -> extraction/formalization -> promotion decisions -> anatomy -> residue proof -> layer closure
 ```
 
+Inventory depth:
+
+- `sample`: scouting/pilot mode. Capture representative rows that test taxonomy and gates. Do not close layers from a sample inventory.
+- `focused`: inspect one accepted layer, component family, surface, or composition deeply enough to extract it.
+- `exhaustive`: inspect all in-scope sources before layer closure or Finish Gate.
+
 Inventory:
 
 - repeated colors or semantic color roles

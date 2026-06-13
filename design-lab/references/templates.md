@@ -16,6 +16,9 @@ Use these when creating durable Design Lab methodology artifacts in a repo. Thes
 ## Artifact Location
 - ...
 
+## Inventory Depth
+- sample | focused | exhaustive
+
 ## Doctrine Compass
 | Axis | Law | Pattern | Forbidden Move | Evidence |
 |---|---|---|---|---|
@@ -217,6 +220,12 @@ This is not the Live Style Guide. It maps taxonomy, ownership, and source-of-tru
 - dirty files: ...
 - untracked files: ...
 
+## Ignored / Generated Outputs
+- ...
+
+## Docs / Config Mismatches
+- ...
+
 ## Edit Ownership
 - user-owned changes to preserve: ...
 - files safe to edit: ...
@@ -258,6 +267,9 @@ accepted / continue / pause
 
 ## Scope
 - ...
+
+## Inventory Depth
+sample / focused / exhaustive
 
 ## Sources Inspected
 - ...

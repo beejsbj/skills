@@ -24,6 +24,8 @@ Start read-only unless the user explicitly asks to implement. Gather:
 - Style-guide surfaces or pages.
 - Screenshots, assets, moodboards, reference folders.
 - Notes, docs, TODOs, planning files.
+- `.gitignore`, README/setup docs, package scripts, and config files that may disagree about routes, ports, or verification commands.
+- Ignored/generated output folders, treated as excluded evidence unless the user explicitly names them.
 - Git history themes: when did tokens, visual language, or components change?
 - Current worktree status.
 
@@ -36,10 +38,12 @@ Use this for repos, old sites, forks, abandoned previews, or prior attempts befo
 Read in this order:
 
 1. current structure: routes/views, components, token files, style-guide/kitchen-sink files, docs, assets
-2. current worktree status and branch names
-3. git history for token, CSS, component, and visual-language changes
-4. deleted/renamed design files and old preview folders
-5. fork/origin comparison when a repo was forked from a mentor/template
+2. `.gitignore` and obvious generated/cache output so source evidence is not polluted
+3. current worktree status and branch names
+4. README/config/script mismatches that affect verification or live preview
+5. git history for token, CSS, component, and visual-language changes
+6. deleted/renamed design files and old preview folders
+7. fork/origin comparison when a repo was forked from a mentor/template
 
 Output target:
 
@@ -62,6 +66,12 @@ Output target:
 - ...
 
 ### Drift / Dead Ends
+- ...
+
+### Generated / Ignored Outputs
+- ...
+
+### Docs / Config Mismatches
 - ...
 
 ### Candidate Raw Recipes
@@ -127,6 +137,7 @@ Required outputs:
 - `allowed autonomy`: what the agent may decide without asking, and what needs user taste/check approval.
 - `artifact mode`: chat-only audit, light durable handoff, or full workflow.
 - `artifact location`: where durable methodology files should live if artifacts are created.
+- `inventory depth`: sample, focused, or exhaustive.
 
 Scope gate packet:
 
@@ -157,6 +168,9 @@ Scope gate packet:
 ### Artifact Location
 - ...
 
+### Inventory Depth
+- sample | focused | exhaustive
+
 ### Recommendation
 - ...
 
@@ -186,12 +200,15 @@ Scope gate packet:
 Cannot define scope branch:
 
 - Default to the smallest reversible scope: tokens plus primitives for the most visually repeated in-scope material.
+- Use `sample` inventory depth for scouting/pilots, then require focused or exhaustive inventory before extraction/layer closure.
 - Mark unique specimens, compounds, and compositions as deferred unless they are needed to prove the primitive.
 - Create `Pending Scope Decisions` and stop before irreversible extraction or route/file moves.
 
 ## Surface Gate
 
 Run this before Scope Gate when Figma support is relevant or when the user mentions Figma. The goal is to choose the first formalization surface without pretending Figma is available just because a plugin exists.
+
+If the user explicitly says not to use Figma for this run, record `wanted: no`, `accessible: not tested`, and choose the no-Figma code workflow. Do not call Figma tools merely because Figma was mentioned.
 
 Required outputs:
 
@@ -262,6 +279,8 @@ Run this before extraction edits in a repo. Do not invent paths silently.
 
 Resolve verification by reading `package.json` scripts, README docs, existing style-guide/storybook commands, or asking the user. Record the chosen command here before the Finish Gate.
 
+Compare README/setup instructions against package scripts and framework config. Record mismatches such as a README port that differs from the configured dev server.
+
 ```markdown
 ## Repository Conventions Gate
 
@@ -293,6 +312,12 @@ Resolve verification by reading `package.json` scripts, README docs, existing st
 - branch: ...
 - dirty files: ...
 - untracked files: ...
+
+### Ignored / Generated Outputs
+- ...
+
+### Docs / Config Mismatches
+- ...
 
 ### Edit Ownership
 - user-owned changes to preserve: ...
