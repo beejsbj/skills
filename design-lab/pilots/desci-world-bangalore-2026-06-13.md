@@ -4,7 +4,9 @@ Date: 2026-06-13
 
 ## Goal
 
-Use Design Lab on `/Users/burooj/Projects/desci-world-bangalore` as a real-project pilot, with multiple attempts across model strength and finish-line type:
+Use Design Lab on `/Users/burooj/Projects/desci-world-bangalore` as a real-project pilot, with multiple attempts across model strength and finish-line type.
+
+Current active finish line after the user's latest instruction: code / live style guide only. The Figma track remains historical pilot evidence and is gate-parked unless the user reopens it.
 
 - code / live style-guide finish line
 - Figma Design System File finish line
@@ -14,9 +16,9 @@ Use Design Lab on `/Users/burooj/Projects/desci-world-bangalore` as a real-proje
 
 ## Current Verdict
 
-The code / live style-guide finish line has a clear winning attempt.
+The code / live style-guide finish line has a clear winning attempt and is the active review target.
 
-The Figma Design System File finish line now has a completed bj Starter-compatible v1. The original `Burooj's Figma` plan key failed, the user redirected the target to `bj`, and the Figma file was created and populated there.
+The Figma Design System File finish line has a completed bj Starter-compatible v1, but it is no longer part of the active finish gate after the user asked to skip Figma. The original `Burooj's Figma` plan key failed, the user redirected the target to `bj`, and the Figma file was created and populated there.
 
 ## Attempt Matrix
 
@@ -61,6 +63,26 @@ Main-thread spot check repeated the route after restarting stale Nuxt dev state:
 
 - `curl -I http://127.0.0.1:3005/style-guide` returned 200.
 - Browser check found `EventRow` and `Footer`, no mounted splash proof behavior, no horizontal overflow, and no console errors.
+
+Fresh code/style-guide proof after the user asked for the style-guide version and to skip Figma:
+
+- Stale orphaned Nuxt process on port 3005 was killed after it served a `#internal/nitro` import error from stale `.nuxt` state.
+- Fresh dev server started from `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh` with `COREPACK_ENABLE_AUTO_PIN=0 yarn dev --host 0.0.0.0 --port 3005`.
+- Nuxt advertised:
+  - local: `http://0.0.0.0:3005/`
+  - network: `http://192.168.0.37:3005/`
+- `curl -I http://127.0.0.1:3005/style-guide` returned 200.
+- `curl -I http://192.168.0.37:3005/style-guide` returned 200.
+- Browser desktop rendered audit at `http://127.0.0.1:3005/style-guide`:
+  - title: `Design Lab Style Guide - World of DeSci Bengaluru`
+  - visible guide headings include `World of DeSci Bengaluru`, `Palette and source variables`, `Day and night theme contract`, `Controls and pattern fields`, `Singular marks and hero-image artifacts`, `Source component proofs`, `Route and section proofs`
+  - no horizontal overflow
+  - no console errors or warnings
+- Browser mobile rendered audit at phone-ish viewport:
+  - required guide sections present
+  - no horizontal overflow
+  - no visible out-of-bounds candidates
+  - no console errors or warnings
 
 ## Merge Readiness
 
@@ -186,6 +208,18 @@ Important boundary:
 - Code still owns runtime behavior, data flow, generated visuals, accessibility implementation, and interaction fidelity.
 - The live style guide remains the implementation proof and part of the finished code deliverable.
 
+## Surface Gate Update
+
+Latest user decision: skip Figma.
+
+Active finish line:
+
+- code / live style-guide proof from `/Users/burooj/Projects/desci-world-bangalore-code-gpthigh`
+
+Parked finish line:
+
+- Figma DSF v1 in `bj`; do not spend more tool or review time there unless the user reopens Figma.
+
 ## Requirement Audit
 
 | Requirement | Status | Evidence / Missing Proof |
@@ -195,20 +229,19 @@ Important boundary:
 | run multiple model attempts | partial | low/high code done; Minimax code attempted but failed/incomplete |
 | compare attempts | done in this report | Attempt Matrix |
 | produce code/live style-guide finish line | done pending user Finish Gate | `/style-guide` on high branch |
-| produce Figma finish line | done for Starter-compatible v1 with font-fidelity gate | bj file `z4ROGt453f8rB0wz24MerQ`; tool-call limit blocked final font-family upgrade |
+| produce Figma finish line | gate-parked by latest user instruction | bj file `z4ROGt453f8rB0wz24MerQ` exists as historical pilot evidence; skip Figma for active review |
 | verify winning implementation | done | build plus browser checks |
-| call whole goal complete | pending user Finish Gate | code and Figma tracks have implementation proof; user acceptance still needed |
+| call whole goal complete | pending user Finish Gate | active code/style-guide track has implementation proof; user acceptance still needed |
 
 ## Recommended Next Moves
 
-1. User reviews the bj Figma file and either accepts the DSF v1, asks for a visual revision, or asks for a richer non-Starter rebuild elsewhere.
-2. Use the high code branch as the implementation baseline.
+1. User reviews the live style guide at `/style-guide` and accepts, continues, or pauses the code/style-guide Finish Gate.
+2. Use the high code branch as the implementation baseline if accepted.
 3. Decide whether to merge/apply `design-lab-code-gpthigh` into the main repo.
-4. When the Figma MCP limit resets or a non-Starter target is available, update Figma text styles from Inter to `Unbounded` and `Space Grotesk`.
-5. Either clean or discard the dirty Minimax worktree after preserving this report.
+4. Either clean or discard the dirty Minimax worktree after preserving this report.
 
 ## Finish Gate State
 
 Current gate decision: `review`
 
-Reason: code/style-guide proof and Figma DSF v1 now both exist. The remaining decision is whether the user accepts the Starter-compatible Figma file, with the recorded font-fidelity gate, and the high code branch as the pilot finish line.
+Reason: the user asked to skip Figma, so the active review target is the high code/style-guide branch. The remaining decision is whether the user accepts the live style guide and high code branch as the pilot finish line.
