@@ -1,32 +1,77 @@
 ---
 name: agents
-description: Choose and spawn agents or sessions as ephemeral helpers or durable root sessions. Use when the user says use an agent, start a session, spawn a parent/root session, resume an agent session, fork a session, create an ephemeral helper, hand work to another agent, use claude, use codex, use opus, ask sonnet, or ask haiku.
+description: Choose and operate top-level provider-visible agents/sessions across Claude, Codex, opencode, and Cursor. Use when the user says use an agent, start a session, resume an agent session, fork a session, hand work to another visible agent, get a quick one-off answer from another provider, throwaway cross-provider second opinion, use claude, use codex, use opencode, use cursor, ask opus, ask sonnet, or ask haiku. Do not use for harness-native subagents.
 ---
 
 # Agents
 
-Use one simple topology for agents and sessions:
+Use this skill for **top-level provider-visible agents/sessions**: durable Claude, Codex, opencode, or Cursor sessions that can be discovered, inspected, resumed, forked, attached to, or archived.
 
-- **Ephemeral helper**: a bounded agent call that returns an answer here and does not need durable history.
-- **Root session**: a parent agent session with durable history that can be resumed, forked, attached to, or inspected later.
+Do not use this skill for harness-native internal delegation:
+
+- Codex subagents
+- Claude subagents
+- Claude agent teams
+- Claude `/tasks`
+- opencode subagents (via `@general` etc.)
+- provider-internal background work
+
+Rule of thumb:
+
+- If the work should report back inside the current conversation and can run in the current harness, use the current harness's native subagent system.
+- If the work is a quick one-shot but needs a *different* provider, use `agents.py run`.
+- If the work should become a visible resumable session/thread, use `agents.py` (`start`/`resume`/`fork`) or the native top-level provider CLI.
 
 Everything else is a modifier:
 
 - **Provider**: the CLI or harness used to run the agent.
-- **Lineage**: fresh, resumed, or forked.
+- **Lineage**: started, resumed, or forked.
 - **Workspace**: current checkout, worktree, sandbox, or another working directory.
 - **Run configuration**: model, effort/thinking level, output format, permissions, and tool access.
-- **Intent**: ask, review, or do.
+- **Intent**: ask, review, do, steward, inspect, or coordinate.
 
-Topology is one of two modes. Everything else — provider, lineage, workspace, run configuration, and intent — is a modifier on top.
+Provider, lineage, workspace/isolation, run configuration, and intent are modifiers on top of the visible-session primitive.
+
+## agents.py
+
+The Python CLI lives beside this file:
+
+```bash
+python /Users/burooj/Projects/skills/agents/agents.py --help
+```
+
+It is stateless and JSON-first. It reads provider stores for discovery, uses native provider commands for actions, and does not edit provider transcript stores.
+
+V1 verbs:
+
+```text
+discover
+inspect
+start
+run
+resume
+fork
+archive
+unarchive
+attach
+```
+
+`run` is a **cross-provider ephemeral one-shot**: prompt a provider, get the answer back here, no durable handoff. It exists because native subagents only run inside the current harness — they cannot reach another provider. Use `run` when you want a quick second opinion or cheap pass from a *different* provider (e.g. you are in Claude and want a throwaway answer from Codex or a cheap opencode model). For codex (`--ephemeral`) and claude (`--no-session-persistence`) this is truly non-persistent; opencode and cursor have no ephemeral flag, so `run` creates a disposable session whose row still persists and is surfaced with a warning.
+
+There is intentionally no subagent or team command — that work belongs to each harness's native subagent system.
+
+Model guidance lives in `profiles.json`. Profiles guide but do not restrict; unknown model names are passed through with a warning.
 
 ## Decision Rule
 
-- Use an **ephemeral helper** for quick ask/review/summarize/classify/debug-hypothesis work where only the returned result matters.
-- Use a **root session** for work the user may want to see, resume, fork, attach to, or hand off later.
+- Use native subagents for quick ask/review/summarize/classify/debug-hypothesis work where only the returned result matters and the current harness can do it.
+- Use `agents.py run` for that same quick work when it needs a *different* provider — a throwaway cross-provider second opinion or cheap pass.
+- Use a visible top-level session for work the user may want to see, resume, fork, attach to, archive, or hand off later.
 - Use a worktree/workspace modifier when independent edits may collide with the current checkout.
 - Use the provider the user named. If unnamed, choose the provider whose strengths fit the task, or stay in the current session for small work.
-- When creating a root session, report the session ID, name, working directory, and attach/resume command back to the user.
+- Use **opencode** when the task benefits from opencode's TUI, its built-in provider integrations (opencode-go models), or when resuming an existing opencode session.
+- Use **cursor** when the task needs the Cursor agent CLI, particularly for Composer 2.5 models. cursor discovery is minimal (workspace only); prefer start/resume.
+- When creating a visible session, report the session ID, name, working directory, and attach/resume command back to the user.
 - When the spawned agent needs to report back automatically, pass an explicit callback target such as a parent session ID, output file path, issue, or command. Otherwise poll logs or transcripts.
 
 ## Worked Examples
@@ -52,37 +97,81 @@ Attach: claude attach <id>
 Logs: claude logs <id>
 ```
 
-User says: "Ask Codex to quickly review this diff."
+User says (while working in Claude): "Get a quick throwaway second opinion from Codex on this diff."
 
-- Topology: ephemeral helper, because only the returned review matters.
-- Provider: Codex.
-- Workspace: current repo.
-- Run configuration: read-only sandbox.
+- Intent: ask, one-shot. Only the returned answer matters and no session is wanted.
+- Why not a native subagent: a Claude subagent cannot reach Codex. Cross-provider one-shot → `run`.
 - Command:
 
 ```bash
-git diff | codex exec --cd "$PWD" --sandbox read-only --ephemeral \
-  "Review this diff. Return correctness findings only."
+python /Users/burooj/Projects/skills/agents/agents.py run \
+  --provider codex \
+  --workspace "$PWD" \
+  --message "Run git diff in this repo and review the working changes. Return correctness findings only."
+```
+
+`run` does not forward stdin to the provider, so put the instruction in `--message` and let the agent read the repo itself (codex `run` uses a read-only sandbox scoped to `--workspace`).
+
+User says: "Ask Codex to start a visible review session for this repo."
+
+- Provider: Codex.
+- Workspace: current repo.
+- Run configuration: visible durable session.
+- Command:
+
+```bash
+python /Users/burooj/Projects/skills/agents/agents.py start \
+  --provider codex \
+  --workspace "$PWD" \
+  --model gpt-5.5 \
+  --wait \
+  --message "Review this repository state. Return correctness findings only."
+```
+
+User says: "Start an opencode session with kimi-k2.7-code to implement auth."
+
+- Provider: opencode.
+- Workspace: current repo.
+- Run configuration: kimi-k2.7-code model.
+- Command:
+
+```bash
+python /Users/burooj/Projects/skills/agents/agents.py start \
+  --provider opencode \
+  --workspace "$PWD" \
+  --model opencode-go/kimi-k2.7-code \
+  --wait \
+  --message "Implement the auth feature described in the README."
+```
+
+User says: "Use Cursor with composer-2.5 to review this PR."
+
+- Provider: cursor.
+- Workspace: current repo.
+- Run configuration: Composer 2.5, print mode.
+- Command:
+
+```bash
+python /Users/burooj/Projects/skills/agents/agents.py start \
+  --provider cursor \
+  --workspace "$PWD" \
+  --model composer-2.5 \
+  --message "Review this PR for correctness issues."
 ```
 
 ## Model And Effort
 
 - Use the user's named model or effort exactly when provided.
 - Use stronger models and higher effort for architecture, security, ambiguous bugs, code review with real risk, and handoffs that may guide implementation.
-- Use faster/cheaper models and lower effort for extraction, summarization, classification, simple checks, and disposable helper passes.
+- Use faster/cheaper models and lower effort for extraction, summarization, classification, and simple checks.
 - Prefer native CLI flags when available, such as Claude `--model` and `--effort`.
 - For Codex, use `--model` when the user names a Codex model. Use config overrides only when the local Codex CLI/provider documents the relevant setting.
-- Keep effort lower for ephemeral helpers unless disagreement or uncertainty would be expensive.
 - Increase effort for durable root sessions that will become a source of truth for later work.
 - Verify provider flags with local `--help` when portability matters. These examples were written against Claude Code `2.1.138` and Codex CLI `0.136.0`.
 
 ## Claude CLI Examples
 
 ```bash
-# Ephemeral helper
-claude -p --no-session-persistence --model sonnet --effort medium \
-  "Review this plan. Return findings only."
-
 # Root session in print mode
 claude -p --name "auth-review" --model opus --effort high \
   "Review this architecture and keep the session available for follow-up."
@@ -109,10 +198,6 @@ claude --worktree feature-auth --bg --name "feature-auth" \
 ## Codex CLI Examples
 
 ```bash
-# Ephemeral helper
-codex exec --cd "$PWD" --sandbox read-only --ephemeral \
-  "Review this diff. Return findings only."
-
 # Root session
 codex exec --cd "$PWD" --sandbox read-only \
   "Review this architecture and keep the session available for follow-up."
@@ -131,8 +216,73 @@ codex exec --cd "<worktree-path>" --sandbox workspace-write \
   "Implement this bounded change and report verification."
 ```
 
+## opencode CLI Examples
+
+```bash
+# Start a new session (prints JSON)
+opencode run --format json \
+  --model opencode-go/glm-5.1 \
+  "Implement this bounded change and report verification."
+
+# Start in a specific directory
+opencode run --format json --dir /path/to/project \
+  --model opencode-go/kimi-k2.7-code \
+  "Review this architecture and keep the session available for follow-up."
+
+# Resume a session
+opencode run --format json --session ses_xxx \
+  "Continue the previous investigation."
+
+# Fork a session
+opencode run --format json --session ses_xxx --fork \
+  "Explore an alternate path."
+
+# List sessions (JSON)
+opencode session list --format json
+
+# Export a session transcript
+opencode export ses_xxx
+```
+
+opencode sessions are discovered via `opencode session list --format json` (with SQLite fallback). Session state is stored in `~/.local/share/opencode/opencode.db`.
+
+opencode has no archive verb. Use cockpit-level state tracking for archival semantics.
+
+## Cursor Agent CLI Examples
+
+```bash
+# Start a new session (print mode)
+cursor agent --print \
+  --model composer-2.5-fast \
+  "Implement this bounded change and report verification."
+
+# Start in a specific workspace
+cursor agent --print --workspace /path/to/project \
+  --model composer-2.5 \
+  "Review this architecture and produce findings."
+
+# Resume a session
+cursor agent --resume <chatId> --print \
+  "Continue the previous investigation."
+
+# Continue the last session
+cursor agent --continue --print \
+  "Continue from where we left off."
+
+# Start in an isolated worktree
+cursor agent --print --worktree feature-branch \
+  --model composer-2.5 \
+  "Implement this bounded change."
+```
+
+Cursor agent has limited discovery (`cursor agent ls` requires a TTY). Session metadata is minimal (workspace only). Use `agents.py discover --provider cursor` for best-effort metadata, or prefer start/resume.
+
+Cursor agent has no archive/fork verbs. Use cockpit-level state tracking for archival semantics.
+
 ## Notes
 
-- A returned session/thread ID is not proof of durability. Ephemeral/no-persistence runs may still emit an ID that cannot be resumed.
+- A returned session/thread ID is not proof of durability; inspect or resume before treating it as a durable handoff.
 - Multiple root sessions can be simulated with multiple shell terminals or background sessions.
 - Keep prompts bounded and name the output shape.
+- **opencode** session IDs use the `ses_` prefix (e.g., `ses_abc123`). Discovery uses `opencode session list --format json` with SQLite fallback at `~/.local/share/opencode/opencode.db`.
+- **cursor** agent sessions are thin-metadata (workspace/cwd only, no rich transcript). Prefer start/resume over discover/inspect. Cursor's `--print` flag is required for non-interactive use.

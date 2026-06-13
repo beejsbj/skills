@@ -1,0 +1,93 @@
+[
+  {
+    "provider": "codex",
+    "model": "gpt-5.5",
+    "good_for": "Soft default; stewardship, implementation, debugging, synthesis, tool-heavy coordination.",
+    "avoid_for": "Bulk extraction or cheap throwaway work where a smaller model is enough.",
+    "default_effort": "medium"
+  },
+  {
+    "provider": "claude",
+    "model": "opus",
+    "good_for": "Deep architecture, hard review, ambiguous reasoning, high-stakes judgment.",
+    "avoid_for": "Routine extraction, simple edits, or low-risk cleanup.",
+    "default_effort": "high"
+  },
+  {
+    "provider": "claude",
+    "model": "sonnet",
+    "good_for": "General implementation, review, debugging, and balanced code work.",
+    "avoid_for": "Tiny extraction tasks or problems needing the deepest available reasoning.",
+    "default_effort": "medium"
+  },
+  {
+    "provider": "claude",
+    "model": "haiku",
+    "good_for": "Fast summaries, classification, extraction, low-risk scouting.",
+    "avoid_for": "Architecture, complex implementation, or nuanced product judgment.",
+    "default_effort": "low"
+  },
+  {
+    "provider": "opencode",
+    "model": "opencode-go/deepseek-v4-flash",
+    "good_for": "Cheap/fast lane. Use this for throwaway work — extraction, summarization, classification, and ephemeral `run` passes. Use it when you want maximum throughput per dollar and don't need depth.",
+    "avoid_for": "Complex implementation, hard reasoning, or anything you will build on.",
+    "default_effort": "low"
+  },
+  {
+    "provider": "opencode",
+    "model": "opencode-go/glm-5.1",
+    "good_for": "General balanced coder. Use this for everyday implementation and review through opencode. Use it when you want a dependable all-rounder and need neither a specialist nor a flagship.",
+    "avoid_for": "The hardest reasoning or peak code work; reach for deepseek-v4-pro.",
+    "default_effort": "medium"
+  },
+  {
+    "provider": "opencode",
+    "model": "opencode-go/kimi-k2.7-code",
+    "good_for": "Code specialist. Use this for writing, editing, and refactoring. Use it when the task is mostly code and you want Kimi's code-tuned fork (faster, fewer reasoning tokens).",
+    "avoid_for": "General agentic or long tool-use chains; use kimi-k2.6 for that.",
+    "default_effort": "medium"
+  },
+  {
+    "provider": "opencode",
+    "model": "opencode-go/kimi-k2.6",
+    "good_for": "General agentic workhorse. Use this for long, tool-heavy chains — it sustains thousands of tool calls cheaply. Use it for broad agentic work that isn't purely code.",
+    "avoid_for": "Pure code grinding (prefer kimi-k2.7-code) or quick throwaway tasks.",
+    "default_effort": "medium"
+  },
+  {
+    "provider": "opencode",
+    "model": "opencode-go/minimax-m3",
+    "good_for": "Max-context, multimodal. Use this for huge codebases, long documents, or images — up to ~1M tokens and fast for its tier. Use it when context size is the constraint.",
+    "avoid_for": "Small, latency-sensitive tasks; minimax-m2.7 is faster when context is modest.",
+    "default_effort": "medium"
+  },
+  {
+    "provider": "opencode",
+    "model": "opencode-go/minimax-m2.7",
+    "good_for": "Fast agentic. Use this when you want speed on agentic work at a modest (~200K) context — much quicker and cheaper than m3. Use it when m3's huge window is overkill.",
+    "avoid_for": "Very large context or multimodal input; use minimax-m3.",
+    "default_effort": "medium"
+  },
+  {
+    "provider": "opencode",
+    "model": "opencode-go/deepseek-v4-pro",
+    "good_for": "Peak coding/reasoning. Use this for the hardest bugs, algorithmic work, and high-stakes code — it leads the open coding benchmarks. Use it when depth matters most.",
+    "avoid_for": "Cheap or throwaway work; deepseek-v4-flash is far cheaper.",
+    "default_effort": "high"
+  },
+  {
+    "provider": "cursor",
+    "model": "composer-2.5-fast",
+    "good_for": "Fast coding lane (Cursor's default). Use this for quick edits, boilerplate, and tight agent loops where speed beats depth.",
+    "avoid_for": "Deep architecture, ambiguous reasoning, or high-stakes review; reach for a frontier model (opus, deepseek-v4-pro).",
+    "default_effort": "medium"
+  },
+  {
+    "provider": "cursor",
+    "model": "composer-2.5",
+    "good_for": "Stronger Composer for more involved multi-file coding where the fast variant's quality falls short. Still a fast in-house coding model, not a reasoning flagship.",
+    "avoid_for": "Deep architecture or hard reasoning; use opus or deepseek-v4-pro instead.",
+    "default_effort": "medium"
+  }
+]

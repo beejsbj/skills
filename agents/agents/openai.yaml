@@ -1,4 +1,4 @@
 interface:
   display_name: "Agents"
-  short_description: "Spawn helpers or root sessions."
-  default_prompt: "Use $agents to choose an ephemeral helper or durable root session."
+  short_description: "Operate visible Claude/Codex/opencode/Cursor sessions."
+  default_prompt: "Use $agents to discover, start, resume, fork, attach, or archive top-level visible Claude, Codex, opencode, or Cursor sessions."
