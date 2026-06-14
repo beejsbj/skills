@@ -19,6 +19,8 @@ Style-guide surface
 
 Style-guide surfaces demonstrate components. They should not become component source of truth.
 
+Style-guide surfaces also must not smuggle unresolved taxonomy. A section titled `primitives` is not proof that every displayed item is a primitive. Each displayed item still needs source truth, layer classification, and either Anatomy or a documented reason Anatomy is not needed.
+
 ## Anatomy Pass
 
 Use Anatomy or the local equivalent to display:
@@ -197,6 +199,20 @@ For each artifact being formalized:
    - layout proportions
 5. Resolve every item through promote/prune/keep-local.
 
+When formalizing a style-guide section:
+
+1. Treat the section itself as a proof surface, not a taxonomy object.
+2. Inventory each child item separately.
+3. Split mixed children by layer before extraction:
+   - buttons, links, toggles, tabs, knobs, keys -> control primitive candidates
+   - marks, stickers, badges, indicators -> visual primitive candidates
+   - card/drawer/panel shells -> container primitive candidates
+   - repeated texture/pattern fields -> token or field primitive candidates
+   - singular marks/assets/animations -> unique specimen candidates
+   - layout frames, proof cards, labels -> style-guide-only keep-local
+4. If the section remains mixed, label it as a mixed proof surface and do not use it as layer-closure evidence.
+5. Do not close a primitive layer from a section that still contains token demos, one-offs, or unclassified utilities.
+
 ## Promote / Prune / Keep Local
 
 Use this decision rule:
@@ -292,3 +308,15 @@ A component is formalized when:
 - the style-guide surface imports and demonstrates the component
 - raw recipes have been promoted, pruned, or kept local with a reason
 - unresolved decisions are documented as Promotion Gates
+
+## Completion Check For One Style-Guide Section
+
+A style-guide section is formalized when:
+
+- the section role is named: layer-pure proof, mixed proof surface, anatomy surface, or composition proof
+- every displayed item has a source-of-truth reference or is explicitly style-guide-only
+- every displayed item has a taxonomy decision
+- mixed layer content is split or explicitly marked as mixed and excluded from layer closure
+- primitives are grouped by primitive family or justified through a Layer Purity Gate
+- token/utility/pattern demos are not counted as primitive components without Anatomy
+- one-offs are promoted to unique specimen or kept local with singular-role justification

@@ -55,6 +55,23 @@ Decision test: "Does it have a single identity and stand alone without named chi
 
 Primitive does not mean tiny. A drawer can be primitive if its job is a structural shell with slots and behavior.
 
+Primitive does not mean "whatever is low-level." A primitive section must be made of named primitive families, not a grab bag of unrelated low-level items.
+
+Common primitive families:
+
+- `control primitives`: button, text link, icon button, toggle, tab, key, knob.
+- `visual primitives`: mark, sticker, badge, indicator, decorative label.
+- `container primitives`: card shell, drawer shell, panel shell, stage shell.
+- `field primitives`: pattern field, texture field, grid field only when the field has renderable identity, constraints, and usage rules beyond a token class.
+
+Usually not primitive:
+
+- raw CSS variables, utility classes, texture classes, and pattern backgrounds that can be represented as tokens or doctrine shorthand
+- singular decorative assets that do not form a reusable family
+- one-off composition helpers, proof cards, demo frames, or style-guide labels
+
+If a style-guide section contains a button class, text link class, toggle, arrow, and pattern-background swatches together, do not accept it as "the primitive layer." Split it into control primitives, pattern/texture tokens or field primitives, visual primitives, and unique specimens, or open a Layer Purity Gate.
+
 ### Unique Specimens
 
 Singular preserved artifacts that matter to the system but should not become a reusable family. They may be visually complex, may appear directly in compositions or inside compounds, and may have local variations without gaining standard reusable variant axes.
@@ -146,10 +163,58 @@ If work in a higher layer reveals a missing lower-layer idea, pause the current 
 Layer-specific prompts:
 
 - `tokens`: What values, aliases, maps, constraints, effects, or motion rules recur before anything renders?
-- `primitives`: What renderable identities stand alone once content is removed?
+- `primitives`: What renderable identities stand alone once content is removed, and which primitive family does each belong to?
 - `unique specimens`: Which singular artifacts matter enough to preserve but should not become a reusable family?
 - `compounds`: Which primitive/unique-specimen assemblies always travel together and need a child contract?
 - `compositions`: Which screens, regions, or states prove the grammar in real usage?
+
+## Layer Purity Gate
+
+Run this before presenting or closing a style-guide section as one taxonomy layer. This gate prevents the common failure where "primitives" becomes a random mix of controls, utilities, one-offs, pattern swatches, and proof cards.
+
+Layer purity checks:
+
+1. Every item in the section has an artifact row with candidate layer, source of truth, and proof.
+2. Every primitive item names its primitive family: control, visual, container, or field.
+3. Token demonstrations and utility recipes are not counted as primitive components unless they have anatomy, states, variants, and usage rules.
+4. Unique specimens are not placed inside primitive sections merely because they are small or visual.
+5. A mixed section is either split into layer-pure subsections or labeled as a mixed proof surface, not a closed layer.
+6. Any item that cannot pass the layer test opens a Taxonomy Gate or Promotion Gate before extraction.
+
+Gate packet:
+
+```markdown
+## Layer Purity Gate: <section or surface>
+
+Claimed layer:
+- ...
+
+Items:
+| Item | Current label | Candidate layer | Primitive family | Source of truth | Decision |
+|---|---|---|---|---|---|
+| ... | ... | token / primitive / unique specimen / compound / composition / style-guide-only | control / visual / container / field / n/a | ... | keep / split / reclassify / gate |
+
+Mixed-section risk:
+- ...
+
+Recommendation:
+- split into ... / relabel as mixed proof surface / continue as layer-pure
+
+Alternatives rejected:
+- ...
+
+Unresolved risk:
+- ...
+
+Decision needed:
+- ...
+
+Unblocks:
+- ...
+
+Gate Decision:
+- accepted | continue | pause
+```
 
 ## Layer Closure
 
@@ -182,6 +247,7 @@ Primitive closure requires:
 - primitive families have anatomy, API, states, variants, and token dependencies
 - primitives consume tokens or approved lower-level data/constants
 - style-guide surfaces import/demonstrate primitive source files
+- primitive style-guide sections are layer-pure or explicitly split by primitive family
 
 Compound closure requires:
 

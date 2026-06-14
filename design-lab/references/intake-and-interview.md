@@ -213,6 +213,7 @@ If the user explicitly says not to use Figma for this run, record `wanted: no`, 
 Required outputs:
 
 - `Figma Availability`: whether the user wants Figma used and whether the agent can create/edit the Design System File.
+- `Figma Trust State`: parked, probe-only, approved for scratch, or approved for production file.
 - `first extraction surface`: Design System File when Figma is wanted and accessible; otherwise the current no-Figma code workflow.
 - `visual source-of-truth surface`: where visual truth will live.
 - `implementation proof surface`: Live Style Guide, reusable components, composition views, or code probes when implementation is in scope.
@@ -226,6 +227,15 @@ Figma is accessible only when all are true:
 - the target file exists or the agent can create it
 
 If any condition fails, recommend the no-Figma code workflow unless the user wants to pause and fix Figma access.
+
+Figma is still parked when:
+
+- the user says not to use it
+- the user does not trust the agent's Figma ability yet
+- the connector can create files but canvas mutation or screenshot verification has not been proven
+- the last Figma write was cancelled, failed, or could not be visually verified
+
+In a parked state, the agent may run a separate Figma capability probe only if the user asks for one. The probe must use a scratch file, avoid existing production files, report exact tools/actions/blockers, and must not make Figma the Design Lab source of truth.
 
 Surface gate packet:
 
@@ -241,6 +251,11 @@ Surface gate packet:
 - tool callable: yes/no/unknown
 - authenticated/edit access: yes/no/unknown
 - file/project: existing | create | unavailable
+
+### Figma Trust State
+- parked | probe-only | approved-for-scratch | approved-for-production
+- last capability proof: ...
+- blocker: ...
 
 ### Recommended First Extraction Surface
 - Design System File | no-Figma code workflow

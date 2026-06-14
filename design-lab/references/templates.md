@@ -115,6 +115,11 @@ Use these when creating durable Design Lab methodology artifacts in a repo. Thes
 - authenticated/edit access: yes/no/unknown
 - file/project: existing / create / unavailable
 
+## Figma Trust State
+- parked / probe-only / approved-for-scratch / approved-for-production
+- last capability proof: ...
+- blocker: ...
+
 ## Recommended First Extraction Surface
 Design System File / no-Figma code workflow
 
@@ -161,6 +166,14 @@ This is not the Live Style Guide. It maps taxonomy, ownership, and source-of-tru
 ## Primitives
 - ...
 
+### Primitive Families
+| Family | Items | Source Of Truth | Status |
+|---|---|---|---|
+| control | ... | ... | ... |
+| visual | ... | ... | ... |
+| container | ... | ... | ... |
+| field | ... | ... | ... |
+
 ## Unique Specimens
 - ...
 
@@ -184,6 +197,44 @@ This is not the Live Style Guide. It maps taxonomy, ownership, and source-of-tru
 | Source artifact | Layer | Source Of Truth | Resolution | Notes |
 |---|---|---|---|---|
 | ... | token / primitive / unique specimen / compound / composition | ... | promote / prune / keep local / unresolved / deferred | ... |
+```
+
+## LAYER_PURITY_GATE.md
+
+```markdown
+# Layer Purity Gate: <Section Or Surface>
+
+## Claimed Layer
+- token / primitive / unique specimen / compound / composition / mixed proof surface
+
+## Evidence
+- ...
+
+## Items
+| Item | Current Label | Candidate Layer | Primitive Family | Source Of Truth | Decision | Proof |
+|---|---|---|---|---|---|---|
+| ... | ... | token / primitive / unique specimen / compound / composition / style-guide-only | control / visual / container / field / n/a | ... | keep / split / reclassify / promote / prune / gate | ... |
+
+## Mixed-Section Risk
+- ...
+
+## Recommendation
+- split into layer-pure sections / relabel as mixed proof surface / continue as layer-pure
+
+## Alternatives Rejected
+- ...
+
+## Unresolved Risk
+- ...
+
+## Decision Needed
+- ...
+
+## Unblocks
+- ...
+
+## Gate Decision
+accepted / continue / pause
 ```
 
 ## REPOSITORY_CONVENTIONS.md
@@ -319,6 +370,7 @@ token / primitive / unique specimen / compound / composition
 | raw recipes resolved or gate-parked | pass/fail | ... | ... |
 | source of truth named | pass/fail | ... | ... |
 | style-guide surfaces demonstrate, not define | pass/fail | ... | ... |
+| style-guide sections are layer-pure or explicitly mixed | pass/fail | ... | ... |
 | coverage rows have Resolution | pass/fail | ... | ... |
 
 ## Per-Layer Closure Proof
@@ -342,6 +394,7 @@ Fill only the section for the layer being closed.
 | token dependencies are named | pass/fail/n/a | ... | ... |
 | primitives consume tokens or approved lower-level constants | pass/fail/n/a | ... | ... |
 | style-guide surfaces import/demonstrate primitive source files | pass/fail/n/a | ... | ... |
+| primitive items are grouped by family or resolved through Layer Purity Gate | pass/fail/n/a | ... | ... |
 
 ### Unique Specimen Closure
 | Check | Status | Proof | Linked Artifacts |

@@ -96,6 +96,7 @@ Required gates:
 - `Doctrine Gate`: before treating rules as law.
 - `Repository Conventions Gate`: before extraction changes where tokens, components, style-guide surfaces, Figma pages, or routes live.
 - `Taxonomy Gate`: before moving artifacts between token/primitive/unique specimen/compound/composition.
+- `Layer Purity Gate`: before presenting a style-guide section as one taxonomy layer, especially `primitives`.
 - `Taste Gate`: before committing to a visual direction or major family.
 - `Promotion Gate`: before promoting a raw design recipe downward or pruning it.
 - `Finish Gate`: before calling the requested design-system or style-guide finish line complete. Record the user's accept/continue/pause decision.
@@ -122,13 +123,14 @@ Gate-to-loop mapping:
 - `Doctrine Gate`: after doctrine draft, before classification becomes law.
 - `Repository Conventions Gate`: before extraction edits or route/file moves.
 - `Taxonomy Gate`: during classification and layer-scoped ideation.
+- `Layer Purity Gate`: after taxonomy classification, before style-guide section layout or layer closure.
 - `Taste Gate`: whenever a visual direction would change after doctrine is set.
 - `Promotion Gate`: during raw recipe inventory, extraction, and recipe-gap audit.
 - `Finish Gate`: after residue proof, coverage audit, layer closure, and verification.
 
 ## Subagents
 
-Use subagents when the work is parallelizable and mostly read-only. Give each one a narrow job and raw artifacts, not your conclusions.
+For any serious run, orchestrate the work through specialist passes instead of doing one undifferentiated sweep. Use subagents when the work is parallelizable and mostly read-only. Give each one a narrow job and raw artifacts, not your conclusions.
 
 Useful subagent roles:
 
@@ -140,12 +142,22 @@ Useful subagent roles:
 - `component-extractor`: extract approved primitives/compounds into reusable app components.
 - `taste-skeptic`: challenge whether the result still matches the intended impression.
 
+Default orchestration for full workflow or realistic pilots:
+
+1. `repo-archaeologist` and/or `visual-archaeologist` gather evidence in parallel.
+2. `taxonomy-auditor` classifies candidate artifacts and flags mixed sections.
+3. `recipe-gap-hunter` scans for lower-layer grammar trapped in higher layers.
+4. Main agent reconciles findings and presents gate packets.
+5. After gates pass, `component-extractor` performs bounded implementation slices.
+6. `taste-skeptic` reviews the built surface before Finish Gate.
+
 Subagent rules:
 
 - Default to read-only subagent tasks unless a gate has already approved implementation.
 - Subagents cannot pass gates, close layers, or call the style guide complete.
 - The main agent reconciles contradictions and presents the decision packet.
 - Each subagent brief should include the relevant output schema or gate packet it must fill.
+- Record each subagent pass in `DESIGN_MAP.md` or `DESIGN_LOG.md` when durable artifacts exist: role, inputs, output artifact, and unresolved contradictions.
 - If subagents are unavailable, run these roles sequentially as named phases and label artifacts with the role for traceability.
 
 Example brief:
@@ -169,6 +181,7 @@ A Design Lab run is complete only when the requested finish line is met. For a f
 
 - Token groups are named, documented, and closed by the layer-closure checklist for current scope.
 - Primitives consume tokens and expose clear APIs, states, variants, and anatomy.
+- Primitive sections are layer-pure or explicitly split: controls, visual marks, container shells, pattern fields, and raw token demonstrations cannot be bundled under one "primitives" heading without a Layer Purity Gate.
 - Unique specimens are explicitly marked and justified.
 - Compounds compose primitives and/or unique specimens instead of copy-pasting their internals.
 - Compositions prove the grammar in real context.
@@ -217,6 +230,7 @@ When applicable:
 - `COMPONENT_EXTRACTION_PLAN.md`: extraction order and API decisions.
 - `STYLE_GUIDE_PLAN.md`: style-guide/live-proof coverage plan.
 - `ANATOMY.md`: per artifact formalization sheet when markdown handoff is needed.
+- `LAYER_PURITY_GATE.md`: required when a style-guide/Figma section mixes layers under one heading or when primitive families are unclear.
 - `PROMOTION_AUDIT.md`: promote/prune/keep-local decisions and recipe gaps.
 - `RESIDUE_PROOF.md`: required for Finish Gate.
 - `LAYER_CLOSURE.md`: required before advancing layers.
