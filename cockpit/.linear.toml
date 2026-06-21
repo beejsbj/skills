@@ -1,0 +1,7 @@
+# Cockpit's Linear surface.
+# API credentials stay outside this repo: set LINEAR_API_KEY or run
+# `./node_modules/.bin/linear auth login --profile human-debug --interactive`.
+
+workspace = "bjs-projects"
+team_id = "BJS"
+issue_sort = "priority"
