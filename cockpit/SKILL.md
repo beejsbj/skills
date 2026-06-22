@@ -28,19 +28,15 @@ cd /Users/burooj/Projects/cockpit
 
 Use `./cockpit.py issue BJS-123` before steering or launching work for an issue.
 
-Read [references/linear-discipline.md](references/linear-discipline.md) before creating or editing Linear issues, changing statuses or labels, binding or releasing sessions, marking work done, auditing workflow drift, or updating cockpit's Linear rules. For pure local session discovery with `./cockpit.py sessions`, the reference is usually not needed.
+Read [references/linear-discipline.md](references/linear-discipline.md) before creating or editing Linear issues, changing statuses or labels, marking work done, auditing workflow drift, or updating cockpit's Linear rules.
+
+Read [references/session-discipline.md](references/session-discipline.md) before driving provider sessions: launching, resuming, messaging, binding, releasing, archiving, or auditing them. For pure local session discovery with `./cockpit.py sessions`, the reference is usually not needed.
 
 ## Related Skills
 
 Use `triage` for issue triage, inbox clarification, Needs Burooj vs Ready for agent decisions, agent-ready briefs, and out-of-scope or prior-decision records. Cockpit owns the local CLI/session bridge; `triage` owns issue-formation judgment.
 
-## Cockpit Responsibilities
-
-- Treat Linear as canonical for workflow state, issue content, status, labels, dependencies, comments, and session binding labels.
-- Use cockpit as the local CLI face over Linear plus local provider-session audit/resume helpers.
-- Do not create parallel workflow state in Markdown, SQLite, HTML, or another cockpit-local store.
-- Treat local provider sessions as an audit/resume lens only.
-- Do not create permanent project steward sessions; use issue bodies, comments, project descriptions, and temporary subagents for depth.
+Use `agents` when cockpit needs to start, resume, fork, inspect, message, attach to, or archive top-level provider-visible Codex/Claude/opencode/Cursor sessions. Cockpit may drive sessions through `agents`, but it should not become the executor for ordinary project work.
 
 ## Commands
 
@@ -57,7 +53,7 @@ Use `triage` for issue triage, inbox clarification, Needs Burooj vs Ready for ag
 ./cockpit.py linear-doctor
 ```
 
-Use `bind`, `release`, `done`, and `audit` according to [references/linear-discipline.md](references/linear-discipline.md).
+Use `bind`, `release`, `done`, and `audit` according to [references/linear-discipline.md](references/linear-discipline.md) and [references/session-discipline.md](references/session-discipline.md).
 
 ## Local Sessions
 
@@ -97,7 +93,7 @@ Before doing work inside another project, ask:
 2. Is an active `session:*` label already bound?
 3. Can cockpit inspect or resume that session instead of taking over?
 4. Is the next move synthesis, unblocking, review, or handoff?
-5. Has Burooj explicitly assigned cockpit itself as the worker?
+5. Has Burooj explicitly assigned cockpit itself as the executor?
 
 Edit outside `/Users/burooj/Projects/cockpit` only after that check.
 

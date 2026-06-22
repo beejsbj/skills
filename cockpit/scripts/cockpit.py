@@ -44,6 +44,14 @@ LINEAR_CONFIG = load_linear_config()
 LINEAR_WORKSPACE = str(LINEAR_CONFIG.get("workspace") or "bjs-projects")
 LINEAR_TEAM_KEY = str(LINEAR_CONFIG.get("team_id") or LINEAR_CONFIG.get("team") or "BJS")
 LINEAR_DEFAULT_SORT = str(LINEAR_CONFIG.get("issue_sort") or "priority")
+LINEAR_DECISION_STATUS_ORDER = [
+    "In Progress",
+    "In Review",
+    "Needs Burooj",
+    "Ready for agent",
+    "Blocked",
+    "Todo",
+]
 LINEAR_STATUS_ORDER = [
     "Needs triage",
     "Todo",
@@ -53,6 +61,7 @@ LINEAR_STATUS_ORDER = [
     "In Progress",
     "In Review",
     "Parked",
+    "Backlog",
     "Done",
     "Canceled",
     "Duplicate",
@@ -166,8 +175,8 @@ def linear_auth_hint() -> str:
     )
 
 
-def print_status() -> int:
-    return print_linear_board()
+def print_status(*, project: str | None = None) -> int:
+    return print_linear_status(project=project)
 
 
 def print_sessions(limit: int = 40, *, include_archive: bool = False) -> int:
@@ -460,7 +469,7 @@ def print_linear_doctor() -> int:
     return 0
 
 
-def load_linear_issues(*, limit: int = 100, project: str | None = None) -> list[dict[str, Any]]:
+def load_linear_issues(*, limit: int = 0, project: str | None = None) -> list[dict[str, Any]]:
     args = [
         "issue",
         "list",
@@ -608,7 +617,68 @@ def split_session_label(label: str) -> tuple[str, str] | None:
     return match.group(1), match.group(2)
 
 
-def print_linear_board(limit: int = 80, *, project: str | None = None) -> int:
+def group_issues_by_status(issues: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for issue in issues:
+        grouped.setdefault(issue_status_name(issue), []).append(issue)
+    return grouped
+
+
+def print_linear_status(*, project: str | None = None) -> int:
+    try:
+        issues = load_linear_issues(project=project)
+    except Exception as exc:
+        print("Where we are: Linear board unavailable through cockpit.")
+        print(f"- {exc}")
+        print(f"- {linear_auth_hint()}")
+        print("\nSafe next:")
+        print("- Run `./cockpit.py linear-doctor`.")
+        print("- Keep `./cockpit.py sessions` for local session audit while CLI auth is being wired.")
+        return 1
+
+    grouped = group_issues_by_status(issues)
+    print(f"Where we are: Linear status {LINEAR_WORKSPACE}/{LINEAR_TEAM_KEY}")
+    print(f"- issues loaded: {len(issues)}")
+    print(f"- binding labels: {sum(len(session_labels(issue)) for issue in issues)}")
+    if project:
+        print(f"- project filter: {project}")
+
+    print("\nDecision lanes:")
+    printed_decision_lane = False
+    for status in LINEAR_DECISION_STATUS_ORDER:
+        rows = grouped.get(status, [])
+        if rows:
+            print_linear_issue_group(status, rows)
+            printed_decision_lane = True
+    if not printed_decision_lane:
+        print("- none")
+
+    print("\nOther lanes:")
+    printed_other_lane = False
+    known_statuses = set(LINEAR_DECISION_STATUS_ORDER)
+    for status in LINEAR_STATUS_ORDER:
+        if status in known_statuses:
+            continue
+        rows = grouped.get(status, [])
+        if rows:
+            print(f"- {status}: {len(rows)}")
+            known_statuses.add(status)
+            printed_other_lane = True
+    for status in sorted(set(grouped) - known_statuses):
+        print(f"- {status}: {len(grouped[status])}")
+        printed_other_lane = True
+    if not printed_other_lane:
+        print("- none")
+
+    print("\nSafe next:")
+    print("- Use `./cockpit.py issue BJS-123` before launching work.")
+    print("- Use `./cockpit.py bind BJS-123 codex <session-id>` when a session takes an issue.")
+    print("- Use `./cockpit.py board` for the full grouped board.")
+    print("- Use `./cockpit.py audit` to find drift between session labels and issue state.")
+    return 0
+
+
+def print_linear_board(limit: int = 0, *, project: str | None = None) -> int:
     try:
         issues = load_linear_issues(limit=limit, project=project)
     except Exception as exc:
@@ -620,9 +690,7 @@ def print_linear_board(limit: int = 80, *, project: str | None = None) -> int:
         print("- Keep `./cockpit.py sessions` for local session audit while CLI auth is being wired.")
         return 1
 
-    grouped: dict[str, list[dict[str, Any]]] = {}
-    for issue in issues:
-        grouped.setdefault(issue_status_name(issue), []).append(issue)
+    grouped = group_issues_by_status(issues)
 
     print(f"Where we are: Linear board {LINEAR_WORKSPACE}/{LINEAR_TEAM_KEY}")
     print(f"- issues loaded: {len(issues)}")
@@ -1014,9 +1082,10 @@ def iso_from_epoch_ms(value: Any) -> str | None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Cockpit Linear board and local session audit.")
     sub = parser.add_subparsers(dest="command")
-    sub.add_parser("status", help="Print the Linear issue board; default command.")
-    board_parser = sub.add_parser("board", help="Print the Linear issue board.")
-    board_parser.add_argument("--limit", type=int, default=80, help="Maximum issues to load.")
+    status_parser = sub.add_parser("status", help="Print decision lanes from the Linear issue board.")
+    status_parser.add_argument("--project", help="Filter by Linear project name.")
+    board_parser = sub.add_parser("board", help="Print the full Linear issue board.")
+    board_parser.add_argument("--limit", type=int, default=0, help="Maximum issues to load; 0 means all.")
     board_parser.add_argument("--project", help="Filter by Linear project name.")
     issue_parser = sub.add_parser("issue", help="Show one Linear issue and its session binding.")
     issue_parser.add_argument("issue_id")
@@ -1040,7 +1109,7 @@ def main(argv: list[str] | None = None) -> int:
     done_parser.add_argument("--no-archive", action="store_true", help="Do not archive provider sessions.")
     done_parser.add_argument("--no-comment", action="store_true", help="Do not add a release comment.")
     audit_parser = sub.add_parser("audit", help="Audit Linear session labels against issue status.")
-    audit_parser.add_argument("--limit", type=int, default=250, help="Maximum issues to load.")
+    audit_parser.add_argument("--limit", type=int, default=0, help="Maximum issues to load; 0 means all.")
     sub.add_parser("linear-doctor", help="Check Kyaukyuai linear-cli integration and auth.")
     sessions_parser = sub.add_parser(
         "sessions", help="List local provider sessions and resume commands."
@@ -1061,7 +1130,7 @@ def main(argv: list[str] | None = None) -> int:
     command = args.command or "status"
 
     if command == "status":
-        return print_status()
+        return print_status(project=args.project)
     if command == "board":
         return print_linear_board(limit=args.limit, project=args.project)
     if command == "issue":
