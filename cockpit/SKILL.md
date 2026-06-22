@@ -30,6 +30,10 @@ Use `./cockpit.py issue BJS-123` before steering or launching work for an issue.
 
 Read [references/linear-discipline.md](references/linear-discipline.md) before creating or editing Linear issues, changing statuses or labels, binding or releasing sessions, marking work done, auditing workflow drift, or updating cockpit's Linear rules. For pure local session discovery with `./cockpit.py sessions`, the reference is usually not needed.
 
+## Related Skills
+
+Use `triage` for issue triage, inbox clarification, Needs Burooj vs Ready for agent decisions, agent-ready briefs, and out-of-scope or prior-decision records. Cockpit owns the local CLI/session bridge; `triage` owns issue-formation judgment.
+
 ## Cockpit Responsibilities
 
 - Treat Linear as canonical for workflow state, issue content, status, labels, dependencies, comments, and session binding labels.
