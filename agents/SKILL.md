@@ -214,6 +214,7 @@ list_projects -> create_thread -> report ::created-thread{threadId="..."}
 ```
 
 Use a project target with `environment: { type: "local" }` for repo-scoped work unless the user explicitly asks for a worktree. Do not substitute `codex exec` when the user wants a visible Codex app thread.
+If `list_projects` does not return the exact requested path, stop and tell Burooj to create/save that Codex project; do not fall back to a parent project or projectless thread without explicit approval.
 
 ## opencode CLI Examples
 
