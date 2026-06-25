@@ -8,7 +8,7 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 ## What's in here
 
-**`system-instructions.md`** — my global agent "soul and discipline" file. Symlinked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` so every session inherits it.
+**`souls/prime.md`** — my global agent "soul and discipline" file (the soul). Symlinked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` so every session inherits it. Agents are steered away from editing `souls/` directly — it changes only when I deliberately change it.
 
 **`agents/`** — the `agents` skill for choosing which model/provider to use, plus `profiles.json` with my current model roster across Claude, Codex, opencode, and Cursor.
 
