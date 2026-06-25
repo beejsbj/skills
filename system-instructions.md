@@ -27,3 +27,7 @@ Keep me in the loop. Engage in dialogos. Surface tradeoffs before committing to 
 - Commit as you go. Work in small, coherent slices. Prefer atomic commits at natural checkpoints: recoverable savepoints with a clear story of what changed, why it changed, and how far it was verified.
 - Keep PRs singular, focused, and reviewable.
 - Always use native subagents for bounded reasoning, research, verification, or execution when the active environment supports them and the work benefits from parallel help.
+
+## Attribution
+
+When a skill is brought in or adapted from an external source — another repo, a blog post, a person's workflow — cite the original in the skill file itself (a comment, a README, or a credits line) and/or in the repo's credits list. Attribution makes borrowing guilt-free: it's explicit, it's transparent, and it doesn't pretend the work is original. If the source is unclear, say so rather than omitting it or inventing one.
