@@ -1732,44 +1732,104 @@ def iso_from_epoch_ms(value: Any) -> str | None:
     )
 
 
+def _projects_registry() -> dict[str, str]:
+    """
+    Return the optional [projects] table from .linear.toml.
+
+    The table maps Linear project name (or slug) to an absolute local directory:
+
+        [projects]
+        "My Project" = "/Users/burooj/Projects/my-project"
+        skills       = "/Users/burooj/Projects/skills"
+
+    Entries override the name-based fallback in resolve_issue_project_dir.
+    """
+    projects = LINEAR_CONFIG.get("projects")
+    if isinstance(projects, dict):
+        return {str(k): str(v) for k, v in projects.items()}
+    return {}
+
+
+def _clone_repo(url: str, target_dir: Path) -> Path | None:
+    """
+    Clone *url* into *target_dir* using `git clone`.
+
+    Returns *target_dir* on success, None on failure (with a printed message).
+    """
+    print(f"dispatch: cloning {url} → {target_dir} ...")
+    completed = subprocess.run(
+        ["git", "clone", url, str(target_dir)],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if completed.returncode != 0:
+        print(
+            f"dispatch: git clone failed (exit {completed.returncode}): "
+            f"{(completed.stderr or completed.stdout).strip()[:400]}"
+        )
+        return None
+    print(f"dispatch: cloned into {target_dir}")
+    return target_dir
+
+
 def resolve_issue_project_dir(issue: dict[str, Any]) -> Path | None:
     """
     Attempt to resolve the local directory for the issue's Linear project.
 
     Strategy (best-effort, deterministic):
-    1. Look for a path or repo URL embedded in the issue description.
-    2. Match the issue's project name against known local project directories.
-    3. Return None if no mapping can be determined.
-
-    # TODO(dispatch): Implement a project→dir registry. Currently this only
-    # checks for an explicit path in the issue body or matches the project name
-    # against /Users/burooj/Projects/<name>. A proper registry (e.g., a
-    # [projects] section in .linear.toml) would make this robust.
+    1. [projects] registry in .linear.toml — keyed by project name or slug.
+    2. Explicit absolute path embedded in the issue description.
+    3. GitHub repo URL in the issue body (``repo: https://github.com/...``):
+       derive the target dir from the repo name under /Users/burooj/Projects
+       and clone it if it is missing.
+    4. Match the issue's project name / slug against existing dirs under
+       /Users/burooj/Projects.
+    5. Return None if no mapping can be determined.
     """
+    registry = _projects_registry()
+
+    # 1. Project→dir registry from .linear.toml [projects].
+    project_name = issue_project_name(issue)
+    if project_name:
+        slug = re.sub(r"[^a-z0-9-]", "", project_name.lower().replace(" ", "-"))
+        for key in (project_name, slug):
+            if key in registry:
+                candidate = Path(registry[key]).expanduser()
+                if candidate.exists():
+                    return candidate
+                # Entry exists but dir is missing — treat as authoritative; caller
+                # will handle creation / cloning via ensure_project_dir.
+                return candidate
+
     text = issue_description(issue)
-    # Explicit path in the issue body.
+
+    # 2. Explicit absolute path in the issue body.
     path_match = re.search(r"(/Users/[^\s`),]+|~/[^\s`),]+)", text)
     if path_match:
         candidate = Path(path_match.group(1)).expanduser()
         if candidate.exists():
             return candidate
-    # Explicit repo URL in the issue body.
+
+    # 3. Explicit repo URL in the issue body (``repo: https://github.com/...``).
     repo_match = re.search(
         r"(?:repo|repository)\s*:\s*(https?://github\.com/[^\s]+)",
         text,
         re.IGNORECASE,
     )
     if repo_match:
-        # TODO(dispatch): clone the repo if a URL is found and the dir is missing.
-        pass
+        url = repo_match.group(1).rstrip("/")
+        repo_name = url.rstrip(".git").split("/")[-1]
+        target_dir = Path("/Users/burooj/Projects") / repo_name
+        if target_dir.exists():
+            return target_dir
+        # Dir is missing — clone and return.
+        return _clone_repo(url, target_dir)
 
-    # Match project name to a directory under /Users/burooj/Projects.
-    project_name = issue_project_name(issue)
+    # 4. Match project name to a directory under /Users/burooj/Projects.
     if project_name:
-        # Normalise: lowercase, spaces→hyphens, strip special chars.
         slug = re.sub(r"[^a-z0-9-]", "", project_name.lower().replace(" ", "-"))
         projects_root = Path("/Users/burooj/Projects")
-        # Try exact name first, then slug.
         for candidate_name in (project_name, slug):
             candidate = projects_root / candidate_name
             if candidate.is_dir():
@@ -1780,31 +1840,28 @@ def resolve_issue_project_dir(issue: dict[str, Any]) -> Path | None:
 
 def ensure_project_dir(issue: dict[str, Any], resolved: Path | None) -> Path | None:
     """
-    Ensure the project dir exists.  If resolved is None (unknown mapping)
-    or the path does not exist, attempt to create or clone it.
+    Ensure the project dir exists.  If resolved is None (no mapping could be
+    determined) return None immediately.  If resolved points to a missing path,
+    create it (brand-new, non-git project).
 
-    Returns the usable Path, or None if we cannot determine where to work.
-
-    # TODO(dispatch): Implement git-clone from a repo URL extracted from
-    # the issue body / project metadata. Right now we can only mkdir for
-    # brand-new (non-git) projects; clone is not yet implemented.
+    Git-clone from a repo URL is handled upstream in resolve_issue_project_dir,
+    so by the time this function is called the clone has either succeeded
+    (resolved.exists() == True) or failed (resolved is None).
     """
-    if resolved is not None and resolved.exists():
+    if resolved is None:
+        return None
+
+    if resolved.exists():
         return resolved
 
-    if resolved is not None:
-        # Path was determined but doesn't exist → create it (brand-new project).
-        try:
-            resolved.mkdir(parents=True, exist_ok=True)
-            print(f"dispatch: created directory {resolved}")
-            return resolved
-        except OSError as exc:
-            print(f"dispatch: could not create {resolved}: {exc}")
-            return None
-
-    # No mapping at all.
-    # TODO(dispatch): If the issue body contains a GitHub repo URL, clone it here.
-    return None
+    # Path was determined but doesn't exist → create it (brand-new project).
+    try:
+        resolved.mkdir(parents=True, exist_ok=True)
+        print(f"dispatch: created directory {resolved}")
+        return resolved
+    except OSError as exc:
+        print(f"dispatch: could not create {resolved}: {exc}")
+        return None
 
 
 def ensure_codex_project(project_dir: Path) -> bool:
@@ -1812,9 +1869,8 @@ def ensure_codex_project(project_dir: Path) -> bool:
     Run `codex app <dir>` to register the directory as a Codex saved project.
     Returns True on success, False on failure (non-fatal; dispatch proceeds).
 
-    # TODO(dispatch): `codex app <dir>` is the assumed CLI for saving a Codex
-    # project directory. Verify the exact codex CLI subcommand once codex docs
-    # are confirmed — it may be `codex project save` or similar.
+    Verified correct for codex-cli 0.139.0: `codex app [PATH]` opens/registers
+    a workspace in Codex Desktop.
     """
     codex_bin = shutil.which("codex")
     if not codex_bin:
@@ -2045,12 +2101,17 @@ def dispatch_issue(issue_id: str, *, provider: str = "codex") -> int:
     project_dir = ensure_project_dir(issue, resolved_dir)
 
     if project_dir is None:
+        project_name = issue_project_name(issue) or "(unknown)"
         print(
-            f"dispatch: could not determine working directory for {issue_id}. "
-            "Add a path or repo URL to the issue body, or set up a project mapping."
+            f"dispatch: could not determine working directory for {issue_id} "
+            f"(project: {project_name}).\n"
+            "To fix, choose one of:\n"
+            "  1. Add a path to the issue body:       /Users/burooj/Projects/my-repo\n"
+            "  2. Add a repo URL to the issue body:   repo: https://github.com/owner/my-repo\n"
+            f'  3. Add an entry to cockpit/.linear.toml [projects]:\n'
+            f'       [projects]\n'
+            f'       "{project_name}" = "/Users/burooj/Projects/my-repo"'
         )
-        # TODO(dispatch): Surface a clearer error when the project→dir mapping is
-        # missing, and suggest how to add one (e.g., update .linear.toml [projects]).
         return 1
 
     print(f"dispatch: working directory → {project_dir}")
@@ -2100,9 +2161,12 @@ def prepare_dispatch_issue(issue_id: str, *, provider: str = "codex") -> dict[st
     resolved_dir = resolve_issue_project_dir(issue)
     project_dir = ensure_project_dir(issue, resolved_dir)
     if project_dir is None:
+        project_name = issue_project_name(issue) or "(unknown)"
         raise RuntimeError(
-            f"could not determine working directory for {issue_id}; add a path or repo URL "
-            "to the issue body, or set up a project mapping."
+            f"could not determine working directory for {issue_id} (project: {project_name}). "
+            "Fix: add a path (/Users/burooj/Projects/my-repo) or repo URL "
+            "(repo: https://github.com/owner/my-repo) to the issue body, "
+            f'or add "{project_name}" = "/path/to/dir" under [projects] in cockpit/.linear.toml.'
         )
     if provider == "codex":
         ensure_codex_project(project_dir)
