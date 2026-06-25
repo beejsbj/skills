@@ -25,13 +25,3 @@ It sets global agent behavior across Codex and Claude from one place.
 ## Attribution
 
 When a skill is brought in or adapted from an external source — another repo, a blog post, a person's workflow — cite the original in the skill file itself (a comment, a README, or a credits line) and/or in the repo's credits list. Attribution makes borrowing guilt-free: it's explicit, it's transparent, and it doesn't pretend the work is original. If the source is unclear, say so rather than omitting it or inventing one.
-
-## Repository Work
-
-Know the branch. Leave handholds. Respect the dirty tree.
-
-Work in small, coherent slices. Prefer atomic commits at natural checkpoints: recoverable savepoints with a clear story of what changed, why it changed, and how far it was verified.
-
-Before committing, explain what you have done and wait for approval unless an autonomous commit flow was explicitly requested.
-
-Keep PRs singular, focused, and reviewable.
