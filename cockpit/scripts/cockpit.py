@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import os
 import re
+import selectors
 import shutil
 import sqlite3
 import subprocess
 import sys
+import time
 import tomllib
 import urllib.error
 import urllib.parse
@@ -30,6 +33,9 @@ AGENTS_DISCOVER_PROVIDERS = ("opencode",)
 LINEAR_GRAPHQL_URL = "https://api.linear.app/graphql"
 LINEAR_OAUTH_TOKEN_URL = "https://api.linear.app/oauth/token"
 LINEAR_APP_KEYCHAIN_SERVICE = "cockpit-linear-app-client-secret"
+CODEX_SDK_CACHE_DIR = Path.home() / ".cache/cockpit/openai-codex-sdk"
+CODEX_SDK_LOG_DIR = Path.home() / ".cache/cockpit/dispatch-logs"
+CODEX_SDK_LAUNCH_TIMEOUT_SECONDS = 90
 
 
 def load_linear_config() -> dict[str, Any]:
@@ -1843,6 +1849,8 @@ def build_dispatch_brief(issue: dict[str, Any], comments: list[dict[str, Any]]) 
         if not unresolved_comment(c):
             continue
         body_text = comment_body(c).strip()
+        if COCKPIT_THREAD_MARKER in body_text or QUESTIONS_THREAD_MARKER in body_text:
+            continue
         if body_text:
             unresolved_bodies.append(body_text)
 
@@ -1869,6 +1877,129 @@ def build_dispatch_brief(issue: dict[str, Any], comments: list[dict[str, Any]]) 
     return "\n".join(parts)
 
 
+def sdk_pythonpath(cache_dir: Path = CODEX_SDK_CACHE_DIR) -> str:
+    existing = os.environ.get("PYTHONPATH", "")
+    parts = [str(cache_dir)]
+    if existing:
+        parts.append(existing)
+    return os.pathsep.join(parts)
+
+
+def ensure_codex_sdk(cache_dir: Path = CODEX_SDK_CACHE_DIR) -> Path:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = sdk_pythonpath(cache_dir)
+    probe = subprocess.run(
+        [sys.executable, "-c", "import openai_codex"],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
+    )
+    if probe.returncode == 0:
+        return cache_dir
+
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    print(f"dispatch: installing openai-codex SDK into {cache_dir} ...")
+    install = subprocess.run(
+        [sys.executable, "-m", "pip", "install", "--target", str(cache_dir), "openai-codex"],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if install.returncode != 0:
+        detail = (install.stderr or install.stdout).strip()
+        raise RuntimeError(f"could not install openai-codex SDK: {detail}")
+    return cache_dir
+
+
+def launch_codex_sdk_session(brief: str, project_dir: Path) -> str:
+    """
+    Start a Desktop-visible Codex thread via the official Python SDK.
+
+    The parent process reads the thread id, then leaves a background helper alive
+    to keep the SDK/app-server connection open until the turn completes.
+    """
+    cache_dir = ensure_codex_sdk()
+    CODEX_SDK_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    log_path = CODEX_SDK_LOG_DIR / f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}.log"
+    helper = r"""
+import json
+import sys
+import traceback
+
+from openai_codex import ApprovalMode, Codex, Sandbox
+
+brief = sys.stdin.read()
+project_dir = sys.argv[1]
+log_path = sys.argv[2]
+
+with open(log_path, "a", encoding="utf-8") as log:
+    try:
+        with Codex() as codex:
+            thread = codex.thread_start(
+                approval_mode=ApprovalMode.deny_all,
+                cwd=project_dir,
+                sandbox=Sandbox.workspace_write,
+            )
+            handle = thread.turn(
+                brief,
+                approval_mode=ApprovalMode.deny_all,
+                sandbox=Sandbox.workspace_write,
+            )
+            print(json.dumps({"thread_id": thread.id, "turn_id": handle.id}), flush=True)
+            result = handle.run()
+            final_response = getattr(result, "final_response", None)
+            if final_response:
+                log.write(final_response + "\n")
+    except Exception:
+        traceback.print_exc(file=log)
+        print(json.dumps({"error": traceback.format_exc()}), flush=True)
+        raise
+"""
+    env = os.environ.copy()
+    env["PYTHONPATH"] = sdk_pythonpath(cache_dir)
+    proc = subprocess.Popen(
+        [sys.executable, "-c", helper, str(project_dir), str(log_path)],
+        text=True,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        env=env,
+        start_new_session=True,
+    )
+    assert proc.stdin is not None
+    assert proc.stdout is not None
+    proc.stdin.write(brief)
+    proc.stdin.close()
+
+    selector = selectors.DefaultSelector()
+    selector.register(proc.stdout, selectors.EVENT_READ)
+    deadline = time.monotonic() + CODEX_SDK_LAUNCH_TIMEOUT_SECONDS
+    try:
+        while True:
+            if proc.poll() is not None:
+                raise RuntimeError(f"Codex SDK helper exited early; see {log_path}")
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError(f"timed out waiting for Codex SDK helper; see {log_path}")
+            if not selector.select(timeout=min(remaining, 1.0)):
+                continue
+            line = proc.stdout.readline()
+            if not line:
+                continue
+            payload = json.loads(line)
+            if payload.get("error"):
+                raise RuntimeError(f"Codex SDK helper failed; see {log_path}")
+            thread_id = payload.get("thread_id")
+            if not isinstance(thread_id, str) or not thread_id:
+                raise RuntimeError(f"Codex SDK helper returned no thread id: {payload}")
+            print(f"dispatch: Codex SDK helper log → {log_path}")
+            return thread_id
+    finally:
+        selector.close()
+        proc.stdout.close()
+
+
 def launch_session_for_issue(
     issue_id: str,
     brief: str,
@@ -1879,29 +2010,18 @@ def launch_session_for_issue(
     """
     Launch a worker session for the issue and return its session id.
 
-    NOT WIRED YET — intentionally. The launch step is being built by a dedicated
-    Codex session, because the clean path to a project-native, sidebar-visible
-    Codex Desktop thread (the in-app `create_thread` tool, or the app-server API)
-    is only reachable from inside Codex Desktop, not from a standalone CLI like
-    this script. See docs/handoffs/2026-06-24-dispatch-build.md for the build brief.
-
-    Verified launch facts for that build (tested 2026-06-24, codex-cli 0.139.0):
-    - Deep link — sidebar-visible and project-native, but does NOT auto-submit
-      (waits for a human to press enter) and returns no id:
-        open "codex://threads/new?prompt=<url-encoded brief>&path=<dir>"
-    - Headless `codex exec` — auto-runs to completion and returns the id on the
-      first --json line ({"type":"thread.started","thread_id":"..."}), but is
-      NOT visible in the Desktop sidebar:
-        codex exec -C <dir> --json "<brief>"
-    - `codex app <dir>` opens/registers the workspace in Codex Desktop.
+    Uses the official Python Codex SDK, which controls a pinned local app-server
+    runtime. This path persists into Codex Desktop state on this Mac, unlike
+    standalone `codex app-server` JSON-RPC launched directly from the CLI.
     """
-    print(
-        f"dispatch: {provider} session launch is not wired yet — this step is being "
-        "built by a Codex session. See docs/handoffs/2026-06-24-dispatch-build.md"
-    )
-    print(f"dispatch: prepared brief for {issue_id} in {project_dir}:\n")
-    print(brief)
-    return None
+    if provider != "codex":
+        print(f"dispatch: unsupported provider for launch: {provider}")
+        return None
+    try:
+        return launch_codex_sdk_session(brief, project_dir)
+    except Exception as exc:
+        print(f"dispatch: could not launch Codex session for {issue_id}: {exc}")
+        return None
 
 
 def dispatch_issue(issue_id: str, *, provider: str = "codex") -> int:
@@ -1967,6 +2087,45 @@ def dispatch_issue(issue_id: str, *, provider: str = "codex") -> int:
     return 0
 
 
+def prepare_dispatch_issue(issue_id: str, *, provider: str = "codex") -> dict[str, Any]:
+    """
+    Resolve the same dispatch inputs as `dispatch`, without launching or binding.
+
+    This is the bridge for Codex Desktop sessions: cockpit.py prepares the issue
+    brief and project dir, the Desktop caller uses the native `create_thread`
+    tool for live sidebar refresh, then cockpit.py `bind`s the returned id.
+    """
+    issue = load_linear_issue(issue_id)
+    comments = load_issue_comments(issue_id)
+    resolved_dir = resolve_issue_project_dir(issue)
+    project_dir = ensure_project_dir(issue, resolved_dir)
+    if project_dir is None:
+        raise RuntimeError(
+            f"could not determine working directory for {issue_id}; add a path or repo URL "
+            "to the issue body, or set up a project mapping."
+        )
+    if provider == "codex":
+        ensure_codex_project(project_dir)
+    return {
+        "issue_id": issue_identifier(issue),
+        "title": issue_title(issue),
+        "provider": provider,
+        "project_dir": str(project_dir),
+        "brief": build_dispatch_brief(issue, comments),
+    }
+
+
+def print_dispatch_prepare(issue_id: str, *, provider: str = "codex") -> int:
+    try:
+        with contextlib.redirect_stdout(sys.stderr):
+            prepared = prepare_dispatch_issue(issue_id, provider=provider)
+    except Exception as exc:
+        print(f"dispatch-prepare: {exc}", file=sys.stderr)
+        return 1
+    print(json.dumps(prepared, indent=2))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Cockpit Linear board and local session audit.")
     sub = parser.add_subparsers(dest="command")
@@ -1992,6 +2151,17 @@ def main(argv: list[str] | None = None) -> int:
         default="codex",
         choices=["codex", "claude", "opencode"],
         help="Worker provider to launch (default: codex).",
+    )
+    dispatch_prepare_parser = sub.add_parser(
+        "dispatch-prepare",
+        help="Resolve dispatch project dir and brief as JSON for a Desktop-native launcher.",
+    )
+    dispatch_prepare_parser.add_argument("issue_id")
+    dispatch_prepare_parser.add_argument(
+        "--provider",
+        default="codex",
+        choices=["codex", "claude", "opencode"],
+        help="Worker provider to prepare (default: codex).",
     )
     bind_parser = sub.add_parser("bind", help="Bind a Linear issue to a provider session label.")
     bind_parser.add_argument("issue_id")
@@ -2062,6 +2232,8 @@ def main(argv: list[str] | None = None) -> int:
         return print_inbox(limit=args.limit)
     if command == "dispatch":
         return dispatch_issue(args.issue_id, provider=args.provider)
+    if command == "dispatch-prepare":
+        return print_dispatch_prepare(args.issue_id, provider=args.provider)
     if command == "bind":
         return bind_linear_issue(
             args.issue_id,

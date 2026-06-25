@@ -79,6 +79,23 @@ send({"method":"turn/start","id":2,"params":{"threadId":thread_id,"input":[{"typ
 return thread_id
 ```
 
+### 2026-06-24 Codex Desktop result
+
+Direct `codex app-server` JSON-RPC can return a thread id, but the thread did not
+persist into Codex Desktop's `state_5.sqlite` / sidebar session list on this Mac.
+The official Python SDK (`openai-codex`) did persist into Desktop state and is
+discoverable through `./cockpit.py sessions`; cockpit dispatch now launches through
+that SDK via a background helper so the parent command can bind the returned id
+while the turn continues to run.
+
+However, SDK-created threads may not appear in an already-open Codex Desktop
+sidebar until the app is restarted. The live-refreshing path is the native
+Codex Desktop `create_thread` tool. Cockpit now exposes
+`./cockpit.py dispatch-prepare BJS-X --provider codex` for Desktop callers:
+prepare JSON with `project_dir` + `brief`, call native `create_thread`, then bind
+the returned id with `./cockpit.py bind BJS-X codex <thread-id> --force
+--move-state "In Progress"`.
+
 ### The one thing to verify empirically (you can; the CLI couldn't)
 
 **Do app-server-created threads appear in the Codex Desktop sidebar, live?** Run the
