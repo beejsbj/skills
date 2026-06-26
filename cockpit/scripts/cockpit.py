@@ -1387,26 +1387,61 @@ def is_run_receipt(comment: dict[str, Any]) -> bool:
     return any(body.startswith(prefix) for prefix in _RUN_RECEIPT_PREFIXES)
 
 
+def reply_is_post_resolution(
+    comment: dict[str, Any],
+    by_id: dict[str, dict[str, Any]],
+) -> bool:
+    """Whether a reply should still surface in the comment backlog.
+
+    A reply's own ``resolvedAt`` can't be set through the Linear API — resolving
+    a child comment errors out — so we use its parent thread's ``resolvedAt`` as
+    the proxy for "this thread was dealt with at time T". Resolving the
+    *top-level* comment is the supported way to clear handled replies.
+
+    A reply surfaces while its thread is still open, or when the reply was
+    created *after* the thread was last resolved (a fresh note dropped on a
+    closed thread). Top-level comments (no parentId) always pass here; they use
+    their own resolved state via unresolved_comment().
+    """
+    parent_id = comment.get("parentId")
+    if not parent_id:
+        return True
+    parent = by_id.get(parent_id)
+    if parent is None:
+        return True  # parent not in the fetched set; surface to be safe
+    parent_resolved = parent.get("resolvedAt")
+    if not parent_resolved:
+        return True  # thread still open
+    # Linear timestamps are ISO-8601 UTC, so string comparison is chronological.
+    return (comment.get("createdAt") or "") > parent_resolved
+
+
 def burooj_unresolved_comments_across_issues(
     issues: list[dict[str, Any]],
     *,
-    limit_per_issue: int = 5,
+    limit_per_issue: int = 25,
 ) -> list[dict[str, Any]]:
     """
     Return a flat list of unresolved comments authored by Burooj,
     annotated with ``_issue_identifier`` and ``_issue_title``.
 
     Includes both top-level comments and replies so that genuine async notes
-    left from phone/web are surfaced regardless of threading depth.
+    left from phone/web are surfaced regardless of threading depth. A reply is
+    only surfaced while its thread is open or if it was added after the thread
+    was last resolved (see reply_is_post_resolution()), so resolving the
+    top-level comment clears handled replies.
 
     Excludes:
     - Archived or resolved comments.
+    - Replies whose thread was resolved at/after the reply.
     - Comments not authored by Burooj (cockpit-authored, etc.).
     - Automated run-receipt comments (posted under Burooj's token by workers;
       see is_run_receipt()).
 
-    Only fetches comments for issues in active lanes; stops early when
-    ``limit_per_issue`` Burooj comments are found per issue to keep it fast.
+    Only fetches comments for issues in active lanes; stops at
+    ``limit_per_issue`` Burooj comments per issue to keep it fast (raised from 5
+    to 25 so a handful of worker receipts can't mask real notes — receipts are
+    now filtered out anyway).
     """
     results: list[dict[str, Any]] = []
     for issue in issues:
@@ -1416,16 +1451,19 @@ def burooj_unresolved_comments_across_issues(
             comments = load_issue_comments(issue_identifier(issue))
         except Exception:
             continue
+        by_id = {c.get("id"): c for c in comments if c.get("id")}
         count = 0
         for comment in comments:
-            # Previously this line also skipped any comment with a parentId,
-            # which silently dropped genuine Burooj replies.  Removed that
-            # guard: we want replies too.
+            # The parentId guard was removed so genuine Burooj replies surface.
             if not unresolved_comment(comment):
                 continue
             if not comment_is_burooj_authored(comment):
                 continue
             if is_run_receipt(comment):
+                continue
+            # A reply can't carry its own resolvedAt (Linear errors on resolving
+            # a child), so drop it once its thread was resolved at/after it.
+            if not reply_is_post_resolution(comment, by_id):
                 continue
             annotated = dict(comment)
             annotated["_issue_identifier"] = issue_identifier(issue)
@@ -1475,7 +1513,7 @@ def print_inbox(*, limit: int = 20) -> int:
 
     # --- Part 2: Burooj's unresolved comments ---
     try:
-        burooj_comments = burooj_unresolved_comments_across_issues(issues, limit_per_issue=5)
+        burooj_comments = burooj_unresolved_comments_across_issues(issues, limit_per_issue=25)
     except Exception as exc:
         print(f"\nComment backlog unavailable: {exc}")
         burooj_comments = []
