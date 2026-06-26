@@ -1361,14 +1361,49 @@ def comment_is_burooj_authored(comment: dict[str, Any]) -> bool:
     return any(name in burooj_names for name in names)
 
 
+# Prefixes that identify automated "run receipt" comments posted by worker
+# processes under Burooj's personal Linear token.  Match case-insensitively
+# against the *start* of the stripped comment body.
+# NOTE: the durable fix is worker-side: workers should post receipts via the
+# Cockpit app actor instead of Burooj's personal token so that
+# comment_is_cockpit_authored() catches them.  Until that lands, this
+# prefix-list is the lightweight guard on the inbox side.
+_RUN_RECEIPT_PREFIXES: tuple[str, ...] = (
+    "run receipt",
+    "correction run receipt",
+    "chrome apply run receipt",
+    "run continuation receipt",
+)
+
+
+def is_run_receipt(comment: dict[str, Any]) -> bool:
+    """Return True when the comment body looks like an automated worker receipt.
+
+    Workers post receipts under Burooj's personal Linear token, so they pass
+    comment_is_burooj_authored().  We detect them by their leading text so the
+    inbox stays clean.  Add new prefixes to _RUN_RECEIPT_PREFIXES above.
+    """
+    body = comment_body(comment).strip().lower()
+    return any(body.startswith(prefix) for prefix in _RUN_RECEIPT_PREFIXES)
+
+
 def burooj_unresolved_comments_across_issues(
     issues: list[dict[str, Any]],
     *,
     limit_per_issue: int = 5,
 ) -> list[dict[str, Any]]:
     """
-    Return a flat list of unresolved top-level comments authored by Burooj,
+    Return a flat list of unresolved comments authored by Burooj,
     annotated with ``_issue_identifier`` and ``_issue_title``.
+
+    Includes both top-level comments and replies so that genuine async notes
+    left from phone/web are surfaced regardless of threading depth.
+
+    Excludes:
+    - Archived or resolved comments.
+    - Comments not authored by Burooj (cockpit-authored, etc.).
+    - Automated run-receipt comments (posted under Burooj's token by workers;
+      see is_run_receipt()).
 
     Only fetches comments for issues in active lanes; stops early when
     ``limit_per_issue`` Burooj comments are found per issue to keep it fast.
@@ -1383,11 +1418,14 @@ def burooj_unresolved_comments_across_issues(
             continue
         count = 0
         for comment in comments:
-            if comment.get("archivedAt") or comment.get("parentId"):
-                continue
+            # Previously this line also skipped any comment with a parentId,
+            # which silently dropped genuine Burooj replies.  Removed that
+            # guard: we want replies too.
             if not unresolved_comment(comment):
                 continue
             if not comment_is_burooj_authored(comment):
+                continue
+            if is_run_receipt(comment):
                 continue
             annotated = dict(comment)
             annotated["_issue_identifier"] = issue_identifier(issue)
