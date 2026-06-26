@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web Animation Recipes"
+  short_description: "Build verified web motion recipe demos."
+  default_prompt: "Use $web-animation-recipes to build a focused, verified web animation demo."

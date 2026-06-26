@@ -71,6 +71,13 @@ Three roles:
 
 Resolution rule: reply before resolving; resolve only when the reply says what closed it.
 
+Read/write discipline:
+
+- Use Linear or connector reads to inspect comments when cockpit has no read verb for the needed view.
+- Use cockpit commands for writes/resolution so activity is authored by the Cockpit app actor.
+- After writing a receipt/comment, read it back from Linear. A zero exit code without visible Linear activity is not enough.
+- Treat top-level Cockpit Thread and Questions root comments as coordination containers, not unresolved work items. Only replies or substantive non-root comments are actionable.
+
 ---
 
 ## 5. First move
@@ -134,6 +141,18 @@ Removed verbs (do not use): `issue-doctor`, `dispatch-prompt`, `inbox-review`, `
 5. Bind it and move the issue to `In Progress`.
 
 Dispatch does not stop for folder-create / clone / `codex app`. It **does** respect the stop gates below.
+
+Dispatch ownership boundary:
+
+- Cockpit owns Linear/project resolution, issue brief assembly, comment context, dispatch readiness, binding, and status transitions.
+- `agents` owns provider-visible Claude/opencode/Cursor session operation.
+- Codex Desktop thread creation belongs to the native Codex app thread tools, not `agents.py` or raw app-server calls. Use the native `create_thread` path, then bind the returned session/thread id.
+
+Agent Brief discipline:
+
+- If an issue already contains a current Agent Brief or research/scoping receipt, dispatch from it. Do not make the worker redo the same research unless the brief is stale, contradicted, or explicitly asks for more discovery.
+- Carry unresolved substantive comments into the dispatch prompt; filter out Cockpit Thread / Questions root housekeeping comments.
+- Tell workers whether the job is research/scoping, execution-from-brief, review, or cleanup.
 
 For `Needs-info` work: cockpit spawns a **native subagent** (harness Task), read-only, writing findings back as an issue comment. No separate verb.
 
