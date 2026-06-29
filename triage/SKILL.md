@@ -35,6 +35,16 @@ Do not preserve `needs-info` as a fuzzy bucket. Map it to the actor who can reso
 - Choose `Blocked` when the missing information depends on someone/something outside Burooj and the agent cannot safely obtain it.
 - Choose `Ready for agent` when the missing information can be found by repository inspection, tracker search, docs, web research, or safe local commands, and the work item states where to look and when to stop.
 
+### Cockpit lane translation
+
+When operating inside cockpit, preserve these triage distinctions but use cockpit's lane names:
+
+- `Inbox` replaces `Needs triage`.
+- `Ready for Burooj` replaces `Needs Burooj`.
+- `Needs-info` is valid only as cockpit's bounded fact-gathering lane with an owner, source, question, and stop condition. Do not use it as a vague uncertainty bucket.
+- `Grilling` is for interactive approach/design shaping before readiness.
+- Cockpit has no `Parked` lane; route inactive valid ideas to `Ready for Burooj` for an explicit decision, `Canceled`, or the project's chosen parking convention.
+
 ## Triage Workflow
 
 1. Identify the triage surface: one issue or PR, a project queue, `Needs triage`, new comments since last pass, or Burooj's pasted inbox.
