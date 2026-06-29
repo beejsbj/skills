@@ -1,7 +1,17 @@
 # Cockpit's Linear surface.
 # API credentials stay outside this repo: set LINEAR_API_KEY or run
 # `./node_modules/.bin/linear auth login --profile human-debug --interactive`.
+# Writes use a Linear OAuth app actor, not Burooj's personal identity:
+# set COCKPIT_LINEAR_APP_ACCESS_TOKEN, or set
+# COCKPIT_LINEAR_APP_CLIENT_ID and COCKPIT_LINEAR_APP_CLIENT_SECRET for
+# client-credentials app tokens. On this Mac, the client secret can live in
+# Keychain under app_actor.keychain_service.
 
 workspace = "bjs-projects"
 team_id = "BJS"
 issue_sort = "priority"
+
+[app_actor]
+client_id = "ba0fe8b1f0a9e9867d450d397ae29185"
+keychain_service = "cockpit-linear-app-client-secret"
+scope = "read,write,comments:create"

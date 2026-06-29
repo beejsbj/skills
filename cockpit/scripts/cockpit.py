@@ -6,12 +6,10 @@ import contextlib
 import json
 import os
 import re
-import selectors
 import shutil
 import sqlite3
 import subprocess
 import sys
-import time
 import tomllib
 import urllib.error
 import urllib.parse
@@ -33,9 +31,6 @@ AGENTS_DISCOVER_PROVIDERS = ("opencode",)
 LINEAR_GRAPHQL_URL = "https://api.linear.app/graphql"
 LINEAR_OAUTH_TOKEN_URL = "https://api.linear.app/oauth/token"
 LINEAR_APP_KEYCHAIN_SERVICE = "cockpit-linear-app-client-secret"
-CODEX_SDK_CACHE_DIR = Path.home() / ".cache/cockpit/openai-codex-sdk"
-CODEX_SDK_LOG_DIR = Path.home() / ".cache/cockpit/dispatch-logs"
-CODEX_SDK_LAUNCH_TIMEOUT_SECONDS = 90
 
 
 def load_linear_config() -> dict[str, Any]:
@@ -698,8 +693,9 @@ def print_linear_status(*, project: str | None = None) -> int:
 
     print("\nSafe next:")
     print("- Use `./cockpit.py issue BJS-X` before launching work.")
-    print("- Use `./cockpit.py dispatch BJS-X` to launch a worker session.")
-    print("- Use `./cockpit.py bind BJS-X codex <session-id>` to bind an already-running session.")
+    print("- Use `./cockpit.py prepare BJS-X` to get native launch context.")
+    print("- Create the worker/session/thread with the active orchestration surface.")
+    print("- Use `./cockpit.py bind BJS-X codex <session-id> --move-state \"In Progress\"` to bind it.")
     print("- Use `./cockpit.py board` for the full grouped board.")
     print("- Use `./cockpit.py audit` to find drift between session labels and issue state.")
     return 0
@@ -734,8 +730,9 @@ def print_linear_board(limit: int = 0, *, project: str | None = None) -> int:
 
     print("\nSafe next:")
     print("- Use `./cockpit.py issue BJS-X` before launching work.")
-    print("- Use `./cockpit.py dispatch BJS-X` to launch a worker session.")
-    print("- Use `./cockpit.py bind BJS-X codex <session-id>` to bind an already-running session.")
+    print("- Use `./cockpit.py prepare BJS-X` to get native launch context.")
+    print("- Create the worker/session/thread with the active orchestration surface.")
+    print("- Use `./cockpit.py bind BJS-X codex <session-id> --move-state \"In Progress\"` to bind it.")
     print("- Use `./cockpit.py audit` to find drift between session labels and issue state.")
     return 0
 
@@ -1532,7 +1529,8 @@ def print_inbox(*, limit: int = 20) -> int:
 
     print("\nSafe next:")
     print("- Use `./cockpit.py issue BJS-X` to inspect a specific issue.")
-    print("- Use `./cockpit.py dispatch BJS-X` to launch a worker session.")
+    print("- Use `./cockpit.py prepare BJS-X` to get native launch context.")
+    print("- Create the worker/session/thread with the active orchestration surface, then bind it.")
     print("- Use `./cockpit.py comment-resolve <id>` after handling a comment.")
     return 0
 
@@ -1826,29 +1824,6 @@ def _projects_registry() -> dict[str, str]:
     return {}
 
 
-def _clone_repo(url: str, target_dir: Path) -> Path | None:
-    """
-    Clone *url* into *target_dir* using `git clone`.
-
-    Returns *target_dir* on success, None on failure (with a printed message).
-    """
-    print(f"dispatch: cloning {url} → {target_dir} ...")
-    completed = subprocess.run(
-        ["git", "clone", url, str(target_dir)],
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    if completed.returncode != 0:
-        print(
-            f"dispatch: git clone failed (exit {completed.returncode}): "
-            f"{(completed.stderr or completed.stdout).strip()[:400]}"
-        )
-        return None
-    print(f"dispatch: cloned into {target_dir}")
-    return target_dir
-
-
 def resolve_issue_project_dir(issue: dict[str, Any]) -> Path | None:
     """
     Attempt to resolve the local directory for the issue's Linear project.
@@ -1857,8 +1832,7 @@ def resolve_issue_project_dir(issue: dict[str, Any]) -> Path | None:
     1. [projects] registry in .linear.toml — keyed by project name or slug.
     2. Explicit absolute path embedded in the issue description.
     3. GitHub repo URL in the issue body (``repo: https://github.com/...``):
-       derive the target dir from the repo name under /Users/burooj/Projects
-       and clone it if it is missing.
+       derive the target dir from the repo name under /Users/burooj/Projects.
     4. Match the issue's project name / slug against existing dirs under
        /Users/burooj/Projects.
     5. Return None if no mapping can be determined.
@@ -1899,8 +1873,7 @@ def resolve_issue_project_dir(issue: dict[str, Any]) -> Path | None:
         target_dir = Path("/Users/burooj/Projects") / repo_name
         if target_dir.exists():
             return target_dir
-        # Dir is missing — clone and return.
-        return _clone_repo(url, target_dir)
+        return target_dir
 
     # 4. Match project name to a directory under /Users/burooj/Projects.
     if project_name:
@@ -1920,9 +1893,8 @@ def ensure_project_dir(issue: dict[str, Any], resolved: Path | None) -> Path | N
     determined) return None immediately.  If resolved points to a missing path,
     create it (brand-new, non-git project).
 
-    Git-clone from a repo URL is handled upstream in resolve_issue_project_dir,
-    so by the time this function is called the clone has either succeeded
-    (resolved.exists() == True) or failed (resolved is None).
+    Repository cloning is outside cockpit.py; use native orchestration or an
+    explicit project setup step when a repo needs to be cloned.
     """
     if resolved is None:
         return None
@@ -1933,24 +1905,36 @@ def ensure_project_dir(issue: dict[str, Any], resolved: Path | None) -> Path | N
     # Path was determined but doesn't exist → create it (brand-new project).
     try:
         resolved.mkdir(parents=True, exist_ok=True)
-        print(f"dispatch: created directory {resolved}")
+        print(f"prepare: created directory {resolved}")
         return resolved
     except OSError as exc:
-        print(f"dispatch: could not create {resolved}: {exc}")
+        print(f"prepare: could not create {resolved}: {exc}")
         return None
+
+
+def slugify_for_path(value: str, *, default: str = "work") -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return slug or default
+
+
+def issue_branch_name(issue: dict[str, Any]) -> str:
+    issue_id = issue_identifier(issue)
+    issue_slug = slugify_for_path(issue_id)
+    title_slug = slugify_for_path(issue_title(issue), default="issue")[:48].strip("-")
+    return f"codex/{issue_slug}-{title_slug}" if title_slug else f"codex/{issue_slug}"
 
 
 def ensure_codex_project(project_dir: Path) -> bool:
     """
     Run `codex app <dir>` to register the directory as a Codex saved project.
-    Returns True on success, False on failure (non-fatal; dispatch proceeds).
+    Returns True on success, False on failure (non-fatal; prepare proceeds).
 
     Verified correct for codex-cli 0.139.0: `codex app [PATH]` opens/registers
     a workspace in Codex Desktop.
     """
     codex_bin = shutil.which("codex")
     if not codex_bin:
-        print("dispatch: WARN: codex binary not found; skipping `codex app` registration.")
+        print("prepare: WARN: codex binary not found; skipping `codex app` registration.")
         return False
     completed = subprocess.run(
         [codex_bin, "app", str(project_dir)],
@@ -1960,16 +1944,16 @@ def ensure_codex_project(project_dir: Path) -> bool:
     )
     if completed.returncode != 0:
         print(
-            f"dispatch: WARN: `codex app {project_dir}` failed "
+            f"prepare: WARN: `codex app {project_dir}` failed "
             f"(exit {completed.returncode}): {(completed.stderr or completed.stdout).strip()[:200]}"
         )
         return False
     return True
 
 
-def build_dispatch_brief(issue: dict[str, Any], comments: list[dict[str, Any]]) -> str:
+def build_worker_brief(issue: dict[str, Any], comments: list[dict[str, Any]]) -> str:
     """
-    Derive a plain-text dispatch brief from the issue body + unresolved comments.
+    Derive a plain-text worker brief from the issue body + unresolved comments.
     """
     issue_id = issue_identifier(issue)
     title = issue_title(issue)
@@ -1999,243 +1983,34 @@ def build_dispatch_brief(issue: dict[str, Any], comments: list[dict[str, Any]]) 
         "",
         "## Stop gates (always apply)",
         "- Do not spend money, send email, delete accounts/data, or make broad workflow changes without explicit Burooj approval.",
-        "- Do not bind/release sessions or move this issue's status — cockpit handles that after you confirm acceptance.",
+        "- Do not bind/release sessions or move this issue's status unless cockpit explicitly asks you to.",
+        "- For implementation work, do not claim Done from local commits alone. Produce a review artifact first: normally a pushed branch plus draft/ready PR.",
         "",
         "## Cockpit commands for this issue",
         f"./cockpit.py issue {issue_id}",
         f"./cockpit.py comment {issue_id} \"<update>\"",
-        f"./cockpit.py done {issue_id}",
+        f"./cockpit.py move {issue_id} \"In Review\"  # only after PR/review artifact exists",
+        f"./cockpit.py move {issue_id} Done         # only after acceptance/merge or explicit no-review closure",
     ])
     return "\n".join(parts)
 
-
-def sdk_pythonpath(cache_dir: Path = CODEX_SDK_CACHE_DIR) -> str:
-    existing = os.environ.get("PYTHONPATH", "")
-    parts = [str(cache_dir)]
-    if existing:
-        parts.append(existing)
-    return os.pathsep.join(parts)
-
-
-def ensure_codex_sdk(cache_dir: Path = CODEX_SDK_CACHE_DIR) -> Path:
-    env = os.environ.copy()
-    env["PYTHONPATH"] = sdk_pythonpath(cache_dir)
-    probe = subprocess.run(
-        [sys.executable, "-c", "import openai_codex"],
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        env=env,
-    )
-    if probe.returncode == 0:
-        return cache_dir
-
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    print(f"dispatch: installing openai-codex SDK into {cache_dir} ...")
-    install = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "--target", str(cache_dir), "openai-codex"],
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    if install.returncode != 0:
-        detail = (install.stderr or install.stdout).strip()
-        raise RuntimeError(f"could not install openai-codex SDK: {detail}")
-    return cache_dir
-
-
-def launch_codex_sdk_session(brief: str, project_dir: Path) -> str:
-    """
-    Start a Desktop-visible Codex thread via the official Python SDK.
-
-    The parent process reads the thread id, then leaves a background helper alive
-    to keep the SDK/app-server connection open until the turn completes.
-    """
-    cache_dir = ensure_codex_sdk()
-    CODEX_SDK_LOG_DIR.mkdir(parents=True, exist_ok=True)
-    log_path = CODEX_SDK_LOG_DIR / f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}.log"
-    helper = r"""
-import json
-import sys
-import traceback
-
-from openai_codex import ApprovalMode, Codex, Sandbox
-
-brief = sys.stdin.read()
-project_dir = sys.argv[1]
-log_path = sys.argv[2]
-
-with open(log_path, "a", encoding="utf-8") as log:
-    try:
-        with Codex() as codex:
-            thread = codex.thread_start(
-                approval_mode=ApprovalMode.deny_all,
-                cwd=project_dir,
-                sandbox=Sandbox.workspace_write,
-            )
-            handle = thread.turn(
-                brief,
-                approval_mode=ApprovalMode.deny_all,
-                sandbox=Sandbox.workspace_write,
-            )
-            print(json.dumps({"thread_id": thread.id, "turn_id": handle.id}), flush=True)
-            result = handle.run()
-            final_response = getattr(result, "final_response", None)
-            if final_response:
-                log.write(final_response + "\n")
-    except Exception:
-        traceback.print_exc(file=log)
-        print(json.dumps({"error": traceback.format_exc()}), flush=True)
-        raise
-"""
-    env = os.environ.copy()
-    env["PYTHONPATH"] = sdk_pythonpath(cache_dir)
-    proc = subprocess.Popen(
-        [sys.executable, "-c", helper, str(project_dir), str(log_path)],
-        text=True,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        env=env,
-        start_new_session=True,
-    )
-    assert proc.stdin is not None
-    assert proc.stdout is not None
-    proc.stdin.write(brief)
-    proc.stdin.close()
-
-    selector = selectors.DefaultSelector()
-    selector.register(proc.stdout, selectors.EVENT_READ)
-    deadline = time.monotonic() + CODEX_SDK_LAUNCH_TIMEOUT_SECONDS
-    try:
-        while True:
-            if proc.poll() is not None:
-                raise RuntimeError(f"Codex SDK helper exited early; see {log_path}")
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise TimeoutError(f"timed out waiting for Codex SDK helper; see {log_path}")
-            if not selector.select(timeout=min(remaining, 1.0)):
-                continue
-            line = proc.stdout.readline()
-            if not line:
-                continue
-            payload = json.loads(line)
-            if payload.get("error"):
-                raise RuntimeError(f"Codex SDK helper failed; see {log_path}")
-            thread_id = payload.get("thread_id")
-            if not isinstance(thread_id, str) or not thread_id:
-                raise RuntimeError(f"Codex SDK helper returned no thread id: {payload}")
-            print(f"dispatch: Codex SDK helper log → {log_path}")
-            return thread_id
-    finally:
-        selector.close()
-        proc.stdout.close()
-
-
-def launch_session_for_issue(
+def prepare_issue(
     issue_id: str,
-    brief: str,
-    project_dir: Path,
     *,
     provider: str = "codex",
-) -> str | None:
+    ensure_root_project: bool = False,
+    create_dir: bool = False,
+) -> dict[str, Any]:
     """
-    Launch a worker session for the issue and return its session id.
+    Prepare native orchestration context without creating issue worktrees or sessions.
 
-    Uses the official Python Codex SDK, which controls a pinned local app-server
-    runtime. This path persists into Codex Desktop state on this Mac, unlike
-    standalone `codex app-server` JSON-RPC launched directly from the CLI.
-    """
-    if provider != "codex":
-        print(f"dispatch: unsupported provider for launch: {provider}")
-        return None
-    try:
-        return launch_codex_sdk_session(brief, project_dir)
-    except Exception as exc:
-        print(f"dispatch: could not launch Codex session for {issue_id}: {exc}")
-        return None
-
-
-def dispatch_issue(issue_id: str, *, provider: str = "codex") -> int:
-    """
-    §8 dispatch verb:
-    1. Load the issue + comments.
-    2. Resolve the project dir (clone/create if needed).
-    3. For Codex: ensure `codex app <dir>`.
-    4. Launch a session with the issue brief.
-    5. bind + move to In Progress.
-    """
-    try:
-        issue = load_linear_issue(issue_id)
-        comments = load_issue_comments(issue_id)
-    except Exception as exc:
-        print(f"dispatch: could not load issue {issue_id}: {exc}")
-        return 1
-
-    print(f"dispatch: resolving project dir for {issue_id} ({issue_title(issue)}) ...")
-    resolved_dir = resolve_issue_project_dir(issue)
-    project_dir = ensure_project_dir(issue, resolved_dir)
-
-    if project_dir is None:
-        project_name = issue_project_name(issue) or "(unknown)"
-        print(
-            f"dispatch: could not determine working directory for {issue_id} "
-            f"(project: {project_name}).\n"
-            "To fix, choose one of:\n"
-            "  1. Add a path to the issue body:       /Users/burooj/Projects/my-repo\n"
-            "  2. Add a repo URL to the issue body:   repo: https://github.com/owner/my-repo\n"
-            f'  3. Add an entry to cockpit/.linear.toml [projects]:\n'
-            f'       [projects]\n'
-            f'       "{project_name}" = "/Users/burooj/Projects/my-repo"'
-        )
-        return 1
-
-    print(f"dispatch: working directory → {project_dir}")
-
-    if provider == "codex":
-        ensure_codex_project(project_dir)
-
-    brief = build_dispatch_brief(issue, comments)
-    print(f"dispatch: launching {provider} session in {project_dir} ...")
-    session_id = launch_session_for_issue(issue_id, brief, project_dir, provider=provider)
-
-    if session_id is None:
-        print(
-            f"dispatch: stopping before launch for {issue_id} — the launch step is "
-            "being built by Codex (see docs/handoffs/2026-06-24-dispatch-build.md)."
-        )
-        return 1
-
-    print(f"dispatch: session launched → {provider}:{session_id}")
-
-    # bind + move to In Progress.
-    rc = bind_linear_issue(
-        issue_id,
-        provider,
-        session_id,
-        force=True,
-        move_state="In Progress",
-    )
-    if rc != 0:
-        print(f"dispatch: session launched but bind failed (rc={rc}); session={provider}:{session_id}")
-        return 1
-
-    print(f"dispatch: {issue_id} is now In Progress, bound to {provider}:{session_id}")
-    return 0
-
-
-def prepare_dispatch_issue(issue_id: str, *, provider: str = "codex") -> dict[str, Any]:
-    """
-    Resolve the same dispatch inputs as `dispatch`, without launching or binding.
-
-    This is the bridge for Codex Desktop sessions: cockpit.py prepares the issue
-    brief and project dir, the Desktop caller uses the native `create_thread`
-    tool for live sidebar refresh, then cockpit.py `bind`s the returned id.
+    This is the preferred Desktop path: cockpit emits the root project, branch intent,
+    and brief; the active surface creates the thread/session natively and binds it.
     """
     issue = load_linear_issue(issue_id)
     comments = load_issue_comments(issue_id)
     resolved_dir = resolve_issue_project_dir(issue)
-    project_dir = ensure_project_dir(issue, resolved_dir)
+    project_dir = ensure_project_dir(issue, resolved_dir) if create_dir else resolved_dir
     if project_dir is None:
         project_name = issue_project_name(issue) or "(unknown)"
         raise RuntimeError(
@@ -2244,25 +2019,83 @@ def prepare_dispatch_issue(issue_id: str, *, provider: str = "codex") -> dict[st
             "(repo: https://github.com/owner/my-repo) to the issue body, "
             f'or add "{project_name}" = "/path/to/dir" under [projects] in cockpit/.linear.toml.'
         )
-    if provider == "codex":
+    if not project_dir.exists() and not create_dir:
+        raise RuntimeError(
+            f"resolved project directory does not exist: {project_dir}. "
+            "Pass --create-dir if this is an intentional brand-new local project."
+        )
+    if provider == "codex" and ensure_root_project:
         ensure_codex_project(project_dir)
+    branch_name = issue_branch_name(issue)
+    bind_example = f"./cockpit.py bind {issue_identifier(issue)} {provider} <session-id> --move-state \"In Progress\""
     return {
         "issue_id": issue_identifier(issue),
         "title": issue_title(issue),
         "provider": provider,
         "project_dir": str(project_dir),
-        "brief": build_dispatch_brief(issue, comments),
+        "root_project_dir": str(project_dir),
+        "codex_project_id": str(project_dir) if provider == "codex" else None,
+        "environment": {
+            "type": "worktree",
+            "branchName": branch_name,
+        },
+        "startingState": {
+            "type": "branch",
+            "branchName": branch_name,
+        },
+        "brief": build_worker_brief(issue, comments),
+        "next_actions": [
+            "Create the native worker/session/thread in the active orchestration surface.",
+            bind_example,
+        ],
+        "notes": [
+            "For Codex Desktop, target the root saved project and use a native worktree environment.",
+            "Do not register the issue worktree as its own saved Codex project.",
+            "Verify on first use whether the native worktree environment creates a missing branch or requires it to exist.",
+        ],
     }
 
 
-def print_dispatch_prepare(issue_id: str, *, provider: str = "codex") -> int:
+def print_prepare(
+    issue_id: str,
+    *,
+    provider: str = "codex",
+    ensure_root_project: bool = False,
+    create_dir: bool = False,
+) -> int:
     try:
         with contextlib.redirect_stdout(sys.stderr):
-            prepared = prepare_dispatch_issue(issue_id, provider=provider)
+            prepared = prepare_issue(
+                issue_id,
+                provider=provider,
+                ensure_root_project=ensure_root_project,
+                create_dir=create_dir,
+            )
     except Exception as exc:
-        print(f"dispatch-prepare: {exc}", file=sys.stderr)
+        print(f"prepare: {exc}", file=sys.stderr)
         return 1
     print(json.dumps(prepared, indent=2))
+    return 0
+
+def move_issue_command(issue_id: str, state_name: str, *, comment: bool = True) -> int:
+    try:
+        move_linear_issue(issue_id, state_name)
+        if comment:
+            add_issue_comment(
+                issue_id,
+                "\n".join(
+                    [
+                        f"Moved `{issue_id}` to `{state_name}`.",
+                        "",
+                        "Reason: explicit cockpit state move.",
+                    ]
+                ),
+            )
+    except Exception as exc:
+        print(f"Move failed: {exc}")
+        print(linear_app_auth_hint())
+        return 1
+    print(f"Moved {issue_id} -> {state_name}")
     return 0
 
 
@@ -2281,27 +2114,26 @@ def main(argv: list[str] | None = None) -> int:
         help="List issues needing triage and Burooj's unresolved comment backlog.",
     )
     inbox_parser.add_argument("--limit", type=int, default=20)
-    dispatch_parser = sub.add_parser(
-        "dispatch",
-        help="Resolve dir, launch a worker session, bind it, and move the issue to In Progress.",
+    prepare_parser = sub.add_parser(
+        "prepare",
+        help="Resolve issue/project context and print a native orchestration launch brief as JSON.",
     )
-    dispatch_parser.add_argument("issue_id")
-    dispatch_parser.add_argument(
-        "--provider",
-        default="codex",
-        choices=["codex", "claude", "opencode"],
-        help="Worker provider to launch (default: codex).",
-    )
-    dispatch_prepare_parser = sub.add_parser(
-        "dispatch-prepare",
-        help="Resolve dispatch project dir and brief as JSON for a Desktop-native launcher.",
-    )
-    dispatch_prepare_parser.add_argument("issue_id")
-    dispatch_prepare_parser.add_argument(
+    prepare_parser.add_argument("issue_id")
+    prepare_parser.add_argument(
         "--provider",
         default="codex",
         choices=["codex", "claude", "opencode"],
         help="Worker provider to prepare (default: codex).",
+    )
+    prepare_parser.add_argument(
+        "--ensure-root-project",
+        action="store_true",
+        help="For Codex, run `codex app <root-project-dir>`; never registers issue worktrees.",
+    )
+    prepare_parser.add_argument(
+        "--create-dir",
+        action="store_true",
+        help="Create a missing resolved project directory for brand-new local projects.",
     )
     bind_parser = sub.add_parser("bind", help="Bind a Linear issue to a provider session label.")
     bind_parser.add_argument("issue_id")
@@ -2318,10 +2150,10 @@ def main(argv: list[str] | None = None) -> int:
     release_parser.add_argument("--reason", default="cockpit release")
     release_parser.add_argument("--archive-session", action="store_true", help="Archive released provider sessions.")
     release_parser.add_argument("--no-comment", action="store_true", help="Do not add a release comment.")
-    done_parser = sub.add_parser("done", help="Move issue to Done, remove session labels, archive sessions.")
-    done_parser.add_argument("issue_id")
-    done_parser.add_argument("--no-archive", action="store_true", help="Do not archive provider sessions.")
-    done_parser.add_argument("--no-comment", action="store_true", help="Do not add a release comment.")
+    move_parser = sub.add_parser("move", help="Explicitly move a Linear issue to a workflow state.")
+    move_parser.add_argument("issue_id")
+    move_parser.add_argument("state_name")
+    move_parser.add_argument("--no-comment", action="store_true", help="Do not add a state-move comment.")
     comment_parser = sub.add_parser("comment", help="Add a Cockpit-authored Linear issue comment.")
     comment_parser.add_argument("issue_id")
     comment_parser.add_argument("body", nargs="?")
@@ -2370,10 +2202,13 @@ def main(argv: list[str] | None = None) -> int:
         return print_linear_issue(args.issue_id)
     if command == "inbox":
         return print_inbox(limit=args.limit)
-    if command == "dispatch":
-        return dispatch_issue(args.issue_id, provider=args.provider)
-    if command == "dispatch-prepare":
-        return print_dispatch_prepare(args.issue_id, provider=args.provider)
+    if command == "prepare":
+        return print_prepare(
+            args.issue_id,
+            provider=args.provider,
+            ensure_root_project=args.ensure_root_project,
+            create_dir=args.create_dir,
+        )
     if command == "bind":
         return bind_linear_issue(
             args.issue_id,
@@ -2390,12 +2225,10 @@ def main(argv: list[str] | None = None) -> int:
             archive_sessions=args.archive_session,
             comment=not args.no_comment,
         )
-    if command == "done":
-        return release_linear_issue(
+    if command == "move":
+        return move_issue_command(
             args.issue_id,
-            move_state="Done",
-            reason="issue moved to Done",
-            archive_sessions=not args.no_archive,
+            args.state_name,
             comment=not args.no_comment,
         )
     if command == "comment":

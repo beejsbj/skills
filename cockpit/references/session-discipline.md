@@ -1,12 +1,12 @@
 # Session Discipline (cockpit reference)
 
-Cockpit is the manager-coworker. It dispatches sessions; it does not become the executor for ordinary project work.
+Cockpit is the manager-coworker. It prepares work, binds sessions, and keeps Linear honest; it does not become the executor for ordinary project work.
 
 ---
 
 ## Orchestrate, Don't Execute
 
-Read the board, pick the next move, and dispatch a session to do the work in the issue's own repo. A cockpit chat binds itself only when the issue *is* cockpit's own work. Inspecting a repo before dispatch is fine — keep it read-only, then hand execution to a dispatched session unless Burooj names cockpit as the executor.
+Read the board, pick the next move, prepare the launch brief, and let native orchestration create the worker in the issue's own repo. A cockpit chat binds itself only when the issue *is* cockpit's own work. Inspecting a repo before launch is fine — keep it read-only, then hand execution to a worker unless Burooj names cockpit as the executor.
 
 ---
 
@@ -24,27 +24,25 @@ Edit outside `/Users/burooj/Projects/cockpit` only after that check.
 
 ---
 
-## Dispatching a Session (`dispatch BJS-X`)
+## Preparing Work
 
-`./cockpit.py dispatch BJS-X` is the heavy verb. Cockpit:
+Cockpit prepares and records; native orchestration launches.
 
-1. Resolves the project's directory/repo from the issue's project (deterministic — every project is coupled to a dir and/or GitHub repo).
-2. Ensures the working dir exists: clones if missing and a repo is known; creates the dir if it is a brand-new project.
-3. For Codex sessions: ensures the dir is a saved Codex project via `codex app <dir>`.
-4. Launches a session in that dir (via the `agents` skill / provider CLI / Codex thread tools) with a brief derived from the issue body and its unresolved comments.
-5. Binds it (`./cockpit.py bind BJS-X <provider> <id>`) and moves the issue to `In Progress`.
+Use `prepare BJS-X` to resolve issue/project/repo, produce the launch brief, and expose any branch/worktree metadata. Use the active surface's native tools to create the worker session/thread. Then bind the resulting session with `bind`.
 
-Dispatch does not stop for folder-create / clone / `codex app`. It **does** respect the global stop gates (money / accounts / security / deletion / email-send / broad workflow changes).
+`cockpit.py` is an actuator and ledger, not the orchestration brain. It should not own provider-specific thread lifecycle logic when Codex Desktop, provider CLIs, Matt Pocock's orchestration layer, or native subagents can perform it directly.
 
-For `Needs-info` work, cockpit spawns a **native subagent** (harness Task) pointed at the project dir, read-only, writing its findings back as an issue comment. No `dispatch` verb needed.
+For `Needs-info` work, cockpit spawns a **native subagent** (harness Task) pointed at the project dir, read-only, writing its findings back as an issue comment. No separate CLI launch verb needed.
 
 ---
 
-## Closing and Cleanup
+## Review, Closing, and Cleanup
 
-- `./cockpit.py release BJS-X` — drop the binding without closing the issue.
-- `./cockpit.py done BJS-X` — move to `Done`, remove `session:*`, archive the provider session. Leave the receipt comment first.
-- `./cockpit.py audit` — catch mechanical drift: orphan labels, bound-but-done, double bindings.
-- `./cockpit.py sessions` — find unbound or stale local sessions to resume or archive.
+- `release BJS-X` drops the binding without closing the issue.
+- `move BJS-X "In Review"` is allowed when a PR or explicit review artifact exists and the issue receipt names it.
+- `move BJS-X Done` is allowed only after acceptance/merge, or when Burooj explicitly accepts closure without review.
+- Do not archive/release worker sessions before the PR/review artifact exists and is recorded.
+- `audit` catches mechanical drift: orphan labels, bound-but-done, double bindings.
+- `sessions` finds unbound or stale local sessions to resume or archive.
 
-Cockpit can only catch *mechanical* drift. The dispatched session is responsible for writing durable state back to its issue.
+Cockpit can only catch *mechanical* drift. Artifact gates require checking actual repo/review state, not opaque `workflow:*` labels. The worker is responsible for writing durable state back to its issue before review or closure.

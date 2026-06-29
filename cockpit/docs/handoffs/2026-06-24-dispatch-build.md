@@ -6,6 +6,10 @@ and can empirically test the Desktop sidebar — a standalone CLI cannot).
 Repo: `/Users/burooj/Projects/skills/cockpit` · CLI: `scripts/cockpit.py`
 Design source of truth: `docs/specs/2026-06-24-cockpit-redesign.md` (§8 dispatch).
 
+Update: dispatch now prepares and launches in a per-issue git worktree under
+`~/.codex/worktrees` when the resolved project dir is a git repo. Brand-new or
+non-git dirs still launch in the project dir.
+
 ## Why this is handed to you
 
 The cockpit redesign is done **except dispatch's launch step**. Everything else —
@@ -24,12 +28,12 @@ inside Codex Desktop / its app-server, not from the Claude Code CLI that did the
    `/Users/burooj/Projects/<project-name>`). **TODO(dispatch):** a real project→dir
    registry (e.g. a `[projects]` table in `.linear.toml`) and git-clone when a repo
    URL is in the body but the dir is missing.
-3. `ensure_project_dir()` → mkdir for a brand-new project (clone still TODO).
-4. `ensure_codex_project()` → runs `codex app <dir>` (opens/registers the workspace).
-5. `build_dispatch_brief()` → brief from issue body + unresolved comments + stop gates.
-6. **`launch_session_for_issue()` → THIS IS THE STUB YOU IMPLEMENT.** It currently
-   prints the brief and returns `None`.
-7. On a real session id: `bind_linear_issue(..., move_state="In Progress")` already
+3. `ensure_project_dir()` → mkdir for a brand-new project.
+4. `ensure_dispatch_worktree()` → create/reuse a per-issue worktree when the project dir is a git repo.
+5. `ensure_codex_project()` → runs `codex app <launch-dir>` (opens/registers the workspace).
+6. `build_dispatch_brief()` → brief from issue body + unresolved comments + stop gates.
+7. **`launch_session_for_issue()` → originally the stub this handoff asked you to implement.**
+8. On a real session id: `bind_linear_issue(..., move_state="In Progress")` already
    binds the `session:<provider>:<id>` label and moves the issue. Done for you.
 
 So you only need to make `launch_session_for_issue()` return a real session id.
@@ -110,7 +114,8 @@ and bind by polling the session store (as `./cockpit.py sessions` already reads 
 ## Acceptance criteria
 
 - [ ] `./cockpit.py dispatch BJS-X` launches a real, auto-running Codex session
-      rooted in the issue's project dir and returns its id.
+      rooted in an issue worktree when the project is a git repo, falling back to
+      the project dir for non-git projects, and returns its id.
 - [ ] The session is **visible in the Codex Desktop sidebar** in that workspace
       (verify; record which path achieved it).
 - [ ] cockpit binds `session:codex:<id>` and moves the issue to `In Progress`

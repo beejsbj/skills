@@ -201,11 +201,14 @@ formation/scout/dispatch-prompt-contract machinery and the formation-examples fi
      to a directory and/or a GitHub repo — deterministic, **no asking**).
   2. Ensure the working dir exists: if missing and the project has a repo → **clone**;
      if a brand-new project → **create the dir**.
-  3. Ensure it is a saved Codex project via `codex app <dir>` when the target provider
-     is Codex. (There is no "pinning"; the dir must be saved to Codex to create a thread.)
-  4. Launch a session in that dir (via the `agents` skill / provider CLI / Codex thread
+  3. Create or reuse a per-issue worktree under `~/.codex/worktrees` when the
+     project dir is a git repo; launch in the project dir for brand-new/non-git dirs.
+  4. Ensure the launch dir is a saved Codex project via `codex app <dir>` when
+     the target provider is Codex. (There is no "pinning"; the dir must be saved
+     to Codex to create a thread.)
+  5. Launch a session in that launch dir (via the `agents` skill / provider CLI / Codex thread
      tools) with the issue brief derived from the issue body + unresolved comments.
-  5. `bind` it and move the issue to `In Progress`.
+  6. `bind` it and move the issue to `In Progress`.
   - Dispatch does not stop for folder-create / clone / `codex app`. It DOES still respect
     the global stop gates (money / accounts / security / deletion / email-send).
 
