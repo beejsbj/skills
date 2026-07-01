@@ -1,11 +1,21 @@
 ---
 name: linear
-description: Use when a worker/agent touches the Linear board — creating or editing issues, moving statuses, applying labels, or writing comments — while executing issue work.
+description: Use when a non-cockpit worker/session needs to understand or touch Burooj's Linear board without becoming a full cockpit manager: board ontology, lanes, labels, issue bodies, comments, and the cockpit write path.
 ---
 
 # Linear Board Discipline
 
 Linear is canonical. Do not track workflow state anywhere else.
+
+This is the lightweight Linear map for worker sessions. It lets a session know Burooj's board semantics and write rails without inheriting cockpit's full manager-coworker role. Cockpit remains the orchestrator and write actuator.
+
+Use this skill to:
+
+- understand issue lanes, labels, comments, dependencies, and receipt expectations;
+- leave or request durable board updates through cockpit commands;
+- avoid inventing parallel workflow state in chat, local files, or provider session titles.
+
+Do not use this skill to run cockpit triage, choose workers, launch sessions, or own the board. That is the `cockpit` skill.
 
 ---
 
@@ -58,11 +68,11 @@ Title discipline: plain verb + object + outcome. Prefer repo/path names when the
 | `Needs-info` | Context-gathering; an agent digs or you supply a fact. Bounded — does not linger. |
 | `Grilling` | Deep shaping — clarify intent, sketch approach. Interactive with Burooj; can span sessions. |
 | `Ready for Burooj` | Burooj is the next actor: a decision, approval, judgment, or physical action. |
-| `Ready for agent` | Cold-dispatchable; a worker can start from the issue body alone. |
+| `Ready for agent` | Cold-dispatchable; a worker can start from the issue body or latest authoritative Agent Brief. |
 | `Blocked` | Real external dependency (another issue or outside party). NOT "needs investigation." |
 | `In Progress` | A worker session is executing it. Exactly one `session:*` label must be present. |
 | `In Review` | PR / checks / review phase. |
-| `Done` | Complete. No `session:*` label. Final receipt left in the Cockpit Thread. |
+| `Done` | Accepted closure: review artifact merged/accepted, or Burooj explicitly accepts closure without review. No `session:*` label. Final receipt left in the Cockpit Thread. |
 | `Canceled` | Dead idea (Linear-native). |
 
 Lane invariants:
@@ -89,17 +99,20 @@ Labels encode metadata, never workflow position.
 
 ## Comment Model
 
-**Cockpit Thread** (one per issue): a single top-level comment. All receipts, binding events, and audit trail live as replies under it. `bind`, `release`, `done`, and `comment` commands create or reuse this thread automatically.
+**Cockpit Thread** (one per issue): a single top-level comment. All receipts, binding events, and audit trail live as replies under it. `bind`, `release`, `move`, and `comment` commands create or reuse this thread automatically.
 
 **Questions thread** (one per issue): a top-level comment titled `Questions`. Each question is a reply under it. Burooj replies per-question. Do not put questions in the issue body.
 
 Use cockpit commands for all writes so authorship stays on the Cockpit app actor (not Burooj's personal account):
 
 ```bash
+./cockpit.py bind BJS-123 codex <session-id>
+./cockpit.py release BJS-123
 ./cockpit.py comment BJS-123 "Receipt or update."
 ./cockpit.py comment BJS-123 --reply-to <comment-id> "Reply body."
 ./cockpit.py comment-resolve <comment-id>
 ./cockpit.py comment-unresolve <comment-id>
+./cockpit.py move BJS-123 "In Review"
 ```
 
 Resolve a comment only when its question or blocker has actually been handled. Do not use raw Linear API/CLI writes for cockpit comments.
@@ -117,3 +130,5 @@ Auth (in priority order):
 4. Emergency only: `COCKPIT_ALLOW_PERSONAL_LINEAR_WRITES=1`.
 
 Run `./cockpit.py linear-doctor` to verify. It should report `write actor: app OK`.
+
+Before any board touch, verify the action satisfies the lane invariants above and leaves a durable receipt in the Cockpit Thread when state changes.
