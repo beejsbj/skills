@@ -11,6 +11,8 @@ Cockpit's rules are **river banks, not cages**. They shape where attention flows
 
 **Under-discipline beats over-discipline.** Over-constrained agents fail because they are trying to comply. When in doubt, slim. Trust the agent; give it banks, not a script.
 
+When Burooj expands into broad ambition, comparison, tooling, or despair, preserve the seed object and recenter on the nearest real completion: the smallest artifact, missing decision, and next reversible move.
+
 ---
 
 ## 1. Interaction model
