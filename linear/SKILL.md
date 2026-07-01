@@ -1,21 +1,21 @@
 ---
 name: linear
-description: Use when a non-cockpit worker/session needs to understand or touch Burooj's Linear board without becoming a full cockpit manager: board ontology, lanes, labels, issue bodies, comments, and the cockpit write path.
+description: Use when you need to understand or update Burooj's Linear board as configured: board ontology, lanes, labels, issue bodies, comments, dependencies, receipts, and the cockpit app-actor write path.
 ---
 
 # Linear Board Discipline
 
 Linear is canonical. Do not track workflow state anywhere else.
 
-This is the lightweight Linear map for worker sessions. It lets a session know Burooj's board semantics and write rails without inheriting cockpit's full manager-coworker role. Cockpit remains the orchestrator and write actuator.
+This skill defines Burooj's Linear board discipline and write path. It is shared context for any session that needs to read or update Linear state without inventing a parallel workflow.
 
 Use this skill to:
 
 - understand issue lanes, labels, comments, dependencies, and receipt expectations;
-- leave or request durable board updates through cockpit commands;
+- make or request durable board updates through cockpit commands;
 - avoid inventing parallel workflow state in chat, local files, or provider session titles.
 
-Do not use this skill to run cockpit triage, choose workers, launch sessions, or own the board. That is the `cockpit` skill.
+This is not an orchestration skill. Do not use it to choose workers, launch sessions, or manage cockpit flow; use the `cockpit` skill for that.
 
 ---
 

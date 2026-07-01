@@ -26,7 +26,7 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`design-lab/`** — full design-system composition skill. Takes raw material (repo, screenshots, words, moodboards) and builds out a complete token/primitive/component taxonomy plus a live style guide.
 
-**`linear/`** — lightweight Linear board map for worker sessions that need Burooj's lanes, labels, comments, and write rails without becoming full cockpit sessions.
+**`linear/`** — Burooj's Linear board discipline and write path: lanes, labels, issue bodies, comments, dependencies, receipts, and cockpit app-actor commands.
 
 **`zoom-out/`** — asks me to zoom out when I'm about to grind before naming the right problem.
 
