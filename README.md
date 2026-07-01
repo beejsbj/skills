@@ -30,12 +30,14 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`zoom-out/`** — asks me to zoom out when I'm about to grind before naming the right problem.
 
+**`writing-great-skills/`** — Matt Pocock's reference skill for writing and editing predictable, low-sediment skills.
+
 ---
 
 ## Credits / inspiration
 
 **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills))
-The `triage`, `grill-me`, `grill-with-docs`, and `improve-codebase-architecture` skills are adapted from Matt's engineering skills set. The triage skill and its `agent-brief` + `out-of-scope` reference files follow his structure closely. Really useful starting point — I've been evolving them for my own workflow but the bones are his.
+The `triage`, `grill-me`, `grill-with-docs`, `improve-codebase-architecture`, and `writing-great-skills` skills are adapted from Matt's engineering skills set. The triage skill and its `agent-brief` + `out-of-scope` reference files follow his structure closely. Really useful starting point — I've been evolving them for my own workflow but the bones are his.
 
 **Anthropic** — the `anthropic-skills` bundle (not in this repo; installed separately as a Claude skill plugin) ships several useful primitives.
 
