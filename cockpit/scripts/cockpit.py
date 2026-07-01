@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/opt/homebrew/bin/python3
 from __future__ import annotations
 
 import argparse
@@ -618,6 +618,10 @@ def issue_is_in_progress(issue: dict[str, Any]) -> bool:
     return issue_status_name(issue) == "In Progress"
 
 
+def issue_is_pr_work(issue: dict[str, Any]) -> bool:
+    return "workflow:issue-pr" in issue_labels(issue)
+
+
 def normalize_session_label(provider_or_label: str, session_id: str | None) -> str:
     if provider_or_label.startswith("session:") and session_id is None:
         label = provider_or_label
@@ -636,6 +640,25 @@ def split_session_label(label: str) -> tuple[str, str] | None:
     if not match:
         return None
     return match.group(1), match.group(2)
+
+
+def session_lookup() -> dict[tuple[str, str], dict[str, Any]]:
+    try:
+        discovered = discover_agent_sessions()
+    except Exception:
+        return {}
+    sessions = discovered.get("data", {}).get("sessions", [])
+    if not isinstance(sessions, list):
+        return {}
+    out: dict[tuple[str, str], dict[str, Any]] = {}
+    for session in sessions:
+        if not isinstance(session, dict):
+            continue
+        provider = session.get("provider")
+        session_id = session.get("id")
+        if isinstance(provider, str) and isinstance(session_id, str):
+            out[(provider, session_id)] = session
+    return out
 
 
 def group_issues_by_status(issues: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
@@ -766,6 +789,31 @@ def print_linear_issue(issue_id: str) -> int:
     description = issue.get("description")
     if isinstance(description, str) and description.strip():
         print(f"\nDescription:\n{compact(description, 900)}")
+
+    # Surface Burooj's unresolved comments so `issue` reflects the async channel,
+    # using the same filters as the inbox backlog (see
+    # burooj_unresolved_comments_across_issues).
+    try:
+        comments = load_issue_comments(issue_identifier(issue))
+    except Exception as exc:
+        print(f"\nComments unavailable: {exc}")
+        return 0
+    by_id = {c.get("id"): c for c in comments if c.get("id")}
+    burooj_comments = [
+        c
+        for c in comments
+        if unresolved_comment(c)
+        and comment_is_burooj_authored(c)
+        and not is_run_receipt(c)
+        and reply_is_post_resolution(c, by_id)
+    ]
+    if burooj_comments:
+        print(f"\nBurooj unresolved comments: {len(burooj_comments)}")
+        for comment in burooj_comments:
+            comment_id = str(comment.get("id") or "unknown")
+            print(f"\n{comment_id}")
+            print(f"  body: {compact(comment_body(comment), 400)}")
+            print(f"  resolve: ./cockpit.py comment-resolve {comment_id}")
     return 0
 
 
@@ -1655,6 +1703,8 @@ def audit_linear_bindings(limit: int = 250) -> int:
     multi_bound: list[dict[str, Any]] = []
     done_bound: list[dict[str, Any]] = []
     by_label: dict[str, list[str]] = {}
+    root_checkout_sessions: list[tuple[dict[str, Any], str, str]] = []
+    sessions_by_key = session_lookup()
 
     for issue in issues:
         labels = session_labels(issue)
@@ -1669,6 +1719,8 @@ def audit_linear_bindings(limit: int = 250) -> int:
             multi_bound.append(issue)
         if issue_is_in_progress(issue) and not labels:
             in_progress_unbound.append(issue)
+        if issue_is_in_progress(issue) and labels and issue_is_pr_work(issue):
+            root_checkout_sessions.extend(root_checkout_session_findings(issue, labels, sessions_by_key))
 
     duplicate_labels = {label: ids for label, ids in by_label.items() if len(ids) > 1}
 
@@ -1677,15 +1729,60 @@ def audit_linear_bindings(limit: int = 250) -> int:
     print(f"- In Progress without session label: {len(in_progress_unbound)}")
     print(f"- issues with multiple session labels: {len(multi_bound)}")
     print(f"- duplicate session labels across issues: {len(duplicate_labels)}")
+    print(f"- Codex implementation sessions in root checkouts: {len(root_checkout_sessions)}")
 
     print_audit_bucket("Inactive with session", inactive_with_session)
     print_audit_bucket("In Progress without session", in_progress_unbound)
     print_audit_bucket("Multiple session labels", multi_bound)
+    print_root_checkout_session_bucket(root_checkout_sessions)
     if duplicate_labels:
         print("\nDuplicate session labels:")
         for label, ids in sorted(duplicate_labels.items()):
             print(f"- {label}: {', '.join(ids)}")
-    return 1 if inactive_with_session or in_progress_unbound or multi_bound or duplicate_labels else 0
+    return 1 if inactive_with_session or in_progress_unbound or multi_bound or duplicate_labels or root_checkout_sessions else 0
+
+
+def root_checkout_session_findings(
+    issue: dict[str, Any],
+    labels: list[str],
+    sessions_by_key: dict[tuple[str, str], dict[str, Any]],
+) -> list[tuple[dict[str, Any], str, str]]:
+    project_dir = resolve_issue_project_dir(issue)
+    if project_dir is None or git_root(project_dir) is None:
+        return []
+    findings: list[tuple[dict[str, Any], str, str]] = []
+    project_root = git_root(project_dir)
+    if project_root is None:
+        return []
+    for label in labels:
+        parsed = split_session_label(label)
+        if not parsed:
+            continue
+        provider, session_id = parsed
+        if provider != "codex":
+            continue
+        session = sessions_by_key.get((provider, session_id))
+        workspace = session.get("workspace") if session else None
+        if not isinstance(workspace, str) or not workspace:
+            continue
+        workspace_path = Path(workspace).expanduser()
+        workspace_root = git_root(workspace_path)
+        if workspace_root == project_root and "/.codex/worktrees/" not in str(workspace_path):
+            findings.append((issue, label, workspace))
+    return findings
+
+
+def print_root_checkout_session_bucket(rows: list[tuple[dict[str, Any], str, str]]) -> None:
+    print(f"\nCodex implementation sessions in root checkouts ({len(rows)}):")
+    if not rows:
+        print("- none")
+        return
+    for issue, label, workspace in rows:
+        print(
+            f"- {issue_identifier(issue)} [{issue_status_name(issue)}]: "
+            f"{compact(issue_title(issue), 80)} {label} cwd={workspace}"
+        )
+        print("  expected: create/bind a Codex Desktop worktree session, not a root local-project session")
 
 
 def print_audit_bucket(title: str, rows: list[dict[str, Any]]) -> None:
@@ -1924,6 +2021,57 @@ def issue_branch_name(issue: dict[str, Any]) -> str:
     return f"codex/{issue_slug}-{title_slug}" if title_slug else f"codex/{issue_slug}"
 
 
+def git_branch_exists(repo_dir: Path, branch_name: str) -> bool:
+    completed = subprocess.run(
+        ["git", "show-ref", "--verify", "--quiet", f"refs/heads/{branch_name}"],
+        cwd=repo_dir,
+    )
+    return completed.returncode == 0
+
+
+def git_worktrees_for_branch(repo_dir: Path, branch_name: str) -> list[str]:
+    completed = subprocess.run(
+        ["git", "worktree", "list", "--porcelain"],
+        cwd=repo_dir,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if completed.returncode != 0:
+        return []
+    current_path: str | None = None
+    paths: list[str] = []
+    for line in completed.stdout.splitlines():
+        if line.startswith("worktree "):
+            current_path = line.removeprefix("worktree ").strip()
+        elif line.startswith("branch ") and current_path:
+            ref = line.removeprefix("branch ").strip()
+            if ref == f"refs/heads/{branch_name}":
+                paths.append(current_path)
+    return paths
+
+
+def git_branch_preflight(repo_dir: Path, branch_name: str) -> dict[str, Any]:
+    repo_root = git_root(repo_dir)
+    if repo_root is None:
+        return {
+            "name": branch_name,
+            "repo": None,
+            "exists": False,
+            "checked_out_worktrees": [],
+            "safe_to_start_from_branch": False,
+        }
+    checked_out = git_worktrees_for_branch(repo_root, branch_name)
+    exists = git_branch_exists(repo_root, branch_name)
+    return {
+        "name": branch_name,
+        "repo": str(repo_root),
+        "exists": exists,
+        "checked_out_worktrees": checked_out,
+        "safe_to_start_from_branch": exists and not checked_out,
+    }
+
+
 def ensure_codex_project(project_dir: Path) -> bool:
     """
     Run `codex app <dir>` to register the directory as a Codex saved project.
@@ -2027,6 +2175,15 @@ def prepare_issue(
     if provider == "codex" and ensure_root_project:
         ensure_codex_project(project_dir)
     branch_name = issue_branch_name(issue)
+    branch_preflight = git_branch_preflight(project_dir, branch_name)
+    codex_target = {
+        "type": "project",
+        "projectId": str(project_dir),
+        "environment": {
+            "type": "worktree",
+            "startingState": {"type": "working-tree"},
+        },
+    } if provider == "codex" else None
     bind_example = f"./cockpit.py bind {issue_identifier(issue)} {provider} <session-id> --move-state \"In Progress\""
     return {
         "issue_id": issue_identifier(issue),
@@ -2035,23 +2192,20 @@ def prepare_issue(
         "project_dir": str(project_dir),
         "root_project_dir": str(project_dir),
         "codex_project_id": str(project_dir) if provider == "codex" else None,
-        "environment": {
-            "type": "worktree",
-            "branchName": branch_name,
-        },
-        "startingState": {
-            "type": "branch",
-            "branchName": branch_name,
-        },
+        "branch": branch_preflight,
+        "codex_desktop_target": codex_target,
         "brief": build_worker_brief(issue, comments),
         "next_actions": [
             "Create the native worker/session/thread in the active orchestration surface.",
+            "For Codex Desktop, use codex_desktop_target exactly: project root plus environment.type=worktree.",
+            "After the thread opens, verify the worker cwd is not the root checkout and have it create/switch to the branch name from branch.name.",
             bind_example,
         ],
         "notes": [
-            "For Codex Desktop, target the root saved project and use a native worktree environment.",
+            "For Codex Desktop, never use target.environment.type=local for implementation work in a git repo.",
             "Do not register the issue worktree as its own saved Codex project.",
-            "Verify on first use whether the native worktree environment creates a missing branch or requires it to exist.",
+            "branch.name is branch intent, not the native worktree startingState. Reusing it as startingState can collide with stale branches/worktrees.",
+            "If branch.checked_out_worktrees is non-empty, resume or clean that worktree before launching a new worker.",
         ],
     }
 

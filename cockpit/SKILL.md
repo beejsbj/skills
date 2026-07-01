@@ -156,10 +156,17 @@ Cockpit prepares deterministic launch context; the active environment orchestrat
 1. Resolve the Linear issue, project, project root, and repo.
 2. Ensure only boring prerequisites when safe, such as root project registration needed by native thread creation.
 3. Print/return an agent-ready launch brief from the issue body and unresolved comments.
-4. Include branch/worktree metadata when useful.
+4. Include branch/worktree metadata and preflight any branch collision that would make native worktree creation ambiguous.
 5. Leave session creation, provider launch, worktree-thread creation, and lifecycle decisions to native orchestration.
 
-For Codex Desktop, prefer the root saved project plus native `create_thread` with a worktree environment. Do not register each issue worktree as its own saved Codex project.
+For Codex Desktop implementation work in a git repo:
+
+- Use the **root saved project id** with native `create_thread`.
+- Use `target.environment.type = "worktree"`; do not use a local/root environment for implementation work.
+- Prefer `startingState: { "type": "working-tree" }` and treat the issue branch as branch intent for the worker to create/switch to inside the new worktree.
+- Do not pass an existing issue branch as the native starting state unless `prepare` shows that branch is not checked out in another worktree.
+- After creation, verify the worker cwd is the native worktree path, not `/Users/burooj/Projects/<repo>`.
+- Do not register each issue worktree as its own saved Codex project.
 
 After native orchestration creates a worker, bind it with `./cockpit.py bind BJS-X session:provider:<id>` and move to `In Progress`.
 

@@ -28,7 +28,16 @@ Edit outside `/Users/burooj/Projects/cockpit` only after that check.
 
 Cockpit prepares and records; native orchestration launches.
 
-Use `prepare BJS-X` to resolve issue/project/repo, produce the launch brief, and expose any branch/worktree metadata. Use the active surface's native tools to create the worker session/thread. Then bind the resulting session with `bind`.
+Use `prepare BJS-X` to resolve issue/project/repo, produce the launch brief, and expose branch/worktree preflight metadata. Use the active surface's native tools to create the worker session/thread. Then bind the resulting session with `bind`.
+
+For Codex Desktop implementation work in a git repo, this means root saved project plus native worktree environment. The bad launch shape is a root local-project session whose cwd is the repo checkout, because parallel issue work then collides in the same tree. The good launch shape is:
+
+- `target.type = "project"`
+- `target.projectId = <root project dir>`
+- `target.environment.type = "worktree"`
+- `target.environment.startingState = { "type": "working-tree" }`
+
+Treat the issue branch from `prepare` as branch intent for the worker after the worktree exists. Do not use an existing issue branch as native starting state when `prepare` reports that it is already checked out elsewhere. After launch, verify the worker cwd is a worktree path before binding.
 
 `cockpit.py` is an actuator and ledger, not the orchestration brain. It should not own provider-specific thread lifecycle logic when Codex Desktop, provider CLIs, Matt Pocock's orchestration layer, or native subagents can perform it directly.
 
