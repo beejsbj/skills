@@ -32,12 +32,22 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`writing-great-skills/`** — Matt Pocock's reference skill for writing and editing predictable, low-sediment skills.
 
+**`gsap-skills/`** — imported GSAP AI skills bundle: core GSAP, timelines, ScrollTrigger, plugins, framework usage, examples, and plugin metadata.
+
+**`in-progress/diglot-weave/`** — recovered packet for a future `diglot-weave` skill, including source transcripts, raw zip artifacts, recovered skill drafts, and prior-art notes.
+
 ---
 
 ## Credits / inspiration
 
 **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills))
 The `triage`, `grill-me`, `grill-with-docs`, `improve-codebase-architecture`, and `writing-great-skills` skills are adapted from Matt's engineering skills set. The triage skill and its `agent-brief` + `out-of-scope` reference files follow his structure closely. Really useful starting point — I've been evolving them for my own workflow but the bones are his.
+
+**GreenSock / GSAP** ([greensock/gsap-skills](https://github.com/greensock/gsap-skills))
+The `gsap-skills/` folder is an imported copy of GreenSock's official MIT-licensed GSAP AI skills bundle.
+
+**Diglot-weave packet** (`in-progress/diglot-weave/`)
+The diglot-weave material is recovered from Burooj's June 2026 Claude sessions and preserved with local source transcripts and zip artifacts. Its method lineage points to Robbins Burling's 1968 "diglot weave" and Krashen-style comprehensible input; the packet's research notes also cite adjacent public prior art such as [`m98/fluent`](https://github.com/m98/fluent), [`zhangrui-vibe/claude-code-english-coach`](https://github.com/zhangrui-vibe/claude-code-english-coach), [`geusan/claude-skills-english-tutor`](https://github.com/geusan/claude-skills-english-tutor), [`azborovskyi/claude-english-tutor`](https://github.com/azborovskyi/claude-english-tutor), [`rizukirr/no-vibe`](https://github.com/rizukirr/no-vibe), and [`CreatmanCEO/lingua-companion`](https://github.com/CreatmanCEO/lingua-companion).
 
 **Anthropic** — the `anthropic-skills` bundle (not in this repo; installed separately as a Claude skill plugin) ships several useful primitives.
 
