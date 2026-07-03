@@ -8,7 +8,7 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 ## What's in here
 
-**`souls/prime.md`** — my global agent "soul and discipline" file (the soul). Symlinked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` so every session inherits it. Agents are steered away from editing `souls/` directly — it changes only when I deliberately change it.
+**`souls/prime/`** — my global agent "soul and discipline" file (`soul.md`), plus a README explaining the decisions behind its construction. `soul.md` is symlinked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` so every session inherits it. Agents are steered away from editing `souls/` directly — it changes only when I deliberately change it.
 
 **`acpx/`** — adapted official skill for [openclaw/acpx](https://github.com/openclaw/acpx), the headless ACP client for reaching other models/providers, plus `profiles.json` — my model roster and taste (premium tokens for judgment, cheap classes for execution).
 

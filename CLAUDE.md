@@ -1,6 +1,6 @@
 # Skills Repo Instructions
 
-This repo is the source of truth for personal agent skills and shared agent-home setup. Global Claude instructions live in `souls/prime.md`.
+This repo is the source of truth for personal agent skills and shared agent-home setup. Global Claude instructions live in `souls/prime/soul.md`.
 
 ## Skill Symlinks
 
@@ -13,10 +13,10 @@ When adding, renaming, or removing a skill, update the repo-owned folder first, 
 
 ## Global Instructions & souls/
 
-`souls/prime.md` is the repo-owned global instruction target (Burooj's "soul"), used by:
+`souls/prime/soul.md` is the repo-owned global instruction target (Burooj's "soul"), used by:
 
-- `/Users/burooj/.codex/AGENTS.md` -> `souls/prime.md`
-- `/Users/burooj/.claude/CLAUDE.md` -> `souls/prime.md`
+- `/Users/burooj/.codex/AGENTS.md` -> `souls/prime/soul.md`
+- `/Users/burooj/.claude/CLAUDE.md` -> `souls/prime/soul.md`
 
 It sets global agent behavior across Codex and Claude from one place.
 
