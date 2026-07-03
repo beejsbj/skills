@@ -36,7 +36,7 @@ Every cockpit concern lives in exactly one layer; when unsure where something be
 |---|---|
 | Truth | Linear board — `linear` skill |
 | Actuator + ledger | `cockpit.py` — this skill |
-| Session plane | `agents` skill; Codex native thread tools; ACP/acpx under evaluation (BJS-52) |
+| Session plane | acpx (ACP control plane) + native provider tools; `agents` skill picks the model; discovery feeds this ledger |
 | Workflow discipline | `triage`, `grill-me`/`grill-with-docs`, `to-issues`, `implement`, `tdd`, `two-axis-review`, `diagnosing-bugs`, `prototype` |
 | Intelligence | the scout pass (§5) |
 | Operator | Burooj live/async; scheduled scout sessions; Hermes/OpenClaw candidate, gated on the scout pass being doctrine |
@@ -194,6 +194,8 @@ For Codex Desktop implementation work in a git repo:
 - After creation, verify the worker cwd is the native worktree path, not `/Users/burooj/Projects/<repo>`.
 - Do not register each issue worktree as its own saved Codex project.
 
+For headless workers, `bunx --bun acpx <agent> …` in the project dir (see the `acpx` skill) is a sanctioned launch surface — ACP-launched sessions land in the native provider store, so binding works unchanged.
+
 After native orchestration creates a worker, bind it with `./cockpit.py bind BJS-X session:provider:<id>` and move to `In Progress`.
 
 For `Needs-info` work: cockpit spawns a **native subagent** (harness Task), read-only, writing findings back as an issue comment. No separate verb.
@@ -215,7 +217,7 @@ Stop and ask Burooj before:
 ## 9. Related skills and references
 
 - `linear` skill — board ontology, lane semantics, labels, issue body shape, comment model. Read it before creating or editing issues.
-- `agents` skill — start, resume, fork, inspect, message, attach to, or archive provider sessions. Cockpit drives sessions through `agents`.
+- `agents` skill — reach other models/providers and pick the right one; acpx is its preferred pipe. Cockpit owns session topology and binding; the `acpx` skill holds the ACP mechanics.
 - `triage` skill — use for inbox sorting, issue clarification, duplicate/out-of-scope checks, and agent-ready briefs. Its "Cockpit lane translation" section is the single source for mapping its generic lane names onto cockpit lanes.
 - `grill-me` skill — use when the issue needs interactive design/plan stress-testing with Burooj. Route the issue to `Grilling`; ask one question at a time; inspect code instead of asking when the answer is discoverable.
 - `grill-with-docs` skill — use for `Grilling` when the project has domain docs, `CONTEXT.md`, `CONTEXT-MAP.md`, or ADRs and the session should sharpen language against those docs. It may update project docs during the grilling session when explicitly in execution scope.
