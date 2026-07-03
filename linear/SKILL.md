@@ -92,6 +92,7 @@ Labels encode metadata, never workflow position.
 | Prefix | Purpose | Notes |
 |---|---|---|
 | `type:*` | Work kind | `bug`, `feature`, `improvement`, `cleanup`, `research`, `chore`, `seed`, `grilling`, `context`, `one-off`, `polish` |
+| `executor:*` | Smallest model class the brief is written for | `frontier` (opus/fable judgment), `standard` (gpt-5.5/sonnet/glm/minimax implementation), `small` (haiku/flash bulk work) |
 | `session:<provider>:<id>` | Active session binding | Live issues only; remove on `Done`/`Canceled` |
 | `workflow:issue-pr` | Training rail | Optional |
 

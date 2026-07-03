@@ -36,7 +36,7 @@
   },
   {
     "provider": "opencode",
-    "model": "opencode-go/glm-5.1",
+    "model": "opencode-go/glm-5.2",
     "good_for": "General balanced coder. Use this for everyday implementation and review through opencode. Use it when you want a dependable all-rounder and need neither a specialist nor a flagship.",
     "avoid_for": "The hardest reasoning or peak code work; reach for deepseek-v4-pro.",
     "default_effort": "medium"

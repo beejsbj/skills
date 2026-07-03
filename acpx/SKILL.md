@@ -9,6 +9,12 @@ description: Use acpx as a headless ACP CLI for agent-to-agent communication, in
 
 Use this skill when you need to run coding agents through `acpx`, manage persistent ACP sessions, queue prompts, override the Claude system prompt, prune stale sessions, consume structured agent output from scripts, or compose multi-agent workflows declaratively with `acpx/flows`.
 
+## Model taste (local)
+
+`profiles.json` beside this skill is Burooj's model roster: per provider/model, what it is good for, what to avoid, default effort. Standing rule: premium tokens buy judgment — brief-writing, review, taste (opus/fable class); execution goes to the smallest sufficient class — gpt-5.5 / sonnet / glm-5.2 / minimax-m3 for implementation, deepseek-flash class for bulk extraction. Issues carry an `executor:*` label naming the class their brief is written for (see the `linear` skill).
+
+This Mac: the default node is v16 (too old) — invoke as `bunx --bun acpx …`, global flags **before** the agent subcommand. The codex adapter exits 1 against codex-cli 0.139.0 (recheck after updates); opencode has **no acpx adapter** — reach opencode-go models with the native CLI (`opencode run --format json --model opencode-go/… "…"`).
+
 ## What acpx is
 
 `acpx` is a headless, scriptable CLI client for the Agent Client Protocol (ACP). It is built for agent-to-agent communication over the command line and avoids PTY scraping.

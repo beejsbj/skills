@@ -48,8 +48,8 @@ Each body uses the linear skill's shape — `## Goal / ## Context / ## Done when
   - Holding: no schema changes outside `export/`.
   ```
 
-- **Constraints** — boundaries and non-goals; at minimum, what neighbouring slices own, so the worker doesn't creep into them, plus the stop rule: when reality doesn't match the brief, stop and comment rather than improvise.
-- **Executor class** — one line naming the smallest model class that can run the brief (roster: `profiles.json` in the cockpit skill). If only a frontier model could execute it, the slice is too big or the brief too thin — split or thicken until gpt-5.5/sonnet/glm class suffices.
+- **Constraints** — boundaries and non-goals; at minimum, what neighbouring slices own, so the worker doesn't creep into them, plus the stop rule: adapt freely within the slice, but stop and comment if a premise of the brief breaks.
+- **Executor class** — one line naming the smallest model class that can run the brief, and the matching `executor:*` label on the issue (roster: `profiles.json` in the `acpx` skill). If only a frontier model could execute it, the slice is too big or the brief too thin — split or thicken until standard class suffices.
 
 A brief is complete when a cold worker could start from the body alone.
 

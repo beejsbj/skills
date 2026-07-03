@@ -36,7 +36,7 @@ Every cockpit concern lives in exactly one layer; when unsure where something be
 |---|---|
 | Truth | Linear board — `linear` skill |
 | Actuator + ledger | `cockpit.py` — this skill |
-| Session plane | acpx (ACP control plane) + native provider tools; `profiles.json` picks the model; `scripts/agents.py` discovery feeds this ledger |
+| Session plane | acpx (ACP control plane) + native provider tools; the `acpx` skill's `profiles.json` picks the model; `sessions` discovery feeds this ledger |
 | Workflow discipline | `triage`, `grill-me`/`grill-with-docs`, `to-issues`, `implement`, `tdd`, `two-axis-review`, `diagnosing-bugs`, `prototype` |
 | Intelligence | the scout pass (§5) |
 | Operator | Burooj live/async; scheduled scout sessions; Hermes/OpenClaw candidate, gated on the scout pass being doctrine |
@@ -185,7 +185,7 @@ Cockpit prepares deterministic launch context; the active environment orchestrat
 
 The launch brief should tell the worker to adopt the issue's Done-when as its native goal condition (`/goal` in both Claude Code and Codex), so completion is judged by the issue's own condition rather than the worker's judgment. A `Ready for agent` issue whose Done-when cannot serve as a goal condition is not actually ready — route it back through shaping.
 
-Launch on the issue's named executor class (see `to-issues`), defaulting to the smallest sufficient model from `profiles.json` — frontier models write and review briefs; cheap models execute them.
+Launch on the issue's named executor class (`executor:*` label; see `to-issues` and `brain-to-brawn`), defaulting to the smallest sufficient model from the `acpx` skill's `profiles.json` — frontier models write and review briefs; cheap models execute them.
 
 For Codex Desktop implementation work in a git repo:
 
@@ -219,7 +219,8 @@ Stop and ask Burooj before:
 ## 9. Related skills and references
 
 - `linear` skill — board ontology, lane semantics, labels, issue body shape, comment model. Read it before creating or editing issues.
-- `acpx` skill — mechanics for reaching other models/providers over ACP (sessions, exec, permissions, flows); native provider CLIs are the fallback pipe. Model taste lives in `profiles.json` beside this skill: premium tokens for judgment, codex/opencode-go class for legwork, briefs written so the smallest sufficient model can execute.
+- `acpx` skill — mechanics for reaching other models/providers over ACP (sessions, exec, permissions, flows) plus the model-taste roster (`profiles.json`); native provider CLIs are the fallback pipe. Policy stays here: premium tokens for judgment, cheap classes for execution, briefs written so the smallest sufficient model can execute.
+- `brain-to-brawn` skill — the dispatch move itself: verify an executor-grade brief, launch the cheap worker (acpx/native) with the Done-when as its goal, review the diff against the brief, receipt.
 - `triage` skill — use for inbox sorting, issue clarification, duplicate/out-of-scope checks, and agent-ready briefs. Its "Cockpit lane translation" section is the single source for mapping its generic lane names onto cockpit lanes.
 - `grill-me` skill — use when the issue needs interactive design/plan stress-testing with Burooj. Route the issue to `Grilling`; ask one question at a time; inspect code instead of asking when the answer is discoverable.
 - `grill-with-docs` skill — use for `Grilling` when the project has domain docs, `CONTEXT.md`, `CONTEXT-MAP.md`, or ADRs and the session should sharpen language against those docs. It may update project docs during the grilling session when explicitly in execution scope.
