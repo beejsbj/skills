@@ -1,5 +1,7 @@
 # Handoff: Build cockpit's `dispatch` launch step
 
+**Superseded (2026-07-02)** — historical record only. `dispatch` was built and then deliberately removed; the current contract is `SKILL.md` (`prepare` + native orchestration + `bind`). Do not implement or restore anything from this document.
+
 Date: 2026-06-24
 For: a Codex session running **inside Codex Desktop** (it has the native app tools
 and can empirically test the Desktop sidebar — a standalone CLI cannot).

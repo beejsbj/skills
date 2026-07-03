@@ -47,6 +47,8 @@ Source, repo/path, links, prior decisions — anything needed to avoid re-asking
 - Observable completion condition.
 - PR, checks, receipt, or review expectation where relevant.
 
+Write Done-when **goal-grade**: one measurable end state, a stated check that proves it (a command, artifact, or count), and the constraints that must hold on the way — so a worker can adopt it verbatim as its native `/goal` condition (Claude Code and Codex both evaluate one after every turn).
+
 ## Constraints
 
 - Boundaries, non-goals, approval gates, taste/security/account/money limits.
@@ -79,7 +81,7 @@ Lane invariants:
 - `In Progress` → exactly one `session:*` label.
 - `Done` / `Canceled` / `Inbox` → no `session:*` label.
 - `Blocked` → must have a Linear dependency relation or an explicit blocker comment.
-- `Ready for agent` → must have Goal, Context, Done-when, Constraints, and no hidden blocker.
+- `Ready for agent` → must have Goal, Context, Done-when, Constraints, and no hidden blocker. The Done-when must be goal-grade (see Issue Body Shape) — if a worker could not adopt it as its `/goal` condition, the issue is not ready.
 
 ---
 
@@ -89,11 +91,11 @@ Labels encode metadata, never workflow position.
 
 | Prefix | Purpose | Notes |
 |---|---|---|
-| `type:*` | Work kind | `bug`, `cleanup`, `research`, `chore`, `seed`, `grilling` |
+| `type:*` | Work kind | `bug`, `feature`, `improvement`, `cleanup`, `research`, `chore`, `seed`, `grilling`, `context`, `one-off`, `polish` |
 | `session:<provider>:<id>` | Active session binding | Live issues only; remove on `Done`/`Canceled` |
 | `workflow:issue-pr` | Training rail | Optional |
 
-`formation:*` labels are **removed** — do not read, write, or reference them.
+`formation:*`, `mode:*`, and `agent:*` labels are **removed** (mode/agent encoded dispatch-era routing that lanes now carry) — do not read, write, or reference them. Use `type:*` instead of Linear's default `Feature`/`Improvement`/`Bug` labels.
 
 ---
 

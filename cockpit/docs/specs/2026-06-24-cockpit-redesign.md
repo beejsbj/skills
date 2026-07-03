@@ -1,12 +1,11 @@
 # Cockpit Redesign — Design Spec
 
 Date: 2026-06-24
-Status: Approved (Burooj), ready for implementation
+Status: **Superseded (2026-07-02)** — historical record only. The current contract is `SKILL.md`; the `dispatch`/`done` machinery this spec defines was deliberately removed. Do not implement or restore anything from this document.
 Author: Burooj + cockpit (Opus) brainstorming session
 
-This spec is the single source of truth for the cockpit redesign. Implementation
-agents MUST follow the exact names, lanes, labels, and verbs defined here so the
-skill docs, the CLI, and the board all agree.
+This spec was the source of truth for the 2026-06 cockpit redesign; `SKILL.md`
+has since replaced it.
 
 ---
 

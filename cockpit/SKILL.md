@@ -28,6 +28,19 @@ You  <->  Cockpit (manager-coworker / Linear truth layer)  <->  Native orchestra
 
 `cockpit.py` is an actuator and ledger: inspect, prepare, comment, question, bind, release, move, audit. It is not the orchestration brain and should not hide provider-specific lifecycle logic that the active environment can perform natively.
 
+### Layers
+
+Every cockpit concern lives in exactly one layer; when unsure where something belongs, name its layer first.
+
+| Layer | Lives in |
+|---|---|
+| Truth | Linear board — `linear` skill |
+| Actuator + ledger | `cockpit.py` — this skill |
+| Session plane | `agents` skill; Codex native thread tools; ACP/acpx under evaluation (BJS-52) |
+| Workflow discipline | `triage`, `grill-me`/`grill-with-docs`, `to-issues`, `implement`, `tdd`, `two-axis-review`, `diagnosing-bugs`, `prototype` |
+| Intelligence | the scout pass (§5) |
+| Operator | Burooj live/async; scheduled scout sessions; Hermes/OpenClaw candidate, gated on the scout pass being doctrine |
+
 ---
 
 ## 2. Depends on
@@ -96,7 +109,7 @@ Resolution rule: reply before resolving; resolve only when the reply says what c
 
 ---
 
-## 5. First move
+## 5. First move — the scout pass
 
 ```bash
 cd /Users/burooj/Projects/cockpit
@@ -109,6 +122,16 @@ cd /Users/burooj/Projects/cockpit
 Use `./cockpit.py issue BJS-X` before steering or launching work for an issue.
 
 Check `./cockpit.py inbox` to see both issues needing a triage decision and your unresolved comments as a combined work queue.
+
+Then reconcile — `audit` catches label mechanics, but lanes must not be more confident than reality:
+
+- Every `In Progress` binding: does the bound session still exist and is it live? Archived Codex sessions live in `~/.codex/archived_sessions/`, which `sessions` does not scan — check there before trusting a binding. Is there branch/PR evidence of motion?
+- `In Review`: does the named review artifact actually exist?
+- Sample the oldest `Inbox` and `Ready for Burooj` issues: still real? Has evolution already satisfied a Done-when (tooling built since, work landed elsewhere)? Propose closure with evidence.
+- Every unresolved Burooj comment: handle or route it, then resolve with a reply.
+- End by proposing moves and batching the decisions Burooj owes into one question each — streamline his queue, don't just inventory it.
+
+A scheduled scout session runs this same pass and ends with a short digest; state changes always leave receipts.
 
 ---
 
@@ -133,6 +156,7 @@ Check `./cockpit.py inbox` to see both issues needing a triage decision and your
 
 # Comments
 ./cockpit.py comment BJS-X "text"
+./cockpit.py comment BJS-X --question "Question for Burooj (goes to the Questions thread)"
 ./cockpit.py comment BJS-X --reply-to <comment-id> "text"
 ./cockpit.py comment-resolve <comment-id>
 ./cockpit.py comment-unresolve <comment-id>
@@ -158,6 +182,8 @@ Cockpit prepares deterministic launch context; the active environment orchestrat
 3. Print/return an agent-ready launch brief from the issue body and unresolved comments.
 4. Include branch/worktree metadata and preflight any branch collision that would make native worktree creation ambiguous.
 5. Leave session creation, provider launch, worktree-thread creation, and lifecycle decisions to native orchestration.
+
+The launch brief should tell the worker to adopt the issue's Done-when as its native goal condition (`/goal` in both Claude Code and Codex), so completion is judged by the issue's own condition rather than the worker's judgment. A `Ready for agent` issue whose Done-when cannot serve as a goal condition is not actually ready — route it back through shaping.
 
 For Codex Desktop implementation work in a git repo:
 
@@ -190,8 +216,12 @@ Stop and ask Burooj before:
 
 - `linear` skill — board ontology, lane semantics, labels, issue body shape, comment model. Read it before creating or editing issues.
 - `agents` skill — start, resume, fork, inspect, message, attach to, or archive provider sessions. Cockpit drives sessions through `agents`.
-- `triage` skill — use for inbox sorting, issue clarification, duplicate/out-of-scope checks, and agent-ready briefs. Translate its older lane names into cockpit lanes: `Needs triage` -> `Inbox`, `Needs Burooj` -> `Ready for Burooj`, `Parked` -> usually `Ready for Burooj` or `Canceled` unless cockpit later adds a parked lane. Cockpit's `Needs-info` is allowed only as a bounded fact-gathering lane with an owner and stop condition.
+- `triage` skill — use for inbox sorting, issue clarification, duplicate/out-of-scope checks, and agent-ready briefs. Its "Cockpit lane translation" section is the single source for mapping its generic lane names onto cockpit lanes.
 - `grill-me` skill — use when the issue needs interactive design/plan stress-testing with Burooj. Route the issue to `Grilling`; ask one question at a time; inspect code instead of asking when the answer is discoverable.
 - `grill-with-docs` skill — use for `Grilling` when the project has domain docs, `CONTEXT.md`, `CONTEXT-MAP.md`, or ADRs and the session should sharpen language against those docs. It may update project docs during the grilling session when explicitly in execution scope.
+- `to-issues` skill — use to break a grilled plan/spec into vertical-slice issues with goal-grade Done-whens, feeding `Ready for agent`.
+- `implement` skill — the worker discipline for issue-bound implementation sessions: goal adoption, tdd, review, artifact gate, final receipt.
+- `two-axis-review` skill — standards + spec review of a diff against its originating issue; the normal review shape before `In Review`.
+- `tdd`, `diagnosing-bugs`, `prototype` skills — execution-support disciplines workers reach for during implementation, debugging, and design questions.
 - [references/linear-discipline.md](references/linear-discipline.md) — cockpit's write-auth config and session-binding mechanics (verbatim app-actor rules).
 - [references/session-discipline.md](references/session-discipline.md) — native orchestration boundary, session lifecycle, review, and cleanup.
