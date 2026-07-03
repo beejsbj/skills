@@ -185,6 +185,8 @@ Cockpit prepares deterministic launch context; the active environment orchestrat
 
 The launch brief should tell the worker to adopt the issue's Done-when as its native goal condition (`/goal` in both Claude Code and Codex), so completion is judged by the issue's own condition rather than the worker's judgment. A `Ready for agent` issue whose Done-when cannot serve as a goal condition is not actually ready — route it back through shaping.
 
+Launch on the issue's named executor class (see `to-issues`), defaulting to the smallest sufficient model from `profiles.json` — frontier models write and review briefs; cheap models execute them.
+
 For Codex Desktop implementation work in a git repo:
 
 - Use the **root saved project id** with native `create_thread`.

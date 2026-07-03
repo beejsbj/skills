@@ -26,6 +26,7 @@ Each issue is a **tracer bullet**: a thin but COMPLETE path through every layer 
 
 - A completed slice is demoable or verifiable on its own.
 - Prefactoring slices come first.
+- Slice until a small model can execute it: the intelligence goes into the brief, not the worker — "the plan is the product" (shadcn/improve).
 
 ### 4. Quiz the user
 
@@ -47,7 +48,8 @@ Each body uses the linear skill's shape — `## Goal / ## Context / ## Done when
   - Holding: no schema changes outside `export/`.
   ```
 
-- **Constraints** — boundaries and non-goals; at minimum, what neighbouring slices own, so the worker doesn't creep into them.
+- **Constraints** — boundaries and non-goals; at minimum, what neighbouring slices own, so the worker doesn't creep into them, plus the stop rule: when reality doesn't match the brief, stop and comment rather than improvise.
+- **Executor class** — one line naming the smallest model class that can run the brief (roster: `profiles.json` in the cockpit skill). If only a frontier model could execute it, the slice is too big or the brief too thin — split or thicken until gpt-5.5/sonnet/glm class suffices.
 
 A brief is complete when a cold worker could start from the body alone.
 

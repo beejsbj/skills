@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 The discipline a worker session follows to carry a Linear issue from `Ready for agent` to a receipt in `In Review`. Applies to any issue-bound implementation session, from any harness.
 
+**Stop rule (applies to every step):** when reality doesn't match the brief — a named file is missing, a precondition fails, the code has drifted from the Context — stop and comment on the issue rather than improvise. A paused slice costs less than a wrong guess.
+
 ## 1. Read the issue
 
 From `/Users/burooj/Projects/cockpit`:
