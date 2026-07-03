@@ -36,7 +36,7 @@ Every cockpit concern lives in exactly one layer; when unsure where something be
 |---|---|
 | Truth | Linear board — `linear` skill |
 | Actuator + ledger | `cockpit.py` — this skill |
-| Session plane | acpx (ACP control plane) + native provider tools; `agents` skill picks the model; discovery feeds this ledger |
+| Session plane | acpx (ACP control plane) + native provider tools; `profiles.json` picks the model; `scripts/agents.py` discovery feeds this ledger |
 | Workflow discipline | `triage`, `grill-me`/`grill-with-docs`, `to-issues`, `implement`, `tdd`, `two-axis-review`, `diagnosing-bugs`, `prototype` |
 | Intelligence | the scout pass (§5) |
 | Operator | Burooj live/async; scheduled scout sessions; Hermes/OpenClaw candidate, gated on the scout pass being doctrine |
@@ -217,7 +217,7 @@ Stop and ask Burooj before:
 ## 9. Related skills and references
 
 - `linear` skill — board ontology, lane semantics, labels, issue body shape, comment model. Read it before creating or editing issues.
-- `agents` skill — reach other models/providers and pick the right one; acpx is its preferred pipe. Cockpit owns session topology and binding; the `acpx` skill holds the ACP mechanics.
+- `acpx` skill — mechanics for reaching other models/providers over ACP (sessions, exec, permissions, flows); native provider CLIs are the fallback pipe. Model taste lives in `profiles.json` beside this skill: premium tokens for judgment, codex/opencode-go class for legwork, briefs written so the smallest sufficient model can execute.
 - `triage` skill — use for inbox sorting, issue clarification, duplicate/out-of-scope checks, and agent-ready briefs. Its "Cockpit lane translation" section is the single source for mapping its generic lane names onto cockpit lanes.
 - `grill-me` skill — use when the issue needs interactive design/plan stress-testing with Burooj. Route the issue to `Grilling`; ask one question at a time; inspect code instead of asking when the answer is discoverable.
 - `grill-with-docs` skill — use for `Grilling` when the project has domain docs, `CONTEXT.md`, `CONTEXT-MAP.md`, or ADRs and the session should sharpen language against those docs. It may update project docs during the grilling session when explicitly in execution scope.

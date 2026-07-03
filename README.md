@@ -10,7 +10,7 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`souls/prime.md`** — my global agent "soul and discipline" file (the soul). Symlinked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` so every session inherits it. Agents are steered away from editing `souls/` directly — it changes only when I deliberately change it.
 
-**`agents/`** — the `agents` skill for choosing which model/provider to use, plus `profiles.json` with my current model roster across Claude, Codex, opencode, and Cursor.
+**`acpx/`** — vendored official skill for [openclaw/acpx](https://github.com/openclaw/acpx), the headless ACP client for reaching other models/providers. The model roster (`profiles.json`) and session discovery (`scripts/agents.py`) now live inside `cockpit/`.
 
 **`cockpit/`** — the cockpit skill bundle: Linear-first project orchestration, dispatch logic, session discipline, and the `cockpit.py` script.
 

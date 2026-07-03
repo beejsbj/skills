@@ -21,7 +21,7 @@ from typing import Any
 
 SCRIPT_PATH = Path(__file__).resolve()
 ROOT = SCRIPT_PATH.parents[1] if SCRIPT_PATH.parent.name == "scripts" else SCRIPT_PATH.parent
-AGENTS_CLI = Path("/Users/burooj/Projects/skills/agents/agents.py")
+AGENTS_CLI = SCRIPT_PATH.parent / "agents.py"
 CODEX_STATE_DB = Path.home() / ".codex/state_5.sqlite"
 CODEX_GLOBAL_STATE_JSON = Path.home() / ".codex/.codex-global-state.json"
 CLAUDE_CODE_SESSIONS_DIR = (
@@ -1822,7 +1822,7 @@ def resume_command(session: dict[str, Any]) -> str:
         return f"codex exec resume {session_id}"
     if provider == "claude":
         return f"claude --resume {session_id} -p '<plain evidence + exact ask>'"
-    return f"/Users/burooj/Projects/skills/agents/agents.py resume --provider {provider} --id {session_id}"
+    return f"/Users/burooj/Projects/skills/cockpit/scripts/agents.py resume --provider {provider} --id {session_id}"
 
 
 def project_bucket_order() -> list[tuple[str, str]]:
