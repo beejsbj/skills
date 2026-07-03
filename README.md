@@ -16,6 +16,18 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`triage/`** — triage skill for sorting issues, PRs, and inbox items into clear next states (Needs Burooj, Ready for agent, Blocked, Parked, etc.).
 
+**`to-issues/`** — breaks a plan, spec, or grilling outcome into independently-grabbable tracer-bullet Linear issues with goal-grade Done-whens.
+
+**`implement/`** — worker discipline for implementing a Linear issue end to end: goal adoption, tdd, review, artifact gate, receipt.
+
+**`two-axis-review/`** — Standards + Spec review of a diff against its originating issue, run as parallel subagents (renamed from Matt's `code-review` to avoid Claude Code's built-in command).
+
+**`tdd/`** — the red-green loop, testing at pre-agreed seams, vertical slices.
+
+**`diagnosing-bugs/`** — deep diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
+
+**`prototype/`** — throwaway prototypes to answer a design question before committing to real code.
+
 **`grill-me/`** — rapid-fire interviewing skill. Grills me on a plan until we reach shared understanding.
 
 **`grill-with-docs/`** — same as grill-me but reads existing `CONTEXT.md` and ADRs first, sharpens terminology, and updates docs inline as decisions crystallise.
@@ -41,7 +53,7 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 ## Credits / inspiration
 
 **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills))
-The `triage`, `grill-me`, `grill-with-docs`, `improve-codebase-architecture`, and `writing-great-skills` skills are adapted from Matt's engineering skills set. The triage skill and its `agent-brief` + `out-of-scope` reference files follow his structure closely. Really useful starting point — I've been evolving them for my own workflow but the bones are his.
+The `triage`, `grill-me`, `grill-with-docs`, `improve-codebase-architecture`, `writing-great-skills`, `to-issues`, `two-axis-review` (his `code-review`), `implement`, `tdd`, `diagnosing-bugs`, and `prototype` skills are adapted from Matt's engineering skills set. The triage skill and its `agent-brief` + `out-of-scope` reference files follow his structure closely. Really useful starting point — I've been evolving them for my own workflow but the bones are his.
 
 **GreenSock / GSAP** ([greensock/gsap-skills](https://github.com/greensock/gsap-skills))
 The `gsap-skills/` folder is an imported copy of GreenSock's official MIT-licensed GSAP AI skills bundle.
