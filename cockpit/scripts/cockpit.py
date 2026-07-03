@@ -770,7 +770,7 @@ def print_linear_issue_group(status: str, rows: list[dict[str, Any]]) -> None:
         print(f"- {issue_identifier(issue)}{project_part}: {compact(issue_title(issue), 100)}{binding}")
 
 
-def print_linear_issue(issue_id: str) -> int:
+def print_linear_issue(issue_id: str, *, full: bool = False) -> int:
     try:
         issue = load_linear_issue(issue_id)
     except Exception as exc:
@@ -788,7 +788,12 @@ def print_linear_issue(issue_id: str) -> int:
     print(f"- session: {', '.join(session) if session else 'unbound'}")
     description = issue.get("description")
     if isinstance(description, str) and description.strip():
-        print(f"\nDescription:\n{compact(description, 900)}")
+        if full:
+            print(f"\nDescription:\n{description.strip()}")
+        else:
+            print(f"\nDescription:\n{compact(description, 900)}")
+            if len(description) > 900:
+                print(f"({len(description)} chars; use --full for all)")
 
     # Surface Burooj's unresolved comments so `issue` reflects the async channel,
     # using the same filters as the inbox backlog (see
@@ -2263,6 +2268,7 @@ def main(argv: list[str] | None = None) -> int:
     board_parser.add_argument("--project", help="Filter by Linear project name.")
     issue_parser = sub.add_parser("issue", help="Show one Linear issue and its session binding.")
     issue_parser.add_argument("issue_id")
+    issue_parser.add_argument("--full", action="store_true", help="Print the full untruncated description.")
     inbox_parser = sub.add_parser(
         "inbox",
         help="List issues needing triage and Burooj's unresolved comment backlog.",
@@ -2349,11 +2355,11 @@ def main(argv: list[str] | None = None) -> int:
     command = args.command or "status"
 
     if command == "status":
-        return print_status(project=args.project)
+        return print_status(project=getattr(args, "project", None))
     if command == "board":
         return print_linear_board(limit=args.limit, project=args.project)
     if command == "issue":
-        return print_linear_issue(args.issue_id)
+        return print_linear_issue(args.issue_id, full=args.full)
     if command == "inbox":
         return print_inbox(limit=args.limit)
     if command == "prepare":
@@ -2421,4 +2427,12 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)
+    except Exception as exc:
+        if os.environ.get("COCKPIT_DEBUG"):
+            raise
+        print(f"cockpit: error: {exc}", file=sys.stderr)
+        sys.exit(1)
