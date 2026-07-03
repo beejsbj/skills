@@ -3,3 +3,5 @@ __pycache__/
 .prompt-backups/
 cockpit/node_modules/
 /private/
+tldw/cache/
+tldw/venv/

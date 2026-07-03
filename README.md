@@ -46,6 +46,8 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`writing-great-skills/`** — Matt Pocock's reference skill for writing and editing predictable, low-sediment skills.
 
+**`tldw/`** — imported from the live OpenClaw host for extracting and summarizing YouTube transcripts with `yt-dlp`.
+
 **`gsap-skills/`** — imported GSAP AI skills bundle: core GSAP, timelines, ScrollTrigger, plugins, framework usage, examples, and plugin metadata.
 
 **`in-progress/diglot-weave/`** — recovered packet for a future `diglot-weave` skill, including source transcripts, raw zip artifacts, recovered skill drafts, and prior-art notes.
