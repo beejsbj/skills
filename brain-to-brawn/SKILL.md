@@ -16,6 +16,7 @@ The issue body (or plan file) must stand alone: Goal / Context / goal-grade Done
 Pick the smallest sufficient model from the `acpx` skill's `profiles.json`, then launch:
 
 - acpx (claude/codex/gemini adapters): `bunx --bun acpx --approve-all --cwd <project-root> -s bjs-<n> claude --model sonnet "<brief>"`
+- codex (proven recipe — write the brief to a file first): `codex exec -C <project-root> -m gpt-5.5 -s workspace-write "$(cat brief.md)" < /dev/null` — the `< /dev/null` matters; without it codex exec can hang silently at startup. Its stdout header prints the session id: bind that, no guessing.
 - native CLI when there's no adapter: `opencode run --format json --model opencode-go/glm-5.2 "<brief>"`
 
 The prompt tells the worker to adopt the issue's Done-when as its goal and to follow the `implement` skill (stop rule included). For Linear-bound work, bind the resulting session: `./cockpit.py bind BJS-X session:<provider>:<id>` and move to `In Progress`.
