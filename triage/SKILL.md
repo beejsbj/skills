@@ -18,7 +18,7 @@ Use this skill deliberately when the user asks to triage, clarify, inbox-sort, b
 
 ## Triage Outcomes
 
-Use statuses for workflow position. Use labels for metadata such as `type:*`, `mode:*`, `agent:*`, `workflow:*`, domain, repo, or source.
+Use statuses for workflow position. Use labels for metadata such as `type:*`, `executor:*`, domain, repo, or source — see the `linear` skill for the live taxonomy; `mode:*`, `agent:*`, and `workflow:*` are removed.
 
 - `Needs triage`: intake is not yet classified, the next actor is unknown, or the issue needs basic shaping before anyone should work it.
 - `Needs Burooj`: Burooj is the next actor because the issue needs judgment, taste, priority, approval, private context, account access, physical action, or a non-searchable answer.

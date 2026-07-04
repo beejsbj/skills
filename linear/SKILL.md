@@ -94,9 +94,8 @@ Labels encode metadata, never workflow position.
 | `type:*` | Work kind | `bug`, `feature`, `improvement`, `cleanup`, `research`, `chore`, `seed`, `grilling`, `context`, `one-off`, `polish` |
 | `executor:*` | Smallest model class the brief is written for | `frontier` (opus/fable judgment), `standard` (gpt-5.5/sonnet/glm/minimax implementation), `small` (haiku/flash bulk work) |
 | `session:<provider>:<id>` | Active session binding | Live issues only; remove on `Done`/`Canceled` |
-| `workflow:issue-pr` | Training rail | Optional |
 
-`formation:*`, `mode:*`, and `agent:*` labels are **removed** (mode/agent encoded dispatch-era routing that lanes now carry) — do not read, write, or reference them. Use `type:*` instead of Linear's default `Feature`/`Improvement`/`Bug` labels.
+`formation:*`, `mode:*`, `agent:*`, and `workflow:*` labels are **removed** (mode/agent encoded dispatch-era routing that lanes now carry; `workflow:issue-pr` was an opaque, unused training rail) — do not read, write, or reference them. Use `type:*` instead of Linear's default `Feature`/`Improvement`/`Bug` labels.
 
 ---
 

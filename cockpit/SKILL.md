@@ -93,7 +93,7 @@ Linear state must not be more confident than the artifacts.
 - Local commits, launch success, or a worker saying "done" are not enough for `Done`.
 - Do not archive/release the worker session until the PR/review artifact exists and the Linear issue has a receipt naming it.
 - Worker final receipts should include: branch, commit, pushed yes/no, PR/review artifact URL, checks run, residual risks, and recommended next state.
-- Do not rely on opaque `workflow:*` labels for user-facing lifecycle meaning.
+- `workflow:*` labels are removed (see the `linear` skill); lifecycle meaning lives in the lane alone.
 
 ---
 

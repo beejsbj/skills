@@ -54,4 +54,4 @@ For `Needs-info` work, cockpit spawns a **native subagent** (harness Task) point
 - `audit` catches mechanical drift: orphan labels, bound-but-done, double bindings.
 - `sessions` finds unbound or stale local sessions to resume or archive.
 
-Cockpit can only catch *mechanical* drift. Artifact gates require checking actual repo/review state, not opaque `workflow:*` labels. The worker is responsible for writing durable state back to its issue before review or closure.
+Cockpit can only catch *mechanical* drift. Artifact gates require checking actual repo/review state, not labels. The worker is responsible for writing durable state back to its issue before review or closure.
