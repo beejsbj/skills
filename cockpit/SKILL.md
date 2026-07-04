@@ -129,9 +129,10 @@ Then reconcile — `audit` catches label mechanics, but lanes must not be more c
 - `In Review`: does the named review artifact actually exist?
 - Sample the oldest `Inbox` and `Ready for Burooj` issues: still real? Has evolution already satisfied a Done-when (tooling built since, work landed elsewhere)? Propose closure with evidence.
 - Every unresolved Burooj comment: handle or route it, then resolve with a reply.
-- End by proposing moves and batching the decisions Burooj owes into one question each — streamline his queue, don't just inventory it.
 
-A scheduled scout session runs this same pass and ends with a short digest; state changes always leave receipts.
+Receipt every drift you find — a finding left only in your report is a failed pass; it must land on the board via `comment`. Then apply the correction the evidence supports: release a stale/false binding; move a lane the evidence unambiguously contradicts (completed archived research → `Ready for Burooj`; `In Progress` without a live session → `Ready for agent`, or `Blocked` with the blocker named). Where a move needs Burooj's judgment, state the proposal in the receipt and leave the lane. Batch the decisions he owes into one crisp question each — streamline his queue, don't just inventory it.
+
+A scheduled scout session (codex automation) runs this same pass and ends with a short digest. Receipts and mechanical binding corrections are not lifecycle writes — they are required; the Stop Gates (Done moves, launching/archiving sessions, editing repos) still bind.
 
 ---
 
