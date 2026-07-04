@@ -70,7 +70,7 @@ Title discipline: plain verb + object + outcome. Prefer repo/path names when the
 | `Needs-info` | Context-gathering; an agent digs or you supply a fact. Bounded — does not linger. |
 | `Grilling` | Deep shaping — clarify intent, sketch approach. Interactive with Burooj; can span sessions. |
 | `Ready for Burooj` | Burooj is the next actor: a decision, approval, judgment, or physical action. |
-| `Ready for agent` | Cold-dispatchable; a worker can start from the issue body or latest authoritative Agent Brief. |
+| `Ready for agent` | Cold-dispatchable: a smart model has distilled the issue into a self-contained `/goal` a cheaper executor can run without judgment. |
 | `Blocked` | Real external dependency (another issue or outside party). NOT "needs investigation." |
 | `In Progress` | A worker session is executing it. Exactly one `session:*` label must be present. |
 | `In Review` | PR / checks / review phase. |
@@ -81,7 +81,7 @@ Lane invariants:
 - `In Progress` → exactly one `session:*` label.
 - `Done` / `Canceled` / `Inbox` → no `session:*` label.
 - `Blocked` → must have a Linear dependency relation or an explicit blocker comment.
-- `Ready for agent` → must have Goal, Context, Done-when, Constraints, and no hidden blocker. The Done-when must be goal-grade (see Issue Body Shape) — if a worker could not adopt it as its `/goal` condition, the issue is not ready.
+- `Ready for agent` → must have Goal, Context, Done-when, Constraints, an `executor:*` class, and no hidden blocker. The readiness bar is the whole point of this lane: preparing an issue for it *is* a smart model writing a plan a less-smart model can execute cold. The Done-when must be goal-grade (see Issue Body Shape) — adoptable verbatim as the executor's `/goal` — and the `executor:*` class names the smallest model that plan is written for. If only a frontier model could run it, it isn't ready; sharpen the plan, don't reach for a bigger executor.
 
 ---
 

@@ -12,13 +12,11 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`acpx/`** — adapted official skill for [openclaw/acpx](https://github.com/openclaw/acpx), the headless ACP client for reaching other models/providers, plus `profiles.json` — my model roster and taste (premium tokens for judgment, cheap classes for execution).
 
-**`brain-to-brawn/`** — the dispatch move distilled from shadcn/improve: frontier writes and reviews the brief, a cheap executor runs it with the issue's Done-when as its goal.
-
 **`cockpit/`** — the cockpit skill bundle: Linear-first project orchestration, dispatch logic, session discipline, and the `cockpit.py` script.
 
 **`triage/`** — triage skill for sorting issues, PRs, and inbox items into clear next states (Needs Burooj, Ready for agent, Blocked, Parked, etc.).
 
-**`to-issues/`** — breaks a plan, spec, or grilling outcome into independently-grabbable tracer-bullet Linear issues with goal-grade Done-whens.
+**`to-issues/`** — breaks a plan, spec, or grilling outcome into independently-grabbable tracer-bullet Linear issues with goal-grade Done-whens, each targeted at an executor class (the "smart model writes a plan a cheaper model runs cold" idea, adapted from shadcn/improve).
 
 **`implement/`** — worker discipline for implementing a Linear issue end to end: goal adoption, tdd, review, artifact gate, receipt.
 
@@ -58,6 +56,9 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills))
 The `triage`, `grill-me`, `grill-with-docs`, `improve-codebase-architecture`, `writing-great-skills`, `to-issues`, `two-axis-review` (his `code-review`), `implement`, `tdd`, `diagnosing-bugs`, and `prototype` skills are adapted from Matt's engineering skills set. The triage skill and its `agent-brief` + `out-of-scope` reference files follow his structure closely. Really useful starting point — I've been evolving them for my own workflow but the bones are his.
+
+**shadcn** ([shadcn/improve](https://github.com/shadcn/improve))
+The "smart model writes a self-contained plan a cheaper model executes cold; the plan is the product" idea is adapted from `shadcn/improve` and woven into `to-issues` and the `Ready for agent` readiness bar (not kept as a separate skill).
 
 **GreenSock / GSAP** ([greensock/gsap-skills](https://github.com/greensock/gsap-skills))
 The `gsap-skills/` folder is an imported copy of GreenSock's official MIT-licensed GSAP AI skills bundle.

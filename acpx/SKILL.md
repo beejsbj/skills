@@ -19,6 +19,16 @@ The codex adapter needs `CODEX_PATH` set to the real codex binary: `CODEX_PATH=/
 
 opencode has **no acpx adapter** — reach opencode-go models with the native CLI (`opencode run --format json --model opencode-go/… "…"`).
 
+## Launching a worker
+
+To run a `Ready for agent` issue on its executor class (the issue already carries the `/goal`-grade runbook; see the `linear` skill), pick the smallest sufficient model from `profiles.json` and launch:
+
+- acpx (claude/gemini): `bunx --bun acpx --approve-all --cwd <project-root> -s bjs-<n> claude --model sonnet "<runbook>"`. For codex over acpx, prefix `CODEX_PATH=/opt/homebrew/bin/codex`.
+- codex, native (simplest, proven — write the runbook to a file first): `codex exec -C <project-root> -m gpt-5.5 -s workspace-write "$(cat runbook.md)" < /dev/null`. The `< /dev/null` matters; without it codex exec can hang silently at startup. Its stdout header prints the session id — bind that.
+- opencode, native: `opencode run --format json --dir <project-root> --model opencode-go/glm-5.2 "<runbook>"`.
+
+The prompt should tell the worker to adopt the issue's Done-when as its `/goal` and follow the `implement` skill. To bind the launched session to its issue, identify the session id from the launcher's own header (codex prints it) — or, if you must grep the provider's session store, match a phrase from your prompt in the session's own *user/prompt* record, not merely quoted in its transcript (scouts and workers grep each other's stores). Never trust newest-file mtime; parallel sessions make it lie. Then `./cockpit.py bind BJS-X session:<provider>:<id>` — cockpit owns everything after launch.
+
 ## What acpx is
 
 `acpx` is a headless, scriptable CLI client for the Agent Client Protocol (ACP). It is built for agent-to-agent communication over the command line and avoids PTY scraping.

@@ -8,6 +8,8 @@ disable-model-invocation: true
 
 Break a plan, spec, or grilling outcome into independently-grabbable Linear issues using vertical slices (tracer bullets).
 
+This is where the intelligence is spent: a smart model distills the work into self-contained runbooks — goal-grade `/goal`s targeted at a named executor class — that a less-smart model can then execute cold. That authoring is the point of getting an issue to `Ready for agent`; dispatch afterward is just mechanics (adapted from [shadcn/improve](https://github.com/shadcn/improve)'s "the plan is the product").
+
 Read the `linear` skill first — issue body shape, lanes, and the write path come from it.
 
 ## Process
