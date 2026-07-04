@@ -28,7 +28,7 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`prototype/`** — throwaway prototypes to answer a design question before committing to real code.
 
-**`pear/`** — local-first/P2P guidance for Pear/Holepunch: when to use peer replication, Mac-to-bjslab sync, Hypercore-style append-only stores, and pear:// app distribution instead of defaulting to servers, blockchain, or vague decentralization.
+**`pear/`** — local-first/P2P guidance for Pear/Holepunch: when to use peer replication, multi-device sync, Hypercore-style append-only stores, and pear:// app distribution instead of defaulting to servers, blockchain, or vague decentralization.
 
 **`grill-me/`** — rapid-fire interviewing skill. Grills me on a plan until we reach shared understanding.
 
