@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pear"
+  short_description: "P2P/local-first app and sync guidance"
+  default_prompt: "Use $pear to assess whether this idea should use Pear for local-first P2P sync or app distribution."

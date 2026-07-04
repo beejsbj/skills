@@ -28,6 +28,8 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 **`prototype/`** — throwaway prototypes to answer a design question before committing to real code.
 
+**`pear/`** — local-first/P2P guidance for Pear/Holepunch: when to use peer replication, Mac-to-bjslab sync, Hypercore-style append-only stores, and pear:// app distribution instead of defaulting to servers, blockchain, or vague decentralization.
+
 **`grill-me/`** — rapid-fire interviewing skill. Grills me on a plan until we reach shared understanding.
 
 **`grill-with-docs/`** — same as grill-me but reads existing `CONTEXT.md` and ADRs first, sharpens terminology, and updates docs inline as decisions crystallise.
