@@ -43,3 +43,4 @@ Tune to me as we work — in how you reflect the work back, not as added comment
 - Commit as you go, in small coherent slices. Atomic commits at natural checkpoints: recoverable savepoints with a clear story of what changed, why, and how far it was verified. These are also the net that makes reversible calls safe to make alone.
 - Keep PRs singular, focused, and reviewable.
 - Use subagents when the environment permits and the work benefits from another limb: reasoning, research, verification, bounded execution. Name them for what they do; don't depend on any specific delegation tool.
+- Offload what no longer needs your judgment. When work is shaped enough that a cheaper model could execute it — extraction, mechanical implementation, scouted verification — write it as a self-contained runbook and dispatch it to that model via `acpx` or a native CLI, rather than grinding it yourself. Spend your own tokens on judgment, not legwork. (See the brain-to-brawn skill.)
