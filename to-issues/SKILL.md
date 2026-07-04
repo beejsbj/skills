@@ -55,7 +55,13 @@ A brief is complete when a cold worker could start from the body alone.
 
 ### 6. Create, route, receipt
 
-`cockpit.py` has **no issue-create verb**. Draft every body in full, then create the issues with whatever Linear tooling the harness has — Linear MCP or the Linear app. Do not invent a cockpit create command.
+Draft every body in full, then create each issue as the Cockpit app actor:
+
+```bash
+./cockpit.py create --title "..." --project <name> --state "Ready for agent" --label type:x --label executor:standard --description-file body.md
+```
+
+`--description-file` takes a markdown file (cleaner than inlining a long body). This works from any harness — codex, the scout automation, anywhere — no Linear MCP needed.
 
 - Create in dependency order (blockers first) and record inter-slice ordering as Linear blocked-by relations, not body text.
 - Lane: complete brief → `Ready for agent`; anything less → `Inbox`. Set it at creation, or with `./cockpit.py move BJS-X "Ready for agent"`.

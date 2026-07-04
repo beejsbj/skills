@@ -1168,6 +1168,65 @@ def move_issue_with_app_actor(issue_id: str, status_name: str) -> None:
     update_issue_with_app_actor(issue_id, {"stateId": workflow_state_id(status_name)})
 
 
+def project_id_by_name(name: str) -> str:
+    data = run_linear_graphql(
+        """
+        query CockpitProjects {
+          projects(first: 250) {
+            nodes { id name }
+          }
+        }
+        """,
+        {},
+    )
+    nodes = data.get("projects", {}).get("nodes") if isinstance(data, dict) else None
+    if not isinstance(nodes, list):
+        raise RuntimeError("Linear GraphQL returned no projects.")
+    target = name.strip().lower()
+    for node in nodes:
+        if isinstance(node, dict) and str(node.get("name", "")).strip().lower() == target:
+            return str(node["id"])
+    raise RuntimeError(f"Linear project `{name}` not found.")
+
+
+def create_issue_with_app_actor(
+    title: str,
+    *,
+    project: str | None = None,
+    state: str | None = None,
+    description: str | None = None,
+    labels: list[str] | None = None,
+) -> dict[str, Any]:
+    team_id = linear_team_metadata().get("id")
+    if not team_id:
+        raise RuntimeError(f"Linear GraphQL could not resolve team id for {LINEAR_TEAM_KEY}.")
+    input_payload: dict[str, Any] = {"teamId": str(team_id), "title": title}
+    if description:
+        input_payload["description"] = description
+    if state:
+        input_payload["stateId"] = workflow_state_id(state)
+    if project:
+        input_payload["projectId"] = project_id_by_name(project)
+    if labels:
+        input_payload["labelIds"] = [ensure_linear_label_with_app_actor(label) for label in labels]
+    data = run_linear_graphql(
+        """
+        mutation CockpitIssueCreate($input: IssueCreateInput!) {
+          issueCreate(input: $input) {
+            success
+            issue { id identifier url title state { name } }
+          }
+        }
+        """,
+        {"input": input_payload},
+    )
+    result = data.get("issueCreate") if isinstance(data, dict) else None
+    created = result.get("issue") if isinstance(result, dict) else None
+    if not isinstance(result, dict) or not result.get("success") or not isinstance(created, dict):
+        raise RuntimeError(f"Linear issueCreate did not succeed: {result}")
+    return created
+
+
 def add_issue_label_with_app_actor(issue_id: str, label: str) -> None:
     label_id = ensure_linear_label_with_app_actor(label)
     issue = load_linear_issue_graphql(issue_id)
@@ -2401,6 +2460,34 @@ def print_prepare(
     print(json.dumps(prepared, indent=2))
     return 0
 
+def create_issue_command(
+    title: str,
+    *,
+    project: str | None = None,
+    state: str | None = None,
+    description: str | None = None,
+    labels: list[str] | None = None,
+) -> int:
+    try:
+        created = create_issue_with_app_actor(
+            title,
+            project=project,
+            state=state,
+            description=description,
+            labels=labels,
+        )
+    except Exception as exc:
+        print(f"Create failed: {exc}")
+        print(linear_app_auth_hint())
+        return 1
+    print(f"Created {created.get('identifier') or created.get('id')}: {created.get('title')}")
+    if created.get("url"):
+        print(f"- url: {created['url']}")
+    if isinstance(created.get("state"), dict):
+        print(f"- lane: {created['state'].get('name')}")
+    return 0
+
+
 def move_issue_command(issue_id: str, state_name: str, *, comment: bool = True) -> int:
     try:
         move_linear_issue(issue_id, state_name)
@@ -2479,6 +2566,13 @@ def main(argv: list[str] | None = None) -> int:
     move_parser.add_argument("issue_id")
     move_parser.add_argument("state_name")
     move_parser.add_argument("--no-comment", action="store_true", help="Do not add a state-move comment.")
+    create_parser = sub.add_parser("create", help="Create a Linear issue as the Cockpit app actor.")
+    create_parser.add_argument("--title", required=True)
+    create_parser.add_argument("--project", help="Linear project name.")
+    create_parser.add_argument("--state", help="Initial workflow lane, e.g. 'Ready for agent'.")
+    create_parser.add_argument("--description", help="Issue body markdown.")
+    create_parser.add_argument("--description-file", help="Read the issue body from a markdown/text file.")
+    create_parser.add_argument("--label", action="append", dest="labels", help="Label to attach (repeatable).")
     comment_parser = sub.add_parser("comment", help="Add a Cockpit-authored Linear issue comment.")
     comment_parser.add_argument("issue_id")
     comment_parser.add_argument("body", nargs="?")
@@ -2555,6 +2649,21 @@ def main(argv: list[str] | None = None) -> int:
             args.issue_id,
             args.state_name,
             comment=not args.no_comment,
+        )
+    if command == "create":
+        description = args.description
+        if getattr(args, "description_file", None):
+            try:
+                description = Path(args.description_file).read_text()
+            except OSError as exc:
+                print(f"Create failed: could not read {args.description_file}: {exc}")
+                return 1
+        return create_issue_command(
+            args.title,
+            project=args.project,
+            state=args.state,
+            description=description,
+            labels=args.labels,
         )
     if command == "comment":
         if getattr(args, "question", False):
