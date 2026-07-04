@@ -13,7 +13,11 @@ Use this skill when you need to run coding agents through `acpx`, manage persist
 
 `profiles.json` beside this skill is Burooj's model roster: per provider/model, what it is good for, what to avoid, default effort. Standing rule: premium tokens buy judgment — brief-writing, review, taste (opus/fable class); execution goes to the smallest sufficient class — gpt-5.5 / sonnet / glm-5.2 / minimax-m3 for implementation, deepseek-flash class for bulk extraction. Issues carry an `executor:*` label naming the class their brief is written for (see the `linear` skill).
 
-This Mac: the default node is v16 (too old) — invoke as `bunx --bun acpx …`, global flags **before** the agent subcommand. The codex adapter exits 1 against codex-cli 0.139.0 (recheck after updates); opencode has **no acpx adapter** — reach opencode-go models with the native CLI (`opencode run --format json --model opencode-go/… "…"`).
+This Mac: the default node is v16 (too old) — invoke as `bunx --bun acpx …`, global flags **before** the agent subcommand.
+
+The codex adapter needs `CODEX_PATH` set to the real codex binary: `CODEX_PATH=/opt/homebrew/bin/codex bunx --bun acpx codex exec "…"` (verified working 2026-07-04). Without it, the `@agentclientprotocol/codex-acp` bridge fails to resolve its bundled codex and the process exits 1 — that was the whole "codex adapter broken" symptom. The bridge drives codex via `codex app-server`, so no special codex mode is needed. To make it permanent, export `CODEX_PATH=/opt/homebrew/bin/codex` in the shell profile (Burooj's call — it's a global env change).
+
+opencode has **no acpx adapter** — reach opencode-go models with the native CLI (`opencode run --format json --model opencode-go/… "…"`).
 
 ## What acpx is
 
