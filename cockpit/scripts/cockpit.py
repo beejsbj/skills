@@ -21,13 +21,12 @@ from typing import Any
 
 SCRIPT_PATH = Path(__file__).resolve()
 ROOT = SCRIPT_PATH.parents[1] if SCRIPT_PATH.parent.name == "scripts" else SCRIPT_PATH.parent
-AGENTS_CLI = SCRIPT_PATH.parent / "agents.py"
 CODEX_STATE_DB = Path.home() / ".codex/state_5.sqlite"
 CODEX_GLOBAL_STATE_JSON = Path.home() / ".codex/.codex-global-state.json"
 CLAUDE_CODE_SESSIONS_DIR = (
     Path.home() / "Library/Application Support/Claude/claude-code-sessions"
 )
-AGENTS_DISCOVER_PROVIDERS = ("opencode",)
+OPENCODE_DB = Path.home() / ".local/share/opencode/opencode.db"
 LINEAR_GRAPHQL_URL = "https://api.linear.app/graphql"
 LINEAR_OAUTH_TOKEN_URL = "https://api.linear.app/oauth/token"
 LINEAR_APP_KEYCHAIN_SERVICE = "cockpit-linear-app-client-secret"
@@ -201,27 +200,125 @@ def discover_agent_sessions() -> dict[str, Any]:
         sessions.extend(session for session in provider_sessions if isinstance(session, dict))
         warnings.extend(str(warning) for warning in discovered.get("warnings", []))
 
-    for provider in AGENTS_DISCOVER_PROVIDERS:
-        discovered = discover_agent_provider(provider)
-        provider_sessions = discovered.get("data", {}).get("sessions", [])
-        if not isinstance(provider_sessions, list):
-            raise RuntimeError(f"agents.py discover returned no sessions list for {provider}")
-        sessions.extend(session for session in provider_sessions if isinstance(session, dict))
-        warnings.extend(str(warning) for warning in discovered.get("warnings", []))
+    sessions.extend(discover_opencode_sessions())
 
     sessions.sort(key=lambda item: item.get("updated_at") or "", reverse=True)
     return {"ok": True, "data": {"sessions": sessions}, "warnings": warnings}
 
 
-def discover_agent_provider(provider: str) -> dict[str, Any]:
-    command = [sys.executable, str(AGENTS_CLI), "discover", "--provider", provider]
-    completed = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if completed.returncode != 0:
-        raise RuntimeError((completed.stderr or completed.stdout).strip())
+def discover_opencode_sessions() -> list[dict[str, Any]]:
+    completed = subprocess.run(
+        ["opencode", "session", "list", "--format", "json"],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if completed.returncode == 0 and completed.stdout.strip():
+        try:
+            sessions = json.loads(completed.stdout)
+        except (json.JSONDecodeError, TypeError):
+            sessions = None
+        if isinstance(sessions, list):
+            out: list[dict[str, Any]] = []
+            for session in sessions:
+                if not isinstance(session, dict):
+                    continue
+                sid = session.get("id")
+                if not sid:
+                    continue
+                out.append(format_opencode_session(session, source="opencode session list"))
+            return out
+    return discover_opencode_sessions_from_db()
+
+
+def discover_opencode_sessions_from_db() -> list[dict[str, Any]]:
+    if not OPENCODE_DB.exists():
+        return []
     try:
-        return json.loads(completed.stdout)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(f"agents.py discover returned invalid JSON for {provider}: {exc}") from exc
+        conn = sqlite3.connect(str(OPENCODE_DB))
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT id, title, directory, model, time_created, time_updated FROM session ORDER BY time_updated DESC"
+        ).fetchall()
+        conn.close()
+    except Exception:
+        return []
+
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        out.append(
+            prune_none(
+                {
+                    "provider": "opencode",
+                    "id": row["id"],
+                    "workspace": row["directory"],
+                    "title": row["title"] or "opencode session",
+                    "updated_at": normalize_opencode_time(row["time_updated"]),
+                    "created_at": normalize_opencode_time(row["time_created"]),
+                    "archived": False,
+                    "source": f"sqlite:{OPENCODE_DB}",
+                    "model": opencode_model_id(row["model"]),
+                    "mode": "interactive",
+                    "cwd_confidence": "high" if row["directory"] else "low",
+                    "status": "unknown",
+                    "running": None,
+                }
+            )
+        )
+    return out
+
+
+def format_opencode_session(session: dict[str, Any], *, source: str) -> dict[str, Any]:
+    return prune_none(
+        {
+            "provider": "opencode",
+            "id": str(session["id"]),
+            "workspace": session.get("directory"),
+            "title": session.get("title") or "opencode session",
+            "updated_at": normalize_opencode_time(session.get("updated")),
+            "created_at": normalize_opencode_time(session.get("created")),
+            "archived": False,
+            "source": source,
+            "model": opencode_model_id(session.get("model")),
+            "mode": "interactive",
+            "cwd_confidence": "high" if session.get("directory") else "low",
+            "status": "unknown",
+            "running": None,
+        }
+    )
+
+
+def opencode_model_id(value: Any) -> str | None:
+    if isinstance(value, dict):
+        model = value.get("id")
+        return str(model) if model else None
+    if isinstance(value, str) and value:
+        try:
+            data = json.loads(value)
+        except (json.JSONDecodeError, TypeError):
+            return value
+        if isinstance(data, dict):
+            model = data.get("id")
+            return str(model) if model else value
+        return value
+    return None
+
+
+def normalize_opencode_time(value: Any) -> str | None:
+    if value is None:
+        return None
+    try:
+        ms = int(value)
+    except (ValueError, TypeError):
+        return None
+    try:
+        return datetime.fromtimestamp(ms / 1000, tz=timezone.utc).isoformat().replace("+00:00", "Z")
+    except OSError:
+        return None
+
+
+def prune_none(value: dict[str, Any]) -> dict[str, Any]:
+    return {key: item for key, item in value.items() if item is not None}
 
 
 def discover_codex_sidebar_sessions() -> dict[str, Any]:
@@ -1657,24 +1754,11 @@ def release_linear_issue(
                 if not pair:
                     continue
                 provider, session_id = pair
-                completed = subprocess.run(
-                    [
-                        sys.executable,
-                        str(AGENTS_CLI),
-                        "archive",
-                        "--provider",
-                        provider,
-                        "--id",
-                        session_id,
-                    ],
-                    text=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                )
-                if completed.returncode == 0:
+                archived_session, message = archive_provider_session(provider, session_id)
+                if archived_session:
                     archived.append(label)
                 else:
-                    print(f"WARN: could not archive {label}: {(completed.stderr or completed.stdout).strip()}")
+                    print(f"WARN: could not archive {label}: {message}")
         if comment:
             body = [
                 f"Released session binding for `{issue_id}`.",
@@ -1693,6 +1777,85 @@ def release_linear_issue(
         return 1
     print(f"Released {issue_id}; removed {len(labels)} session label(s).")
     return 0
+
+
+def archive_provider_session(provider: str, session_id: str) -> tuple[bool, str]:
+    if provider == "claude":
+        return (
+            False,
+            archive_result_json(
+                provider,
+                "claude_archive_unsupported",
+                "Claude CLI exposes stop/rm, but no non-destructive archive matching cockpit semantics.",
+            ),
+        )
+    if provider == "opencode":
+        return (
+            False,
+            archive_result_json(
+                provider,
+                "opencode_archive_unsupported",
+                "opencode session delete is destructive. Use cockpit-level state tracking instead.",
+            ),
+        )
+    if provider == "cursor":
+        return (
+            False,
+            archive_result_json(
+                provider,
+                "cursor_archive_unsupported",
+                "Cursor agent CLI does not support archiving sessions.",
+            ),
+        )
+    if provider != "codex":
+        return False, archive_result_json(provider, "unknown_provider", f"unknown provider: {provider}")
+
+    completed = subprocess.run(
+        ["codex", "archive", session_id],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if completed.returncode == 0:
+        return True, ""
+    message = (completed.stderr or completed.stdout or f"Native command exited {completed.returncode}.").strip()
+    return (
+        False,
+        json.dumps(
+            {
+                "data": {
+                    "archived": False,
+                    "exit_code": completed.returncode,
+                    "id": session_id,
+                    "stderr": completed.stderr,
+                    "stdout": completed.stdout,
+                },
+                "debug": {"native_action": ["codex", "archive", session_id]},
+                "error": {"code": "native_command_failed", "message": message},
+                "ok": False,
+                "provider": "codex",
+                "verb": "archive",
+                "warnings": [],
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+    )
+
+
+def archive_result_json(provider: str, code: str, message: str) -> str:
+    return json.dumps(
+        {
+            "data": {},
+            "error": {"code": code, "message": message},
+            "ok": False,
+            "provider": provider,
+            "verb": "archive",
+            "warnings": [],
+        },
+        indent=2,
+        sort_keys=True,
+    )
 
 
 def audit_linear_bindings(limit: int = 250) -> int:
@@ -1827,7 +1990,9 @@ def resume_command(session: dict[str, Any]) -> str:
         return f"codex exec resume {session_id}"
     if provider == "claude":
         return f"claude --resume {session_id} -p '<plain evidence + exact ask>'"
-    return f"/Users/burooj/Projects/skills/cockpit/scripts/agents.py resume --provider {provider} --id {session_id}"
+    if provider == "opencode":
+        return f'opencode run --format json --session {session_id} "<prompt>"'
+    return f"{provider} resume {session_id}"
 
 
 def project_bucket_order() -> list[tuple[str, str]]:
