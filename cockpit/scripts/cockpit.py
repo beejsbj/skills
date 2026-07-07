@@ -867,7 +867,53 @@ def print_linear_issue_group(status: str, rows: list[dict[str, Any]]) -> None:
         print(f"- {issue_identifier(issue)}{project_part}: {compact(issue_title(issue), 100)}{binding}")
 
 
-def print_linear_issue(issue_id: str, *, full: bool = False) -> int:
+def comment_context_label(comment: dict[str, Any]) -> str:
+    body = comment_body(comment)
+    if COCKPIT_THREAD_MARKER in body:
+        return "Cockpit Thread"
+    if QUESTIONS_THREAD_MARKER in body:
+        return "Questions Thread"
+    if is_run_receipt(comment):
+        return "run receipt"
+    if comment_is_cockpit_authored(comment):
+        return "cockpit"
+    if comment_is_burooj_authored(comment):
+        return "Burooj"
+    return "comment"
+
+
+def comment_body_hint(comment: dict[str, Any], *, limit: int = 220) -> str:
+    lines = []
+    for raw_line in comment_body(comment).splitlines():
+        line = raw_line.strip()
+        if not line or line in {COCKPIT_THREAD_MARKER, QUESTIONS_THREAD_MARKER}:
+            continue
+        if line in {"## Cockpit Thread", "## Questions"}:
+            continue
+        lines.append(line)
+    return compact(" ".join(lines), limit)
+
+
+def print_parent_context(
+    comment: dict[str, Any],
+    by_id: dict[str, dict[str, Any]],
+    *,
+    indent: str = "  ",
+) -> None:
+    parent_id = comment.get("parentId")
+    if not parent_id:
+        return
+    parent = by_id.get(parent_id)
+    if parent is None:
+        print(f"{indent}parent: {parent_id} (not loaded)")
+        return
+    label = comment_context_label(parent)
+    hint = comment_body_hint(parent)
+    suffix = f" - {hint}" if hint else ""
+    print(f"{indent}parent: {label} {parent_id}{suffix}")
+
+
+def print_linear_issue(issue_id: str, *, full: bool = False, show_cockpit: bool = False) -> int:
     try:
         issue = load_linear_issue(issue_id)
     except Exception as exc:
@@ -914,8 +960,25 @@ def print_linear_issue(issue_id: str, *, full: bool = False) -> int:
         for comment in burooj_comments:
             comment_id = str(comment.get("id") or "unknown")
             print(f"\n{comment_id}")
+            print_parent_context(comment, by_id)
             print(f"  body: {compact(comment_body(comment), 400)}")
             print(f"  resolve: ./cockpit.py comment-resolve {comment_id}")
+    if show_cockpit:
+        cockpit_comments = [
+            c
+            for c in comments
+            if unresolved_comment(c)
+            and (comment_is_cockpit_authored(c) or is_run_receipt(c))
+            and not comment_is_thread_root(c)
+        ]
+        if cockpit_comments:
+            print(f"\nCockpit comments/receipts: {len(cockpit_comments)}")
+            for comment in cockpit_comments:
+                comment_id = str(comment.get("id") or "unknown")
+                print(f"\n{comment_id}")
+                print_parent_context(comment, by_id)
+                print(f"  kind: {comment_context_label(comment)}")
+                print(f"  body: {compact(comment_body(comment), 500)}")
     return 0
 
 
@@ -1337,6 +1400,11 @@ def cockpit_comment_author_names() -> set[str]:
 def comment_body(comment: dict[str, Any]) -> str:
     value = comment.get("body") or comment.get("text") or comment.get("content")
     return str(value or "")
+
+
+def comment_is_thread_root(comment: dict[str, Any]) -> bool:
+    body = comment_body(comment)
+    return COCKPIT_THREAD_MARKER in body or QUESTIONS_THREAD_MARKER in body
 
 
 def comment_is_cockpit_authored(comment: dict[str, Any]) -> bool:
@@ -2521,6 +2589,11 @@ def main(argv: list[str] | None = None) -> int:
     issue_parser = sub.add_parser("issue", help="Show one Linear issue and its session binding.")
     issue_parser.add_argument("issue_id")
     issue_parser.add_argument("--full", action="store_true", help="Print the full untruncated description.")
+    issue_parser.add_argument(
+        "--show-cockpit",
+        action="store_true",
+        help="Also show unresolved cockpit-authored comments and run receipts.",
+    )
     inbox_parser = sub.add_parser(
         "inbox",
         help="List issues needing triage and Burooj's unresolved comment backlog.",
@@ -2618,7 +2691,7 @@ def main(argv: list[str] | None = None) -> int:
     if command == "board":
         return print_linear_board(limit=args.limit, project=args.project)
     if command == "issue":
-        return print_linear_issue(args.issue_id, full=args.full)
+        return print_linear_issue(args.issue_id, full=args.full, show_cockpit=args.show_cockpit)
     if command == "inbox":
         return print_inbox(limit=args.limit)
     if command == "prepare":
