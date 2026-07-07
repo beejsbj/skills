@@ -1,6 +1,6 @@
 ---
 name: linear
-description: Use when you need to understand or update Burooj's Linear board as configured: board ontology, lanes, labels, issue bodies, comments, dependencies, receipts, and the cockpit app-actor write path.
+description: "Use when you need to understand or update Burooj's Linear board as configured: board ontology, lanes, labels, issue bodies, comments, dependencies, receipts, and the cockpit app-actor write path."
 ---
 
 # Linear Board Discipline

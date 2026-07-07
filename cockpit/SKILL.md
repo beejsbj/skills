@@ -1,6 +1,6 @@
 ---
 name: cockpit
-description: Use when coordinating Burooj's cockpit — the manager-coworker layer over Linear: triaging the board, preparing native worker launches, binding Codex/Claude/opencode/Cursor sessions to Linear issues through session:* labels, handling issue comments, auditing local sessions, or updating cockpit's Linear-first orchestration rules.
+description: "Use when coordinating Burooj's cockpit — the manager-coworker layer over Linear: triaging the board, preparing native worker launches, binding Codex/Claude/opencode/Cursor sessions to Linear issues through session:* labels, handling issue comments, auditing local sessions, or updating cockpit's Linear-first orchestration rules."
 ---
 
 # Cockpit
@@ -51,18 +51,7 @@ Cockpit depends on the `linear` skill for board ontology, lane meanings, label t
 
 ## 3. Status lanes (9 + Canceled)
 
-| Lane | Meaning | Who acts next |
-|---|---|---|
-| `Inbox` | Intake. Everything new or unclarified. | Cockpit + you (triage) |
-| `Needs-info` | Context gathering. Bounded; does not linger. An agent digs or you supply a fact. | Agent or you |
-| `Grilling` | Deep shaping — clarify intent, sketch approach. Interactive, can linger. Session-ownable. | You + a grilling session |
-| `Ready for Burooj` | You are the next actor: a decision / approval / judgment / physical action. | You |
-| `Ready for agent` | Cold-launchable. A worker can start from the issue body. | Cockpit prepares, native orchestration launches |
-| `Blocked` | Waiting on a real external dependency. NOT "needs investigation" — that is `Needs-info`. | Blocker resolves |
-| `In Progress` | A worker session is bound and executing. Exactly one `session:*` label. Local commits are not completion evidence. | Worker |
-| `In Review` | A review artifact exists: normally a draft/ready PR for git implementation work, or another explicit review artifact named in the issue. | You / reviewer |
-| `Done` | Accepted closure: PR/review artifact merged or accepted, or Burooj explicitly accepts closure without review. No `session:*` label. Final receipt left. | — |
-| `Canceled` | Dead idea (Linear-native). | — |
+Lane names, meanings, and invariants live in the `linear` skill's lane table — read it there; this file does not carry a second copy (it drifted once already). Cockpit's own layer on top is *who acts next* and *how work moves*: the shaping pipeline, routing decisions, and artifact-gated lifecycle below.
 
 ### Shaping pipeline
 
@@ -143,6 +132,7 @@ A scheduled scout session (codex automation) runs this same pass and ends with a
 ./cockpit.py status
 ./cockpit.py board
 ./cockpit.py issue BJS-X
+./cockpit.py issue BJS-X --show-cockpit   # include cockpit-authored comments/receipts
 
 # Triage / inbox
 ./cockpit.py inbox

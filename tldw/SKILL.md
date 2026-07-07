@@ -1,3 +1,8 @@
+---
+name: tldw
+description: "Summarize YouTube videos from a URL: fetch the transcript and produce a too-long-didn't-watch summary. Use when asked to tldw, summarize, or extract key points from a YouTube video or playlist."
+---
+
 # tldw - YouTube Video Summarizer
 
 **too long; didn't watch**
