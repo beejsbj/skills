@@ -142,6 +142,7 @@ A scheduled scout session (codex automation) runs this same pass and ends with a
 ./cockpit.py bind BJS-X codex <session-id>
 ./cockpit.py bind BJS-X session:claude:<session-id>
 ./cockpit.py release BJS-X
+./cockpit.py label BJS-X --add executor:standard --remove type:seed   # non-session labels only
 ./cockpit.py move BJS-X "In Review"
 ./cockpit.py move BJS-X Done
 

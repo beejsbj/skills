@@ -1995,6 +1995,7 @@ def audit_linear_bindings(limit: int = 250) -> int:
 
     inactive_with_session: list[dict[str, Any]] = []
     in_progress_unbound: list[dict[str, Any]] = []
+    ready_missing_executor: list[dict[str, Any]] = []
     multi_bound: list[dict[str, Any]] = []
     done_bound: list[dict[str, Any]] = []
     by_label: dict[str, list[str]] = {}
@@ -2014,6 +2015,10 @@ def audit_linear_bindings(limit: int = 250) -> int:
             multi_bound.append(issue)
         if issue_is_in_progress(issue) and not labels:
             in_progress_unbound.append(issue)
+        if issue_status_name(issue) == "Ready for agent" and not any(
+            label.startswith("executor:") for label in issue_labels(issue)
+        ):
+            ready_missing_executor.append(issue)
         if issue_is_in_progress(issue) and labels and issue_is_pr_work(issue):
             root_checkout_sessions.extend(root_checkout_session_findings(issue, labels, sessions_by_key))
 
@@ -2025,8 +2030,10 @@ def audit_linear_bindings(limit: int = 250) -> int:
     print(f"- issues with multiple session labels: {len(multi_bound)}")
     print(f"- duplicate session labels across issues: {len(duplicate_labels)}")
     print(f"- Codex implementation sessions in root checkouts: {len(root_checkout_sessions)}")
+    print(f"- Ready for agent without executor:* label: {len(ready_missing_executor)}")
 
     print_audit_bucket("Inactive with session", inactive_with_session)
+    print_audit_bucket("Ready for agent without executor label", ready_missing_executor)
     print_audit_bucket("In Progress without session", in_progress_unbound)
     print_audit_bucket("Multiple session labels", multi_bound)
     print_root_checkout_session_bucket(root_checkout_sessions)
@@ -2639,6 +2646,10 @@ def main(argv: list[str] | None = None) -> int:
     move_parser.add_argument("issue_id")
     move_parser.add_argument("state_name")
     move_parser.add_argument("--no-comment", action="store_true", help="Do not add a state-move comment.")
+    label_parser = sub.add_parser("label", help="Add or remove issue labels as the Cockpit app actor.")
+    label_parser.add_argument("issue_id")
+    label_parser.add_argument("--add", action="append", default=[], help="Label to add (repeatable).")
+    label_parser.add_argument("--remove", action="append", default=[], help="Label to remove (repeatable).")
     create_parser = sub.add_parser("create", help="Create a Linear issue as the Cockpit app actor.")
     create_parser.add_argument("--title", required=True)
     create_parser.add_argument("--project", help="Linear project name.")
@@ -2723,6 +2734,25 @@ def main(argv: list[str] | None = None) -> int:
             args.state_name,
             comment=not args.no_comment,
         )
+    if command == "label":
+        if not args.add and not args.remove:
+            print("Nothing to do: pass --add and/or --remove.")
+            return 1
+        if any(SESSION_LABEL_RE.match(label) for label in args.add + args.remove):
+            print("Refusing to touch session:* labels here; use bind/release.")
+            return 1
+        try:
+            for label in args.add:
+                add_issue_label_with_app_actor(args.issue_id, label)
+                print(f"Added {label} to {args.issue_id}.")
+            for label in args.remove:
+                remove_issue_label_with_app_actor(args.issue_id, label)
+                print(f"Removed {label} from {args.issue_id}.")
+        except Exception as exc:
+            print(f"Label update failed: {exc}")
+            print(linear_app_auth_hint())
+            return 1
+        return 0
     if command == "create":
         description = args.description
         if getattr(args, "description_file", None):
