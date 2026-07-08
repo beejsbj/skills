@@ -1164,37 +1164,64 @@ def workflow_state_id(status_name: str) -> str:
 
 
 def issue_label_id(label: str) -> str | None:
-    labels = linear_team_metadata().get("labels", {}).get("nodes")
+    data = run_linear_graphql(
+        """
+        query CockpitIssueLabelByName($name: String!) {
+          issueLabels(filter: { name: { eqIgnoreCase: $name } }, first: 50) {
+            nodes {
+              id
+              name
+              team { id key }
+            }
+          }
+        }
+        """,
+        {"name": label},
+    )
+    labels = data.get("issueLabels", {}).get("nodes") if isinstance(data, dict) else None
     if not isinstance(labels, list):
         return None
+    target = label.casefold()
     for item in labels:
-        if isinstance(item, dict) and item.get("name") == label:
+        if isinstance(item, dict) and str(item.get("name") or "").casefold() == target:
             label_id = item.get("id")
             return str(label_id) if label_id else None
     return None
+
+
+def is_duplicate_label_name_error(exc: RuntimeError) -> bool:
+    return "duplicate label name" in str(exc).casefold()
 
 
 def ensure_linear_label_with_app_actor(label: str) -> str:
     existing = issue_label_id(label)
     if existing:
         return existing
-    data = run_linear_graphql(
-        """
-        mutation CockpitIssueLabelCreate($input: IssueLabelCreateInput!) {
-          issueLabelCreate(input: $input) {
-            success
-            issueLabel { id name }
-          }
-        }
-        """,
-        {
-            "input": {
-                "name": label,
-                "color": "#5E6AD2",
-                "description": "Cockpit session binding label.",
+    try:
+        data = run_linear_graphql(
+            """
+            mutation CockpitIssueLabelCreate($input: IssueLabelCreateInput!) {
+              issueLabelCreate(input: $input) {
+                success
+                issueLabel { id name }
+              }
             }
-        },
-    )
+            """,
+            {
+                "input": {
+                    "name": label,
+                    "color": "#5E6AD2",
+                    "description": "Cockpit session binding label.",
+                }
+            },
+        )
+    except RuntimeError as exc:
+        if not is_duplicate_label_name_error(exc):
+            raise
+        existing = issue_label_id(label)
+        if existing:
+            return existing
+        raise
     result = data.get("issueLabelCreate") if isinstance(data, dict) else None
     created = result.get("issueLabel") if isinstance(result, dict) else None
     if not isinstance(result, dict) or not result.get("success") or not isinstance(created, dict):
