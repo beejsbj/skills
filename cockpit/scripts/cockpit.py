@@ -117,6 +117,10 @@ QUESTIONS_THREAD_ROOT_BODY = "\n".join(
 )
 
 
+class CockpitUsageError(RuntimeError):
+    """User-facing command error that does not need an auth hint."""
+
+
 def compact(text: str, limit: int = 180) -> str:
     one_line = re.sub(r"\s+", " ", text).strip()
     if len(one_line) <= limit:
@@ -1256,6 +1260,204 @@ def update_issue_with_app_actor(issue_id: str, input_payload: dict[str, Any]) ->
 
 def move_issue_with_app_actor(issue_id: str, status_name: str) -> None:
     update_issue_with_app_actor(issue_id, {"stateId": workflow_state_id(status_name)})
+
+
+def load_linear_projects() -> list[dict[str, Any]]:
+    projects: list[dict[str, Any]] = []
+    after: str | None = None
+    while True:
+        data = run_linear_graphql(
+            """
+            query CockpitProjects($first: Int!, $after: String) {
+              projects(first: $first, after: $after) {
+                nodes {
+                  id
+                  name
+                  status { id name type }
+                }
+                pageInfo { hasNextPage endCursor }
+              }
+            }
+            """,
+            {"first": 100, "after": after},
+        )
+        conn = data.get("projects") if isinstance(data, dict) else None
+        nodes = conn.get("nodes") if isinstance(conn, dict) else None
+        if not isinstance(nodes, list):
+            raise RuntimeError("Linear GraphQL returned no projects.")
+        projects.extend(node for node in nodes if isinstance(node, dict))
+        page_info = conn.get("pageInfo") if isinstance(conn, dict) else None
+        if not isinstance(page_info, dict) or not page_info.get("hasNextPage"):
+            return projects
+        after = page_info.get("endCursor")
+        if not after:
+            return projects
+
+
+def load_linear_project_by_id(project_id: str) -> dict[str, Any]:
+    data = run_linear_graphql(
+        """
+        query CockpitProject($id: String!) {
+          project(id: $id) {
+            id
+            name
+            status { id name type }
+          }
+        }
+        """,
+        {"id": project_id},
+    )
+    project = data.get("project") if isinstance(data, dict) else None
+    if not isinstance(project, dict):
+        raise CockpitUsageError(f"Linear project `{project_id}` not found.")
+    return project
+
+
+def resolve_linear_project(project_ref: str) -> dict[str, Any]:
+    ref = project_ref.strip()
+    if re.fullmatch(r"[0-9a-fA-F-]{36}", ref):
+        return load_linear_project_by_id(ref)
+
+    target = ref.casefold()
+    matches = [
+        project
+        for project in load_linear_projects()
+        if str(project.get("name") or "").strip().casefold() == target
+    ]
+    if not matches:
+        raise CockpitUsageError(f"Linear project `{project_ref}` not found.")
+    if len(matches) > 1:
+        choices = ", ".join(
+            f"{project.get('name') or '(unnamed)'} ({project.get('id')})"
+            for project in matches
+        )
+        raise CockpitUsageError(f"Linear project `{project_ref}` is ambiguous: {choices}")
+    return matches[0]
+
+
+def linear_project_statuses() -> list[dict[str, Any]]:
+    data = run_linear_graphql(
+        """
+        query CockpitProjectStatuses {
+          projectStatuses(first: 250) {
+            nodes { id name type position }
+          }
+        }
+        """,
+        {},
+    )
+    statuses = data.get("projectStatuses", {}).get("nodes") if isinstance(data, dict) else None
+    if not isinstance(statuses, list):
+        raise RuntimeError("Linear GraphQL returned no project statuses.")
+    return sorted(
+        (status for status in statuses if isinstance(status, dict)),
+        key=lambda item: item.get("position") if isinstance(item.get("position"), int) else 999,
+    )
+
+
+def project_status_by_name(status_name: str) -> dict[str, Any]:
+    statuses = linear_project_statuses()
+    target = status_name.strip().casefold()
+    matches = [
+        status
+        for status in statuses
+        if str(status.get("name") or "").strip().casefold() == target
+    ]
+    if not matches:
+        valid = ", ".join(str(status.get("name")) for status in statuses if status.get("name"))
+        raise CockpitUsageError(
+            f"Linear project status `{status_name}` not found. Valid states: {valid}."
+        )
+    if len(matches) > 1:
+        choices = ", ".join(
+            f"{status.get('name') or '(unnamed)'} ({status.get('id')})"
+            for status in matches
+        )
+        raise CockpitUsageError(f"Linear project status `{status_name}` is ambiguous: {choices}")
+    return matches[0]
+
+
+def update_project_with_app_actor(project_id: str, input_payload: dict[str, Any]) -> dict[str, Any]:
+    data = run_linear_graphql(
+        """
+        mutation CockpitProjectUpdate($id: String!, $input: ProjectUpdateInput!) {
+          projectUpdate(id: $id, input: $input) {
+            success
+            project {
+              id
+              name
+              status { id name type }
+            }
+          }
+        }
+        """,
+        {"id": project_id, "input": input_payload},
+    )
+    result = data.get("projectUpdate") if isinstance(data, dict) else None
+    project = result.get("project") if isinstance(result, dict) else None
+    if not isinstance(result, dict) or not result.get("success") or not isinstance(project, dict):
+        raise RuntimeError(f"Linear projectUpdate did not succeed: {result}")
+    return project
+
+
+def move_project_with_app_actor(project_ref: str, status_name: str) -> dict[str, Any]:
+    project = resolve_linear_project(project_ref)
+    status = project_status_by_name(status_name)
+    status_id = status.get("id")
+    if not status_id:
+        raise RuntimeError(f"Linear project status `{status_name}` has no id.")
+    return update_project_with_app_actor(str(project["id"]), {"statusId": str(status_id)})
+
+
+def load_project_issues(project_id: str) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    after: str | None = None
+    while True:
+        data = run_linear_graphql(
+            """
+            query CockpitProjectIssues($id: String!, $first: Int!, $after: String) {
+              project(id: $id) {
+                issues(first: $first, after: $after) {
+                  nodes {
+                    id
+                    identifier
+                    title
+                    state { id name type }
+                  }
+                  pageInfo { hasNextPage endCursor }
+                }
+              }
+            }
+            """,
+            {"id": project_id, "first": 100, "after": after},
+        )
+        project = data.get("project") if isinstance(data, dict) else None
+        conn = project.get("issues") if isinstance(project, dict) else None
+        nodes = conn.get("nodes") if isinstance(conn, dict) else None
+        if not isinstance(nodes, list):
+            raise RuntimeError(f"Linear GraphQL returned no issues for project {project_id}.")
+        issues.extend(issue for issue in nodes if isinstance(issue, dict))
+        page_info = conn.get("pageInfo") if isinstance(conn, dict) else None
+        if not isinstance(page_info, dict) or not page_info.get("hasNextPage"):
+            return issues
+        after = page_info.get("endCursor")
+        if not after:
+            return issues
+
+
+def project_open_issues(project_id: str) -> list[dict[str, Any]]:
+    return [issue for issue in load_project_issues(project_id) if not issue_is_doneish(issue)]
+
+
+def project_open_issues_note(issues: list[dict[str, Any]]) -> str:
+    identifiers = [issue_identifier(issue) for issue in issues]
+    shown = identifiers[:5]
+    suffix = f", +{len(identifiers) - len(shown)} more" if len(identifiers) > len(shown) else ""
+    issue_word = "issue remains" if len(issues) == 1 else "issues remain"
+    return (
+        f"note: {len(issues)} open {issue_word} in this project "
+        f"({', '.join(shown)}{suffix})"
+    )
 
 
 def project_id_by_name(name: str) -> str:
@@ -2612,6 +2814,24 @@ def move_issue_command(issue_id: str, state_name: str, *, comment: bool = True) 
     return 0
 
 
+def move_project_command(project_ref: str, state_name: str) -> int:
+    try:
+        moved = move_project_with_app_actor(project_ref, state_name)
+        status = moved.get("status") if isinstance(moved.get("status"), dict) else {}
+        open_issues = project_open_issues(str(moved["id"]))
+    except CockpitUsageError as exc:
+        print(f"Project move failed: {exc}")
+        return 1
+    except Exception as exc:
+        print(f"Project move failed: {exc}")
+        print(linear_app_auth_hint())
+        return 1
+    print(f"Moved project {moved.get('name')} -> {status.get('name') or state_name}")
+    if open_issues:
+        print(project_open_issues_note(open_issues))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Cockpit Linear board and local session audit.")
     sub = parser.add_subparsers(dest="command")
@@ -2673,6 +2893,9 @@ def main(argv: list[str] | None = None) -> int:
     move_parser.add_argument("issue_id")
     move_parser.add_argument("state_name")
     move_parser.add_argument("--no-comment", action="store_true", help="Do not add a state-move comment.")
+    project_move_parser = sub.add_parser("project-move", help="Move a Linear project to a project status.")
+    project_move_parser.add_argument("project")
+    project_move_parser.add_argument("state_name")
     label_parser = sub.add_parser("label", help="Add or remove issue labels as the Cockpit app actor.")
     label_parser.add_argument("issue_id")
     label_parser.add_argument("--add", action="append", default=[], help="Label to add (repeatable).")
@@ -2761,6 +2984,8 @@ def main(argv: list[str] | None = None) -> int:
             args.state_name,
             comment=not args.no_comment,
         )
+    if command == "project-move":
+        return move_project_command(args.project, args.state_name)
     if command == "label":
         if not args.add and not args.remove:
             print("Nothing to do: pass --add and/or --remove.")

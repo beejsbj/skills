@@ -145,6 +145,7 @@ A scheduled scout session (codex automation) runs this same pass and ends with a
 ./cockpit.py label BJS-X --add executor:standard --remove type:seed   # non-session labels only
 ./cockpit.py move BJS-X "In Review"
 ./cockpit.py move BJS-X Done
+./cockpit.py project-move chat-scrobbler Completed
 
 # Comments
 ./cockpit.py comment BJS-X "text"
