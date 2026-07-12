@@ -6,6 +6,25 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 ---
 
+## Access points
+
+This repository is the canonical source for Burooj-owned and deliberately adopted skills. Agent-specific skill directories are access points, not independent sources of truth.
+
+- **Claude Code and Codex on macOS:** repo-owned skill folders are linked into `~/.claude/skills/` and `~/.codex/skills/` as described in `AGENTS.md`.
+- **Hermes profiles:** clone this repository on the machine, then add the checkout as an external skill directory in that profile's `config.yaml`:
+
+  ```yaml
+  skills:
+    external_dirs:
+      - /absolute/path/to/skills
+  ```
+
+  Hermes then exposes the repo-owned skills through its skill index and `/skill-name` commands. Local Hermes skills still take precedence when a name collides.
+
+Bundled skills maintained by an agent framework remain upstream-owned. Add a skill here when Burooj authored it, adapted it, or deliberately wants this repository to preserve the chosen version.
+
+---
+
 ## What's in here
 
 **`souls/prime/`** — my global agent "soul and discipline" file (`soul.md`), plus a README explaining the decisions behind its construction. `soul.md` is symlinked as `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` so every session inherits it. Agents are steered away from editing `souls/` directly — it changes only when I deliberately change it.
