@@ -1,0 +1,21 @@
+{
+  "schema": "gramps-family-investigation-coverage.v2",
+  "updated_at": "YYYY-MM-DDTHH:MM:SS±HH:MM",
+  "active_targets": [
+    {
+      "target_id": "person-or-branch-id",
+      "label": "Human-readable label",
+      "type": "person|family_cluster|branch|place|mystery",
+      "status": "active|dormant",
+      "tracks": {
+        "skeleton_tree": "not_started",
+        "interview_sources": "not_started",
+        "evidence_intake": "not_started",
+        "identity_resolution": "not_started",
+        "place_timeline": "not_started",
+        "branch_campaigns": "not_started",
+        "cleanup_audit": "not_started"
+      }
+    }
+  ]
+}

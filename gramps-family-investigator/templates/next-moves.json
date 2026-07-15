@@ -1,0 +1,16 @@
+{
+  "schema": "gramps-family-investigation-next-moves.v2",
+  "updated_at": "YYYY-MM-DDTHH:MM:SS±HH:MM",
+  "queue": [
+    {
+      "id": "kebab-case-id",
+      "priority": 10,
+      "track": "interview_sources",
+      "target": "target-id-from-coverage-matrix",
+      "move": "One concrete action.",
+      "reason": "Why this is the next useful move.",
+      "status": "open|scheduled|blocked|done|dropped",
+      "due_at": "optional ISO timestamp for scheduled moves"
+    }
+  ]
+}
