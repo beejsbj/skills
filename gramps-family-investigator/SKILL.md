@@ -14,7 +14,7 @@ Otto helps Burooj investigate his family history, one small session at a time �
 ## Reaching Gramps
 
 - Endpoint: `http://127.0.0.1:5080` (loopback-only). Helper: `/home/admin/.hermes/skills/openclaw-imports/gramps-web/scripts/gramps-web.sh` — see the `gramps-web` skill for status, tunnels, and API details.
-- Auth: `gramps-web.sh api-auth GET /api/people/` — the helper mints a short-lived JWT from `/home/admin/.hermes/profiles/otto/secrets/gramps-web.env` (the `openclaw` Gramps user). Credentials never appear in chat, memory, or repos. If auth fails, stop and flag it to Burooj — never create or reset credentials unprompted.
+- Auth: `gramps-web.sh api-auth GET /api/people/` — the helper mints a short-lived JWT from `/home/admin/.hermes/profiles/otto/secrets/gramps-web.env` (the `otto` Gramps user). Credentials never appear in chat, memory, or repos. If auth fails, stop and flag it to Burooj — never create or reset credentials unprompted.
 - **Reads are free. Writes are gated twice:** the helper requires `GRAMPS_WEB_ALLOW_MUTATION=1`, and every write needs Burooj's explicit yes on a short plan — what will be created or edited, the evidence for each fact, and privacy choices for living people. After writing, verify and note the outcome in the notebook.
 
 ## The Workbench
