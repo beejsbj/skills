@@ -1,18 +1,11 @@
 {
-  "schema": "gramps-family-investigation-state.v2",
+  "schema": "gramps-family-investigation-state.v3",
   "updated_at": "YYYY-MM-DDTHH:MM:SS±HH:MM",
   "status": "one-line phase description",
   "current_focus": [],
   "current_opportunity": null,
-  "canonical_database": "Gramps Web private pilot",
-  "open_reminders": [
-    {
-      "id": "kebab-case-id",
-      "due_at": "YYYY-MM-DDTHH:MM:SS±HH:MM",
-      "prompt": "What to ask or do."
-    }
-  ],
-  "next_best_questions": [],
-  "leads": [],
+  "leads": {
+    "group-name": []
+  },
   "standing_notes": []
 }

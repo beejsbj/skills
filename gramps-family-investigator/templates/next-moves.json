@@ -1,11 +1,11 @@
 {
-  "schema": "gramps-family-investigation-next-moves.v2",
+  "schema": "gramps-family-investigation-next-moves.v3",
   "updated_at": "YYYY-MM-DDTHH:MM:SS±HH:MM",
   "queue": [
     {
       "id": "kebab-case-id",
       "priority": 10,
-      "track": "interview_sources",
+      "track": "skeleton|interviews|evidence|places_stories",
       "target": "target-id-from-coverage-matrix",
       "move": "One concrete action.",
       "reason": "Why this is the next useful move.",
