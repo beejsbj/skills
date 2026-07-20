@@ -178,6 +178,8 @@ Cockpit prepares deterministic launch context; the active environment orchestrat
 
 The launch brief should tell the worker to adopt the issue's Done-when as its native goal condition (`/goal` in both Claude Code and Codex), so completion is judged by the issue's own condition rather than the worker's judgment. A `Ready for agent` issue whose Done-when cannot serve as a goal condition is not actually ready — route it back through shaping.
 
+Route on the issue's `site:*` label before picking a launch surface: `site:cloud` may go to a native agent cloud (single-provider only) or any sandbox; `site:bjslab` launches headless on bjslab; `site:macbook` launches locally on the Mac; `site:multi` needs a plan naming both devices. An issue entering `Ready for agent` without a `site:*` label gets one during preparation using the criteria in the `linear` skill.
+
 Launch on the issue's `executor:*` class, defaulting to the smallest sufficient model from the `acpx` skill's `profiles.json` (which holds the launch recipes). This is the payoff of the readiness bar, not a separate planning step: a smart model already distilled the issue into a `/goal` at preparation time, so a cheaper model can now execute it cold. After launch, `bind` the session; when the worker reports done, review the diff against the issue before `In Review` (`two-axis-review` for repo diffs) — the worker's "done" is a claim, the review is the evidence — then leave the receipt.
 
 For Codex Desktop implementation work in a git repo:

@@ -96,14 +96,16 @@ Labels encode metadata, never workflow position.
 | `site:*` | Minimum execution site the work requires | `cloud`, `bjslab`, `macbook`, `multi` — see below |
 | `session:<provider>:<id>` | Active session binding | Live issues only; remove on `Done`/`Canceled` |
 
-`site:*` encodes *where the work can physically run*, as a capability ladder — label the **minimum** site required, not every site that would work:
+`site:*` encodes *where the work can physically run*, as a capability ladder — label the **minimum** site required, not every site that would work. One `site:*` label per issue; absent means site-untriaged. Anything `site:cloud` is by definition phone-driveable, so there is no separate `site:phone` label.
 
-- `site:cloud` — fully portable: any cloud/rented agent environment can run it; driveable from the phone. No local data, hardware, or head needed.
-- `site:bjslab` — needs Burooj's infra (local network, data, services on bjslab) but is headless-fine.
-- `site:macbook` — needs the head: GUI, HITL, physical hardware, keychain/accounts, or Burooj's taste live at the machine.
-- `site:multi` — genuinely spans devices (e.g. coordinated work across bjslab and the MacBook).
+Labeling criteria — walk the ladder top-down and stop at the first "yes":
 
-One `site:*` label per issue. Absent means site-untriaged. Anything `site:cloud` is by definition phone-driveable, so there is no separate `site:phone` label.
+1. **`site:multi`** — does the work *itself* coordinate across devices (e.g. a sync protocol tested between bjslab and the MacBook, a launchd job on one talking to a service on the other)? Rare; needing "the repo plus a server" is not multi — that's wherever both can be reached from.
+2. **`site:macbook`** — does it need the head or the Mac's body: GUI apps, screenshots/computer-use, HITL alongside Burooj, physical hardware (mic, display, USB), macOS keychain secrets, launchd, or accounts that only live on the Mac?
+3. **`site:bjslab`** — does it need Burooj's infra without a head: services or data hosted on bjslab, the home network, long-running daemons, or heavy/local compute that shouldn't ride the laptop?
+4. **`site:cloud`** — none of the above: repo + tokens is enough. Code changes, research, writing, and anything a fresh sandbox clone can do land here. Native agent clouds (Claude Code web, Codex cloud) are valid `site:cloud` targets, with one caveat: each is single-provider — a Claude cloud session cannot drive Codex or vice versa — so an issue that *requires* cross-provider work needs a real box (bjslab or a rented VM), even if otherwise portable.
+
+Site labels are **claims about requirements, not history**. The board was built on the MacBook, so "it has always been done on the Mac" is not evidence for `site:macbook` — most repo work is movable. When in doubt between two rungs, take the more portable one (lower rung) and let execution prove otherwise.
 
 `formation:*`, `mode:*`, `agent:*`, and `workflow:*` labels are **removed** (mode/agent encoded dispatch-era routing that lanes now carry; `workflow:issue-pr` was an opaque, unused training rail) — do not read, write, or reference them. Use `type:*` instead of Linear's default `Feature`/`Improvement`/`Bug` labels.
 
