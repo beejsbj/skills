@@ -93,7 +93,17 @@ Labels encode metadata, never workflow position.
 |---|---|---|
 | `type:*` | Work kind | `bug`, `feature`, `improvement`, `cleanup`, `research`, `chore`, `seed`, `grilling`, `context`, `one-off`, `polish` |
 | `executor:*` | Smallest model class the brief is written for | `frontier` (opus/fable judgment), `standard` (gpt-5.5/sonnet/glm/minimax implementation), `small` (haiku/flash bulk work) |
+| `site:*` | Minimum execution site the work requires | `cloud`, `bjslab`, `macbook`, `multi` — see below |
 | `session:<provider>:<id>` | Active session binding | Live issues only; remove on `Done`/`Canceled` |
+
+`site:*` encodes *where the work can physically run*, as a capability ladder — label the **minimum** site required, not every site that would work:
+
+- `site:cloud` — fully portable: any cloud/rented agent environment can run it; driveable from the phone. No local data, hardware, or head needed.
+- `site:bjslab` — needs Burooj's infra (local network, data, services on bjslab) but is headless-fine.
+- `site:macbook` — needs the head: GUI, HITL, physical hardware, keychain/accounts, or Burooj's taste live at the machine.
+- `site:multi` — genuinely spans devices (e.g. coordinated work across bjslab and the MacBook).
+
+One `site:*` label per issue. Absent means site-untriaged. Anything `site:cloud` is by definition phone-driveable, so there is no separate `site:phone` label.
 
 `formation:*`, `mode:*`, `agent:*`, and `workflow:*` labels are **removed** (mode/agent encoded dispatch-era routing that lanes now carry; `workflow:issue-pr` was an opaque, unused training rail) — do not read, write, or reference them. Use `type:*` instead of Linear's default `Feature`/`Improvement`/`Bug` labels.
 
