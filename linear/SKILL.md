@@ -92,7 +92,7 @@ Labels encode metadata, never workflow position.
 | Prefix | Purpose | Notes |
 |---|---|---|
 | `type:*` | Work kind | `bug`, `feature`, `improvement`, `cleanup`, `research`, `chore`, `seed`, `grilling`, `context`, `one-off`, `polish` |
-| `executor:*` | Smallest model class the brief is written for | `frontier` (opus/fable judgment), `standard` (gpt-5.5/sonnet/glm/minimax implementation), `small` (haiku/flash bulk work) |
+| `executor:*` | Smallest model class the brief is written for | `frontier` (Sol/opus/fable judgment or hard execution), `standard` (Terra/gpt-5.5/sonnet/glm/minimax implementation), `small` (Luna/haiku/flash bulk work) |
 | `site:*` | Minimum execution site the work requires | `cloud`, `bjslab`, `macbook`, `multi` — see below |
 | `session:<provider>:<id>` | Active session binding | Live issues only; remove on `Done`/`Canceled` |
 
@@ -103,7 +103,7 @@ Labeling criteria — walk the ladder top-down and stop at the first "yes":
 1. **`site:multi`** — does the work *itself* coordinate across devices (e.g. a sync protocol tested between bjslab and the MacBook, a launchd job on one talking to a service on the other)? Rare; needing "the repo plus a server" is not multi — that's wherever both can be reached from.
 2. **`site:macbook`** — does it need the head or the Mac's body: GUI apps, screenshots/computer-use, HITL alongside Burooj, physical hardware (mic, display, USB), macOS keychain secrets, launchd, or accounts that only live on the Mac?
 3. **`site:bjslab`** — does it need Burooj's infra without a head: services or data hosted on bjslab, the home network, long-running daemons, or heavy/local compute that shouldn't ride the laptop?
-4. **`site:cloud`** — none of the above: repo + tokens is enough. Code changes, research, writing, and anything a fresh sandbox clone can do land here. Native agent clouds (Claude Code web, Codex cloud) are valid `site:cloud` targets, with one caveat: each is single-provider — a Claude cloud session cannot drive Codex or vice versa — so an issue that *requires* cross-provider work needs a real box (bjslab or a rented VM), even if otherwise portable.
+4. **`site:cloud`** — none of the above: repo + tokens is enough. Code changes, research, writing, and anything a fresh sandbox clone can do land here. Native agent clouds (Claude Code web, Codex cloud) are valid single-provider targets. A provider-neutral sandbox such as Fly.io Sprites is the cloud target when the work needs multiple provider CLIs, durable Linux state, or isolation from bjslab's live services. The label still records the requirement, not the chosen vendor; cockpit chooses the concrete target at dispatch time.
 
 Site labels are **claims about requirements, not history**. The board was built on the MacBook, so "it has always been done on the Mac" is not evidence for `site:macbook` — most repo work is movable. When in doubt between two rungs, take the more portable one (lower rung) and let execution prove otherwise.
 

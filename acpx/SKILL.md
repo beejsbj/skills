@@ -11,7 +11,9 @@ Use this skill when you need to run coding agents through `acpx`, manage persist
 
 ## Model taste (local)
 
-`profiles.json` beside this skill is Burooj's model roster: per provider/model, what it is good for, what to avoid, default effort. Standing rule: premium tokens buy judgment — brief-writing, review, taste (opus/fable class); execution goes to the smallest sufficient class — gpt-5.5 / sonnet / glm-5.2 / minimax-m3 for implementation, deepseek-flash class for bulk extraction. Issues carry an `executor:*` label naming the class their brief is written for (see the `linear` skill).
+`profiles.json` beside this skill is Burooj's model roster: per provider/model, executor class, what it is good for, what to avoid, default effort, and cost metadata. Exact token prices are included only when the provider or access route publishes a stable rate; moving aliases and subscription products use relative cost plus an access note instead of false precision. Check each record's `checked` date and source before making a material spending decision.
+
+Standing rule: use the smallest sufficient class. In the roster, `provider: chatgpt` names the provider; execution surfaces are chosen separately and may be Codex CLI, OpenCode CLI, Hermes, or another compatible harness. GPT-5.6 Sol is a frontier workhorse for judgment plus hard execution, but its autonomy needs strong success criteria, boundaries, validation, and stopping conditions. Terra is the balanced standard worker; Luna is the small/high-volume lane. GPT-5.5 stays as the proven incumbent and compatibility fallback — not as a cheaper Sol, because their current standard short-context API prices match. Claude Fable is the very-premium, long-horizon frontier lane; reserve it for ambitious work that benefits from sustained autonomy and can accept its retention policy. Issues carry an `executor:*` label naming the class their brief is written for (see the `linear` skill).
 
 This Mac: the default node is v16 (too old) — invoke as `bunx --bun acpx …`, global flags **before** the agent subcommand.
 
@@ -24,7 +26,7 @@ opencode has **no acpx adapter** — reach opencode-go models with the native CL
 To run a `Ready for agent` issue on its executor class (the issue already carries the `/goal`-grade runbook; see the `linear` skill), pick the smallest sufficient model from `profiles.json` and launch:
 
 - acpx (claude/gemini): `bunx --bun acpx --approve-all --cwd <project-root> -s bjs-<n> claude --model sonnet "<runbook>"`. For codex over acpx, prefix `CODEX_PATH=/opt/homebrew/bin/codex`.
-- codex, native (simplest, proven — write the runbook to a file first): `codex exec -C <project-root> -m gpt-5.5 -s workspace-write "$(cat runbook.md)" < /dev/null`. The `< /dev/null` matters; without it codex exec can hang silently at startup. Its stdout header prints the session id — bind that.
+- codex, native (simplest, proven — choose Sol/Terra/Luna from `profiles.json` and write the runbook to a file first): `codex exec -C <project-root> -m gpt-5.6-terra -s workspace-write "$(cat runbook.md)" < /dev/null`. The `< /dev/null` matters; without it codex exec can hang silently at startup. Its stdout header prints the session id — bind that.
 - opencode, native: `opencode run --format json --dir <project-root> --model opencode-go/glm-5.2 "<runbook>"`.
 
 The prompt should tell the worker to adopt the issue's Done-when as its `/goal` and follow the `implement` skill. To bind the launched session to its issue, identify the session id from the launcher's own header (codex prints it) — or, if you must grep the provider's session store, match a phrase from your prompt in the session's own *user/prompt* record, not merely quoted in its transcript (scouts and workers grep each other's stores). Never trust newest-file mtime; parallel sessions make it lie. Then `./cockpit.py bind BJS-X session:<provider>:<id>` — cockpit owns everything after launch.
