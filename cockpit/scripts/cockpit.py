@@ -115,6 +115,27 @@ QUESTIONS_THREAD_ROOT_BODY = "\n".join(
         "Questions for Burooj. Each question is a reply here — reply to the specific question to answer it.",
     ]
 )
+FOR_BUROOJ_THREAD_MARKER = "<!-- cockpit-for-burooj-thread-root -->"
+FOR_BUROOJ_THREAD_ROOT_BODY = "\n".join(
+    [
+        "## For Burooj",
+        "",
+        FOR_BUROOJ_THREAD_MARKER,
+        "",
+        "Decision briefs for Burooj: the exact decision, minimum facts, options with a recommendation, "
+        "and a pointer to the receipt trail. Burooj reads and replies only here.",
+    ]
+)
+GRILLING_THREAD_MARKER = "<!-- cockpit-grilling-thread-root -->"
+GRILLING_THREAD_ROOT_BODY = "\n".join(
+    [
+        "## Grilling",
+        "",
+        GRILLING_THREAD_MARKER,
+        "",
+        "Interactive shaping dialogue with Burooj. Can span sessions; resolve once conclusions graduate into the issue body.",
+    ]
+)
 
 
 class CockpitUsageError(RuntimeError):
@@ -877,6 +898,10 @@ def comment_context_label(comment: dict[str, Any]) -> str:
         return "Cockpit Thread"
     if QUESTIONS_THREAD_MARKER in body:
         return "Questions Thread"
+    if FOR_BUROOJ_THREAD_MARKER in body:
+        return "For Burooj Thread"
+    if GRILLING_THREAD_MARKER in body:
+        return "Grilling Thread"
     if is_run_receipt(comment):
         return "run receipt"
     if comment_is_cockpit_authored(comment):
@@ -890,9 +915,14 @@ def comment_body_hint(comment: dict[str, Any], *, limit: int = 220) -> str:
     lines = []
     for raw_line in comment_body(comment).splitlines():
         line = raw_line.strip()
-        if not line or line in {COCKPIT_THREAD_MARKER, QUESTIONS_THREAD_MARKER}:
+        if not line or line in {
+            COCKPIT_THREAD_MARKER,
+            QUESTIONS_THREAD_MARKER,
+            FOR_BUROOJ_THREAD_MARKER,
+            GRILLING_THREAD_MARKER,
+        }:
             continue
-        if line in {"## Cockpit Thread", "## Questions"}:
+        if line in {"## Cockpit Thread", "## Questions", "## For Burooj", "## Grilling"}:
             continue
         lines.append(line)
     return compact(" ".join(lines), limit)
@@ -1633,7 +1663,12 @@ def comment_body(comment: dict[str, Any]) -> str:
 
 def comment_is_thread_root(comment: dict[str, Any]) -> bool:
     body = comment_body(comment)
-    return COCKPIT_THREAD_MARKER in body or QUESTIONS_THREAD_MARKER in body
+    return (
+        COCKPIT_THREAD_MARKER in body
+        or QUESTIONS_THREAD_MARKER in body
+        or FOR_BUROOJ_THREAD_MARKER in body
+        or GRILLING_THREAD_MARKER in body
+    )
 
 
 def comment_is_cockpit_authored(comment: dict[str, Any]) -> bool:
@@ -1723,6 +1758,94 @@ def add_question_to_issue(issue_id: str, question_body: str) -> dict[str, str]:
     )
 
 
+def for_burooj_thread_root_comment_id(issue_id: str) -> str | None:
+    """Return the id of the existing For Burooj top-level thread comment, or None."""
+    for comment in load_issue_comments(issue_id):
+        if comment.get("archivedAt") or comment.get("parentId"):
+            continue
+        if FOR_BUROOJ_THREAD_MARKER not in comment_body(comment):
+            continue
+        if comment_is_cockpit_authored(comment):
+            comment_id = comment.get("id")
+            return str(comment_id) if comment_id else None
+    return None
+
+
+def for_burooj_thread_root_comment(issue_id: str) -> dict[str, Any] | None:
+    """Return the existing For Burooj top-level thread comment dict, or None."""
+    for comment in load_issue_comments(issue_id):
+        if comment.get("archivedAt") or comment.get("parentId"):
+            continue
+        if FOR_BUROOJ_THREAD_MARKER not in comment_body(comment):
+            continue
+        if comment_is_cockpit_authored(comment):
+            return comment
+    return None
+
+
+def ensure_for_burooj_thread_root(issue_id: str) -> str:
+    """Return (creating if needed) the id of the For Burooj top-level thread comment."""
+    existing = for_burooj_thread_root_comment_id(issue_id)
+    if existing:
+        return existing
+    created = add_issue_comment_with_app_actor(
+        issue_id,
+        FOR_BUROOJ_THREAD_ROOT_BODY,
+        parent_id=None,
+        thread=False,
+    )
+    return created["id"]
+
+
+def add_brief_to_issue(issue_id: str, brief_body: str) -> dict[str, str]:
+    """Add a decision brief as a reply under the issue's For Burooj thread."""
+    parent_id = ensure_for_burooj_thread_root(issue_id)
+    return add_issue_comment_with_app_actor(
+        issue_id,
+        brief_body,
+        parent_id=parent_id,
+        thread=False,
+    )
+
+
+def grilling_thread_root_comment_id(issue_id: str) -> str | None:
+    """Return the id of the existing Grilling top-level thread comment, or None."""
+    for comment in load_issue_comments(issue_id):
+        if comment.get("archivedAt") or comment.get("parentId"):
+            continue
+        if GRILLING_THREAD_MARKER not in comment_body(comment):
+            continue
+        if comment_is_cockpit_authored(comment):
+            comment_id = comment.get("id")
+            return str(comment_id) if comment_id else None
+    return None
+
+
+def ensure_grilling_thread_root(issue_id: str) -> str:
+    """Return (creating if needed) the id of the Grilling top-level thread comment."""
+    existing = grilling_thread_root_comment_id(issue_id)
+    if existing:
+        return existing
+    created = add_issue_comment_with_app_actor(
+        issue_id,
+        GRILLING_THREAD_ROOT_BODY,
+        parent_id=None,
+        thread=False,
+    )
+    return created["id"]
+
+
+def add_grilling_note_to_issue(issue_id: str, note_body: str) -> dict[str, str]:
+    """Add a shaping note as a reply under the issue's Grilling thread."""
+    parent_id = ensure_grilling_thread_root(issue_id)
+    return add_issue_comment_with_app_actor(
+        issue_id,
+        note_body,
+        parent_id=parent_id,
+        thread=False,
+    )
+
+
 def add_issue_comment_with_app_actor(
     issue_id: str,
     body: str,
@@ -1801,6 +1924,9 @@ def comment_linear_issue(
             print("Comment failed: empty comment body.")
             return 2
         add_issue_comment(issue_id, text, parent_id=reply_to, thread=not top_level)
+        if not reply_to and not top_level:
+            # Default path: a reply landed under the Cockpit Thread — a receipt.
+            resolve_cockpit_thread_after_receipt(issue_id)
     except Exception as exc:
         print(f"Comment failed: {exc}")
         print(linear_app_auth_hint())
@@ -1833,6 +1959,37 @@ def resolve_linear_comment(comment_id: str, *, unresolve: bool = False) -> int:
         return 1
     print(f"Comment {action}d as Linear app actor: {comment_id}")
     return 0
+
+
+def resolve_cockpit_thread_after_receipt(issue_id: str) -> None:
+    """Resolve the Cockpit Thread after cockpit posts a receipt to it.
+
+    Best-effort: receipts are audit trail, not attention, so a resolve failure
+    here must not fail the calling command (bind/release/move/comment already
+    succeeded at that point). Idempotent — resolving an already-resolved
+    comment is a no-op on Linear's side.
+
+    Only the Cockpit Thread is touched. Questions, For Burooj, and Grilling
+    threads are never auto-resolved (see reply_is_post_resolution(), which
+    keeps a Burooj reply posted after resolution surfacing as new/unresolved).
+    """
+    try:
+        root_id = cockpit_thread_root_comment_id(issue_id)
+        if not root_id:
+            return
+        run_linear_graphql(
+            """
+            mutation CockpitThreadAutoResolve($id: String!) {
+              commentResolve(id: $id) {
+                success
+              }
+            }
+            """,
+            {"id": root_id},
+        )
+    except Exception:
+        # Non-fatal: the receipt itself already landed.
+        pass
 
 
 def burooj_comment_author_names() -> set[str]:
@@ -2079,6 +2236,7 @@ def bind_linear_issue(
                 ]
             ),
         )
+        resolve_cockpit_thread_after_receipt(issue_id)
     except Exception as exc:
         print(f"Bind failed: {exc}")
         print(linear_app_auth_hint())
@@ -2127,6 +2285,7 @@ def release_linear_issue(
             if archived:
                 body.append(f"Archived sessions: {', '.join(f'`{label}`' for label in archived)}")
             add_issue_comment(issue_id, "\n".join(body))
+            resolve_cockpit_thread_after_receipt(issue_id)
     except Exception as exc:
         print(f"Release failed: {exc}")
         print(linear_app_auth_hint())
@@ -2792,6 +2951,34 @@ def create_issue_command(
     return 0
 
 
+def warn_if_ready_for_burooj_missing_brief(issue_id: str, state_name: str) -> None:
+    """Loud (non-fatal) warning when moving to Ready for Burooj without a current brief.
+
+    Mirrors the Ready-for-agent readiness bar: a Ready-for-Burooj issue without
+    a For Burooj brief isn't ready. Does not block the move — Burooj's calls
+    on his own board are not cockpit's to veto.
+    """
+    if state_name.strip().lower() != "ready for burooj":
+        return
+    try:
+        root = for_burooj_thread_root_comment(issue_id)
+    except Exception as exc:
+        print(f"WARN: could not check For Burooj thread for {issue_id}: {exc}")
+        return
+    if root is None:
+        print(
+            f"WARN: {issue_id} moved to `Ready for Burooj` with no For Burooj brief. "
+            f"Post one with `./cockpit.py comment {issue_id} --brief \"...\"` — this lane's "
+            "readiness bar is the brief, same as Ready-for-agent's goal-grade Done-when."
+        )
+        return
+    if not unresolved_comment(root):
+        print(
+            f"WARN: {issue_id} moved to `Ready for Burooj` but its For Burooj thread is resolved "
+            f"(stale). Post a current brief with `./cockpit.py comment {issue_id} --brief \"...\"`."
+        )
+
+
 def move_issue_command(issue_id: str, state_name: str, *, comment: bool = True) -> int:
     try:
         move_linear_issue(issue_id, state_name)
@@ -2806,6 +2993,8 @@ def move_issue_command(issue_id: str, state_name: str, *, comment: bool = True) 
                     ]
                 ),
             )
+            resolve_cockpit_thread_after_receipt(issue_id)
+        warn_if_ready_for_burooj_missing_brief(issue_id, state_name)
     except Exception as exc:
         print(f"Move failed: {exc}")
         print(linear_app_auth_hint())
@@ -2922,6 +3111,16 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Add the comment as a reply under the issue's Questions thread (for Burooj).",
     )
+    comment_parser.add_argument(
+        "--brief",
+        action="store_true",
+        help="Add the comment as a reply under the issue's For Burooj thread (decision brief).",
+    )
+    comment_parser.add_argument(
+        "--grilling",
+        action="store_true",
+        help="Add the comment as a reply under the issue's Grilling thread (shaping note).",
+    )
     resolve_parser = sub.add_parser("comment-resolve", help="Resolve a Linear comment as Cockpit.")
     resolve_parser.add_argument("comment_id")
     unresolve_parser = sub.add_parser("comment-unresolve", help="Unresolve a Linear comment as Cockpit.")
@@ -3021,6 +3220,14 @@ def main(argv: list[str] | None = None) -> int:
             labels=args.labels,
         )
     if command == "comment":
+        exclusive_flags = [
+            name
+            for name in ("question", "brief", "grilling")
+            if getattr(args, name, False)
+        ]
+        if len(exclusive_flags) > 1:
+            print(f"Comment failed: use only one of --question/--brief/--grilling, not {exclusive_flags}.")
+            return 2
         if getattr(args, "question", False):
             try:
                 text = read_comment_body(body=args.body, body_file=args.body_file).strip()
@@ -3032,6 +3239,32 @@ def main(argv: list[str] | None = None) -> int:
                 return 0
             except Exception as exc:
                 print(f"Comment (question) failed: {exc}")
+                print(linear_app_auth_hint())
+                return 1
+        if getattr(args, "brief", False):
+            try:
+                text = read_comment_body(body=args.body, body_file=args.body_file).strip()
+                if not text:
+                    print("Comment failed: empty comment body.")
+                    return 2
+                result = add_brief_to_issue(args.issue_id, text)
+                print(f"Brief added to {args.issue_id}: {result.get('url') or result.get('id')}")
+                return 0
+            except Exception as exc:
+                print(f"Comment (brief) failed: {exc}")
+                print(linear_app_auth_hint())
+                return 1
+        if getattr(args, "grilling", False):
+            try:
+                text = read_comment_body(body=args.body, body_file=args.body_file).strip()
+                if not text:
+                    print("Comment failed: empty comment body.")
+                    return 2
+                result = add_grilling_note_to_issue(args.issue_id, text)
+                print(f"Grilling note added to {args.issue_id}: {result.get('url') or result.get('id')}")
+                return 0
+            except Exception as exc:
+                print(f"Comment (grilling) failed: {exc}")
                 print(linear_app_auth_hint())
                 return 1
         return comment_linear_issue(
