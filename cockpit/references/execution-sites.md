@@ -22,7 +22,7 @@ Current control surfaces:
 
 - MacBook CLI: `/Users/burooj/.local/bin/sprite`
 - bjslab CLI: `/home/admin/.local/bin/sprite`
-- Authentication is per machine/config under `~/.sprites/sprites.json`; never copy or print its tokens casually.
+- `~/.sprites/sprites.json` holds only org metadata, not secrets. Actual credentials live under `~/.sprites/keyring/` and `~/.sprites/users/*.token.enc`; never copy or print those files casually.
 - The CLI may not be on non-interactive SSH `PATH`; use the absolute bjslab path.
 
 Before a Sprite dispatch:
