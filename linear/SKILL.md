@@ -120,6 +120,10 @@ Site labels are **claims about requirements, not history**. The board was built 
 
 **For Burooj thread** (one per issue): a top-level comment titled `For Burooj`. Posted when an issue moves to `Ready for Burooj` (or to `In Review` with Burooj as reviewer). Shape: the exact decision/question being asked, the minimum facts needed to decide, options with a recommendation, and a one-line pointer to the receipt trail (Cockpit Thread). Burooj reads only this comment and replies there — it is the entry point, not a duplicate of the Cockpit Thread. Mirrors the `Ready for agent` readiness bar: preparing an issue for `Ready for Burooj` *is* writing this brief.
 
+**Grilling thread** (one per issue): a top-level comment titled `Grilling`. Interactive shaping dialogue with Burooj — multi-turn, can span sessions. The thread is the working-out, not the record: when grilling converges, conclusions graduate into the issue body and the thread resolves.
+
+**Research routing rule:** research/brainstorm output routes to whoever acts next, never sits mid-air. If it ends in a Burooj decision (e.g. "pick tldraw vs excalidraw"), the result *is* the For Burooj brief — options, pros/cons, recommendation — posted to that thread. If it feeds an agent's next step, distill it into the body's Context section. Long-form artifacts get a linked Linear document; the brief/Context holds only the pointer and the settled takeaway. The body records only what is settled — in-progress findings never land there; when a decision lands, Context gets one line recording it.
+
 Use cockpit commands for all writes so authorship stays on the Cockpit app actor (not Burooj's personal account):
 
 ```bash
@@ -133,7 +137,7 @@ Use cockpit commands for all writes so authorship stays on the Cockpit app actor
 ./cockpit.py move BJS-123 "In Review"
 ```
 
-Resolve a comment only when its question or blocker has actually been handled. Do not use raw Linear API/CLI writes for cockpit comments.
+Resolution semantics: resolving a thread asserts the issue body no longer needs it — content graduated into the body, or the thread became moot. Unresolved threads are live context: `prepare` builds launch briefs from the body plus unresolved comments, so a cold worker sees exactly which threads still matter. The Cockpit Thread is auto-resolved by cockpit and is therefore never load-bearing for a cold start; Questions, For Burooj, and Grilling resolve only when a reply says what closed them — for Grilling, that means its conclusions have graduated into the body. Do not use raw Linear API/CLI writes for cockpit comments.
 
 ---
 

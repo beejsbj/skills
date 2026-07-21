@@ -74,6 +74,8 @@ Inbox → [Grilling?] → [Needs-info?] → Ready for agent / Ready for Burooj
 
 **Gate:** moving to `Ready for Burooj` without a current `For Burooj` brief (§4) is not ready — same bar as landing in `Ready for agent` without a goal-grade Done-when. `move` warns loudly (not a hard fail) when the thread is missing or stale; treat that warning as a to-do, not noise.
 
+**Research routing rule:** research/brainstorm output routes to whoever acts next, not into the issue body wholesale. Ends in a Burooj decision → it becomes the `For Burooj` brief (§4). Feeds an agent's next step → distilled into the body's Context section. Long-form → a linked Linear document, with the brief/Context holding only the pointer and the settled takeaway.
+
 ### Artifact-gated lifecycle
 
 Linear state must not be more confident than the artifacts.
@@ -90,14 +92,15 @@ Linear state must not be more confident than the artifacts.
 
 ## 4. Comments (cockpit's async channel)
 
-Four roles:
+Five roles:
 
 1. **Your async channel to cockpit.** From phone/web you drop notes: clarity, "split this," "move it," "this is done," instructions. `inbox` surfaces your unresolved comments as the work queue; cockpit handles each (often by spawning a per-issue native subagent).
 2. **Cockpit Thread (one per issue).** A single top-level comment; all receipts / audit / log trails are replies under it. `comment`, `bind`, `release`, and `move` create or reuse it automatically. Cockpit resolves this thread after posting a receipt, so it stays collapsed; a Burooj reply after resolution still counts as new/unresolved and surfaces in `inbox`.
 3. **Questions thread (one per issue).** Questions *for you* live as a dedicated top-level comment thread with each question as a reply — NOT checkboxes in the issue body. Cockpit creates/reuses this thread when adding a question. Never auto-resolved by receipt-posting.
 4. **For Burooj thread (one per issue).** The decision brief that gates `Ready for Burooj` (§3): the exact decision/question, minimum facts, options with a recommendation, and a one-line pointer to the Cockpit Thread's receipt trail. `comment --brief` creates/reuses this top-level thread titled `For Burooj`. You read only this comment and reply there. Never auto-resolved by receipt-posting.
+5. **Grilling thread (one per issue).** Interactive shaping dialogue with Burooj — multi-turn, can span sessions; the thread is the working-out. `comment --grilling` creates/reuses this top-level thread titled `Grilling`. When grilling converges, conclusions graduate into the issue body and the thread resolves. Never auto-resolved by receipt-posting.
 
-Resolution rule: reply before resolving; resolve only when the reply says what closed it. This governs the Questions and For Burooj threads, which cockpit never resolves on your behalf.
+Resolution semantics: resolving a thread asserts the issue body no longer needs it — content graduated into the body, or the thread became moot. Unresolved threads are live context: `prepare` (§7) builds launch briefs from the body plus unresolved comments, so a cold worker sees exactly which threads still matter. The Cockpit Thread is auto-resolved by cockpit and therefore never load-bearing for a cold start. Questions, For Burooj, and Grilling resolve only when a reply says what closed them — for Grilling, that means its conclusions have graduated into the body.
 
 ---
 
@@ -154,6 +157,7 @@ A scheduled scout session (codex automation) runs this same pass and ends with a
 ./cockpit.py comment BJS-X "text"
 ./cockpit.py comment BJS-X --question "Question for Burooj (goes to the Questions thread)"
 ./cockpit.py comment BJS-X --brief "Decision brief (goes to the For Burooj thread)"
+./cockpit.py comment BJS-X --grilling "Shaping note (goes to the Grilling thread)"
 ./cockpit.py comment BJS-X --reply-to <comment-id> "text"
 ./cockpit.py comment-resolve <comment-id>
 ./cockpit.py comment-unresolve <comment-id>
