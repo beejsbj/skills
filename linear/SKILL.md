@@ -69,7 +69,7 @@ Title discipline: plain verb + object + outcome. Prefer repo/path names when the
 | `Inbox` | Intake; everything new or unclarified. |
 | `Needs-info` | Context-gathering; an agent digs or you supply a fact. Bounded — does not linger. |
 | `Grilling` | Deep shaping — clarify intent, sketch approach. Interactive with Burooj; can span sessions. |
-| `Ready for Burooj` | Burooj is the next actor: a decision, approval, judgment, or physical action. |
+| `Ready for Burooj` | Burooj is the next actor: a decision, approval, judgment, or physical action. Requires a current `For Burooj` brief (see Comment Model). |
 | `Ready for agent` | Cold-dispatchable: a smart model has distilled the issue into a self-contained `/goal` a cheaper executor can run without judgment. |
 | `Blocked` | Real external dependency (another issue or outside party). NOT "needs investigation." |
 | `In Progress` | A worker session is executing it. Exactly one `session:*` label must be present. |
@@ -82,6 +82,7 @@ Lane invariants:
 - `Done` / `Canceled` / `Inbox` → no `session:*` label.
 - `Blocked` → must have a Linear dependency relation or an explicit blocker comment.
 - `Ready for agent` → must have Goal, Context, Done-when, Constraints, an `executor:*` class, and no hidden blocker. The readiness bar is the whole point of this lane: preparing an issue for it *is* a smart model writing a plan a less-smart model can execute cold. The Done-when must be goal-grade (see Issue Body Shape) — adoptable verbatim as the executor's `/goal` — and the `executor:*` class names the smallest model that plan is written for. If only a frontier model could run it, it isn't ready; sharpen the plan, don't reach for a bigger executor.
+- `Ready for Burooj` → must have a current `For Burooj` brief (top-level comment thread, see Comment Model) naming the decision, the minimum facts, options with a recommendation, and a receipt-trail pointer. This is the same readiness bar as `Ready for agent`, aimed at Burooj instead of a worker: preparing the issue for this lane *is* writing the brief.
 
 ---
 
@@ -117,6 +118,8 @@ Site labels are **claims about requirements, not history**. The board was built 
 
 **Questions thread** (one per issue): a top-level comment titled `Questions`. Each question is a reply under it. Burooj replies per-question. Do not put questions in the issue body.
 
+**For Burooj thread** (one per issue): a top-level comment titled `For Burooj`. Posted when an issue moves to `Ready for Burooj` (or to `In Review` with Burooj as reviewer). Shape: the exact decision/question being asked, the minimum facts needed to decide, options with a recommendation, and a one-line pointer to the receipt trail (Cockpit Thread). Burooj reads only this comment and replies there — it is the entry point, not a duplicate of the Cockpit Thread. Mirrors the `Ready for agent` readiness bar: preparing an issue for `Ready for Burooj` *is* writing this brief.
+
 Use cockpit commands for all writes so authorship stays on the Cockpit app actor (not Burooj's personal account):
 
 ```bash
@@ -124,6 +127,7 @@ Use cockpit commands for all writes so authorship stays on the Cockpit app actor
 ./cockpit.py release BJS-123
 ./cockpit.py comment BJS-123 "Receipt or update."
 ./cockpit.py comment BJS-123 --reply-to <comment-id> "Reply body."
+./cockpit.py comment BJS-123 --brief "Decision brief text (goes to the For Burooj thread)."
 ./cockpit.py comment-resolve <comment-id>
 ./cockpit.py comment-unresolve <comment-id>
 ./cockpit.py move BJS-123 "In Review"
