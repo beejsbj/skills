@@ -10,7 +10,7 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 This repository is the canonical source for Burooj-owned and deliberately adopted skills. Agent-specific skill directories are access points, not independent sources of truth.
 
-- **Claude Code and Codex on macOS:** repo-owned skill folders are linked into `~/.claude/skills/` and `~/.codex/skills/` as described in `AGENTS.md`.
+- **Claude Code and Codex on macOS:** repo-owned skill folders are linked into `~/.claude/skills/`, `~/.agents/skills/`, and `~/.codex/skills/` as described in `AGENTS.md`. Run [`scripts/sync-matt-pocock-skills.sh`](scripts/sync-matt-pocock-skills.sh) after cloning or updating the upstream vendor pin.
 - **Hermes profiles:** clone this repository on the machine, then add the checkout as an external skill directory in that profile's `config.yaml`:
 
   ```yaml
@@ -33,37 +33,15 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`cockpit/`** — the cockpit skill bundle: Linear-first project orchestration, dispatch logic, session discipline, and the `cockpit.py` script.
 
-**`triage/`** — triage skill for sorting issues, PRs, and inbox items into clear next states (Needs Burooj, Ready for agent, Blocked, Parked, etc.).
-
-**`to-issues/`** — breaks a plan, spec, or grilling outcome into independently-grabbable tracer-bullet Linear issues with goal-grade Done-whens, each targeted at an executor class (the "smart model writes a plan a cheaper model runs cold" idea, adapted from shadcn/improve).
-
-**`implement/`** — worker discipline for implementing a Linear issue end to end: goal adoption, tdd, review, artifact gate, receipt.
-
-**`two-axis-review/`** — Standards + Spec review of a diff against its originating issue, run as parallel subagents (renamed from Matt's `code-review` to avoid Claude Code's built-in command).
-
-**`tdd/`** — the red-green loop, testing at pre-agreed seams, vertical slices.
-
-**`diagnosing-bugs/`** — deep diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
-
-**`prototype/`** — throwaway prototypes to answer a design question before committing to real code.
+**`vendor/mattpocock-skills/`** — unchanged, pinned upstream suite from [mattpocock/skills](https://github.com/mattpocock/skills). The vendor exposes exactly its 25 promoted engineering and productivity skills through the manifest-driven linker; experimental and miscellaneous upstream skills stay unlinked by default.
 
 **`pear/`** — local-first/P2P guidance for Pear/Holepunch: when to use peer replication, multi-device sync, Hypercore-style append-only stores, and pear:// app distribution instead of defaulting to servers, blockchain, or vague decentralization.
-
-**`grill-me/`** — rapid-fire interviewing skill. Grills me on a plan until we reach shared understanding.
-
-**`grill-with-docs/`** — same as grill-me but reads existing `CONTEXT.md` and ADRs first, sharpens terminology, and updates docs inline as decisions crystallise.
-
-**`grill-me-stateful/`** — stateful variant that tracks progress across turns.
-
-**`improve-codebase-architecture/`** — finds deepening opportunities in a codebase: shallow-to-deep refactors, better seams, higher interface leverage.
 
 **`design-lab/`** — full design-system composition skill. Takes raw material (repo, screenshots, words, moodboards) and builds out a complete token/primitive/component taxonomy plus a live style guide.
 
 **`linear/`** — Burooj's Linear board discipline and write path: lanes, labels, issue bodies, comments, dependencies, receipts, and cockpit app-actor commands.
 
 **`zoom-out/`** — asks me to zoom out when I'm about to grind before naming the right problem.
-
-**`writing-great-skills/`** — Matt Pocock's reference skill for writing and editing predictable, low-sediment skills.
 
 **`tldw/`** — imported from the live OpenClaw host for extracting and summarizing YouTube transcripts with `yt-dlp`.
 
@@ -76,10 +54,10 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 ## Credits / inspiration
 
 **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills))
-The `triage`, `grill-me`, `grill-with-docs`, `improve-codebase-architecture`, `writing-great-skills`, `to-issues`, `two-axis-review` (his `code-review`), `implement`, `tdd`, `diagnosing-bugs`, and `prototype` skills are adapted from Matt's engineering skills set. The triage skill and its `agent-brief` + `out-of-scope` reference files follow his structure closely. Really useful starting point — I've been evolving them for my own workflow but the bones are his.
+The upstream suite is preserved unchanged in `vendor/mattpocock-skills/`, pinned as a git submodule. It replaces the earlier local forks of his workflow skills; updates are reviewed by advancing the pin rather than adapting copies.
 
 **shadcn** ([shadcn/improve](https://github.com/shadcn/improve))
-The "smart model writes a self-contained plan a cheaper model executes cold; the plan is the product" idea is adapted from `shadcn/improve` and woven into `to-issues` and the `Ready for agent` readiness bar (not kept as a separate skill).
+The "smart model writes a self-contained plan a cheaper model executes cold; the plan is the product" idea is adapted from `shadcn/improve` and lives in Cockpit's `Ready for agent` readiness bar (not kept as a separate skill).
 
 **GreenSock / GSAP** ([greensock/gsap-skills](https://github.com/greensock/gsap-skills))
 The `gsap-skills/` folder is an imported copy of GreenSock's official MIT-licensed GSAP AI skills bundle.

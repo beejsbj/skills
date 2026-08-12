@@ -1,6 +1,0 @@
-interface:
-  display_name: "Triage"
-  short_description: "Triage issues and PRs into agent-ready briefs"
-  default_prompt: "Use $triage to triage this issue, PR, or work item and draft an agent-ready brief."
-policy:
-  allow_implicit_invocation: false

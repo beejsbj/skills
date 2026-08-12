@@ -4,12 +4,22 @@ This repo is the source of truth for personal agent skills and shared agent-home
 
 ## Skill Symlinks
 
-This repo keeps personal skills in one place. Codex and Claude make those same repo-owned skills available by symlinking from their skill directories:
+This repo keeps Burooj-owned skills in one place. Codex and Claude make those same repo-owned skills available by symlinking from their skill directories:
 
 - `/Users/burooj/.codex/skills/<skill-name>` -> `/Users/burooj/Projects/skills/<skill-name>`
 - `/Users/burooj/.claude/skills/<skill-name>` -> `/Users/burooj/Projects/skills/<skill-name>`
 
-When adding, renaming, or removing a skill, update the repo-owned folder first, then refresh both agent-home symlinks. Do not edit the symlink target as if it were a generated copy; the target in this repo is the source of truth.
+Vendored Matt Pocock skills use the same agent-home directories but point into `vendor/mattpocock-skills/skills/<bucket>/<skill-name>` instead.
+
+When adding, renaming, or removing a Burooj-owned skill, update the repo-owned folder first, then refresh both agent-home symlinks. Do not edit the symlink target as if it were a generated copy; the target in this repo is the source of truth.
+
+## Vendored Matt Pocock Skills
+
+`vendor/mattpocock-skills/` is a pinned git submodule of [mattpocock/skills](https://github.com/mattpocock/skills). It is an upstream subscription, not a local fork: never edit files inside it.
+
+The promoted suite is defined by its `.claude-plugin/plugin.json`, not by scanning the whole submodule. Run `scripts/sync-matt-pocock-skills.sh` after cloning this repository or changing the pin; it links each promoted whole skill directory into the selected Claude/Codex skill roots and safely removes only the retired local Matt-fork links. Use `--check` to validate the links first.
+
+To update the upstream suite, fetch and review the desired upstream commit, check out that exact commit in the submodule, run the linker, and commit the changed gitlink. Do not use `npx skills update` here: it would copy editable files back into this repository.
 
 ## Global Instructions & souls/
 

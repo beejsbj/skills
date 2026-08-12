@@ -37,7 +37,7 @@ Every cockpit concern lives in exactly one layer; when unsure where something be
 | Truth | Linear board — `linear` skill |
 | Actuator + ledger | `cockpit.py` — this skill |
 | Session plane | acpx (ACP control plane) + native provider tools; the `acpx` skill's `profiles.json` picks the model; `sessions` discovery feeds this ledger |
-| Workflow discipline | `triage`, `grill-me`/`grill-with-docs`, `to-issues`, `implement`, `tdd`, `two-axis-review`, `diagnosing-bugs`, `prototype` |
+| Workflow discipline | The pinned upstream Matt Pocock suite: `triage`, `grilling`, `grill-me`/`grill-with-docs`, `to-spec`, `to-tickets`, `implement`, `tdd`, `code-review`, `diagnosing-bugs`, `prototype`, `wayfinder`, and their shared primitives |
 | Intelligence | the scout pass (§5) |
 | Operator | Burooj live/async; scheduled scout sessions; Hermes/OpenClaw candidate, gated on the scout pass being doctrine |
 
@@ -188,7 +188,7 @@ The launch brief should tell the worker to adopt the issue's Done-when as its na
 
 Route on the issue's `site:*` label before picking a launch surface: `site:cloud` may go to a native agent cloud when one provider is sufficient, or to Fly.io Sprites when the work needs a provider-neutral, persistent Linux sandbox or should be isolated from bjslab's live services; `site:bjslab` launches headless on bjslab; `site:macbook` launches locally on the Mac; `site:multi` needs a plan naming both devices. The machine invoking `sprite` is only the control surface — installing the CLI on bjslab does not make Sprite-hosted work `site:bjslab`. An issue entering `Ready for agent` without a `site:*` label gets one during preparation using the criteria in the `linear` skill. See [references/execution-sites.md](references/execution-sites.md) for the target-selection and Sprites launch contract.
 
-Launch on the issue's `executor:*` class, defaulting to the smallest sufficient model from the `acpx` skill's `profiles.json` (which holds the launch recipes). This is the payoff of the readiness bar, not a separate planning step: a smart model already distilled the issue into a `/goal` at preparation time, so a cheaper model can now execute it cold. After launch, `bind` the session; when the worker reports done, review the diff against the issue before `In Review` (`two-axis-review` for repo diffs) — the worker's "done" is a claim, the review is the evidence — then leave the receipt.
+Launch on the issue's `executor:*` class, defaulting to the smallest sufficient model from the `acpx` skill's `profiles.json` (which holds the launch recipes). This is the payoff of the readiness bar, not a separate planning step: a smart model already distilled the issue into a `/goal` at preparation time, so a cheaper model can now execute it cold. After launch, `bind` the session; when the worker reports done, review the diff against the issue before `In Review` (`code-review` for repo diffs) — the worker's "done" is a claim, the review is the evidence — then leave the receipt.
 
 For Codex Desktop implementation work in a git repo:
 
@@ -223,12 +223,13 @@ Stop and ask Burooj before:
 
 - `linear` skill — board ontology, lane semantics, labels, issue body shape, comment model. Read it before creating or editing issues.
 - `acpx` skill — mechanics for reaching other models/providers over ACP (sessions, exec, permissions, flows), the launch recipes, plus the model-taste roster (`profiles.json`); native provider CLIs are the fallback pipe. Policy stays here: premium tokens for judgment, cheap classes for execution, briefs written so the smallest sufficient model can execute.
-- `triage` skill — use for inbox sorting, issue clarification, duplicate/out-of-scope checks, and agent-ready briefs. Its "Cockpit lane translation" section is the single source for mapping its generic lane names onto cockpit lanes.
-- `grill-me` skill — use when the issue needs interactive design/plan stress-testing with Burooj. Route the issue to `Grilling`; ask one question at a time; inspect code instead of asking when the answer is discoverable.
-- `grill-with-docs` skill — use for `Grilling` when the project has domain docs, `CONTEXT.md`, `CONTEXT-MAP.md`, or ADRs and the session should sharpen language against those docs. It may update project docs during the grilling session when explicitly in execution scope.
-- `to-issues` skill — use to break a grilled plan/spec into vertical-slice issues with goal-grade Done-whens, feeding `Ready for agent`.
-- `implement` skill — the worker discipline for issue-bound implementation sessions: goal adoption, tdd, review, artifact gate, final receipt.
-- `two-axis-review` skill — standards + spec review of a diff against its originating issue; the normal review shape before `In Review`.
+- `triage` skill — use for inbox sorting, issue clarification, duplicate/out-of-scope checks, and agent-ready briefs. Cockpit maps its tracker roles onto local lanes; upstream does not own Cockpit's lane semantics.
+- `grill-me` skill — use when the issue needs interactive design/plan stress-testing with Burooj. Route the issue to `Grilling`; work dependency-ready questions in rounds, and inspect code instead of asking when the answer is discoverable.
+- `grill-with-docs` skill — use for `Grilling` when the project has domain docs, `CONTEXT.md`, `CONTEXT-MAP.md`, or ADRs and the session should sharpen language against those docs. It composes `grilling` with `domain-modeling` and may update project docs during the session when explicitly in execution scope.
+- `to-spec` then `to-tickets` — upstream's multi-session planning flow. Cockpit's `Ready for agent` gate still requires its own goal-grade Done-when, executor class, and no hidden blocker.
+- `implement` — the upstream worker discipline; Cockpit adds its issue binding, artifact gate, and final receipt around it.
+- `code-review` — upstream Standards + Spec review of a diff; the normal review shape before `In Review`.
+- `wayfinder`, `research`, `handoff`, `domain-modeling`, and `codebase-design` — upstream planning and knowledge primitives. Cockpit supplies the Linear/session adapter; it does not fork their workflow logic.
 - `tdd`, `diagnosing-bugs`, `prototype` skills — execution-support disciplines workers reach for during implementation, debugging, and design questions.
 - [references/linear-discipline.md](references/linear-discipline.md) — cockpit's write-auth config and session-binding mechanics (verbatim app-actor rules).
 - [references/session-discipline.md](references/session-discipline.md) — native orchestration boundary, session lifecycle, review, and cleanup.
