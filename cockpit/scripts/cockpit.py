@@ -23,6 +23,7 @@ SCRIPT_PATH = Path(__file__).resolve()
 ROOT = SCRIPT_PATH.parents[1] if SCRIPT_PATH.parent.name == "scripts" else SCRIPT_PATH.parent
 CODEX_STATE_DB = Path.home() / ".codex/state_5.sqlite"
 CODEX_GLOBAL_STATE_JSON = Path.home() / ".codex/.codex-global-state.json"
+CODEX_ARCHIVED_SESSIONS_DIR = Path.home() / ".codex/archived_sessions"
 CLAUDE_CODE_SESSIONS_DIR = (
     Path.home() / "Library/Application Support/Claude/claude-code-sessions"
 )
@@ -762,6 +763,56 @@ def split_session_label(label: str) -> tuple[str, str] | None:
     if not match:
         return None
     return match.group(1), match.group(2)
+
+
+def archived_codex_session_files() -> dict[str, str]:
+    """Map codex session id -> archived rollout filename.
+
+    Archived Codex sessions are a flat dir of
+    `rollout-<timestamp>-<session-id>.jsonl`. Missing dir is not an error:
+    return an empty map so callers skip the check cleanly.
+    """
+    out: dict[str, str] = {}
+    try:
+        if not CODEX_ARCHIVED_SESSIONS_DIR.is_dir():
+            return out
+        for path in CODEX_ARCHIVED_SESSIONS_DIR.iterdir():
+            name = path.name
+            if not name.startswith("rollout-") or not name.endswith(".jsonl"):
+                continue
+            stem = name[len("rollout-") : -len(".jsonl")]
+            # `<YYYY-MM-DDTHH-MM-SS>-<session-id>`; timestamp is 5 dash-parts
+            match = re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}-(.+)$", stem)
+            if not match:
+                continue
+            session_id = match.group(1)
+            if session_id:
+                out.setdefault(session_id, name)
+    except OSError:
+        return {}
+    return out
+
+
+def archived_session_findings(
+    issue: dict[str, Any],
+    labels: list[str],
+    archived: dict[str, str],
+) -> list[tuple[dict[str, Any], str, str]]:
+    findings: list[tuple[dict[str, Any], str, str]] = []
+    if not archived:
+        return findings
+    for label in labels:
+        parsed = split_session_label(label)
+        if not parsed:
+            continue
+        provider, session_id = parsed
+        if provider != "codex":
+            # only the codex archive store is knowable; never guess others
+            continue
+        rollout = archived.get(session_id)
+        if rollout:
+            findings.append((issue, label, rollout))
+    return findings
 
 
 def session_lookup() -> dict[tuple[str, str], dict[str, Any]]:
@@ -2388,7 +2439,9 @@ def audit_linear_bindings(limit: int = 250) -> int:
     done_bound: list[dict[str, Any]] = []
     by_label: dict[str, list[str]] = {}
     root_checkout_sessions: list[tuple[dict[str, Any], str, str]] = []
+    archived_bound: list[tuple[dict[str, Any], str, str]] = []
     sessions_by_key = session_lookup()
+    archived_sessions = archived_codex_session_files()
 
     for issue in issues:
         labels = session_labels(issue)
@@ -2409,6 +2462,8 @@ def audit_linear_bindings(limit: int = 250) -> int:
             ready_missing_executor.append(issue)
         if issue_is_in_progress(issue) and labels and issue_is_pr_work(issue):
             root_checkout_sessions.extend(root_checkout_session_findings(issue, labels, sessions_by_key))
+        if issue_is_in_progress(issue) and labels:
+            archived_bound.extend(archived_session_findings(issue, labels, archived_sessions))
 
     duplicate_labels = {label: ids for label, ids in by_label.items() if len(ids) > 1}
 
@@ -2418,6 +2473,7 @@ def audit_linear_bindings(limit: int = 250) -> int:
     print(f"- issues with multiple session labels: {len(multi_bound)}")
     print(f"- duplicate session labels across issues: {len(duplicate_labels)}")
     print(f"- Codex implementation sessions in root checkouts: {len(root_checkout_sessions)}")
+    print(f"- In Progress bound to archived session: {len(archived_bound)}")
     print(f"- Ready for agent without executor:* label: {len(ready_missing_executor)}")
 
     print_audit_bucket("Inactive with session", inactive_with_session)
@@ -2425,11 +2481,40 @@ def audit_linear_bindings(limit: int = 250) -> int:
     print_audit_bucket("In Progress without session", in_progress_unbound)
     print_audit_bucket("Multiple session labels", multi_bound)
     print_root_checkout_session_bucket(root_checkout_sessions)
+    print_archived_session_bucket(archived_bound, archived_sessions)
     if duplicate_labels:
         print("\nDuplicate session labels:")
         for label, ids in sorted(duplicate_labels.items()):
             print(f"- {label}: {', '.join(ids)}")
-    return 1 if inactive_with_session or in_progress_unbound or multi_bound or duplicate_labels or root_checkout_sessions else 0
+    return (
+        1
+        if inactive_with_session
+        or in_progress_unbound
+        or multi_bound
+        or duplicate_labels
+        or root_checkout_sessions
+        or archived_bound
+        else 0
+    )
+
+
+def print_archived_session_bucket(
+    rows: list[tuple[dict[str, Any], str, str]],
+    archived_sessions: dict[str, str],
+) -> None:
+    print(f"\nIn Progress bound to archived session ({len(rows)}):")
+    if not rows:
+        if not archived_sessions:
+            print(f"- none (no archived codex sessions found at {CODEX_ARCHIVED_SESSIONS_DIR})")
+        else:
+            print("- none")
+        return
+    for issue, label, rollout in rows:
+        print(
+            f"- {issue_identifier(issue)} [{issue_status_name(issue)}]: "
+            f"{compact(issue_title(issue), 80)} {label} archived={rollout}"
+        )
+        print("  expected: session is archived; re-bind to a live session or move the issue off In Progress")
 
 
 def root_checkout_session_findings(
