@@ -10,7 +10,7 @@ It's a work in progress. I'll keep tweaking wording as I learn what actually wor
 
 This repository is the canonical source for Burooj-owned and deliberately adopted skills. Agent-specific skill directories are access points, not independent sources of truth.
 
-- **Claude Code and Codex on macOS:** repo-owned skill folders are linked into `~/.claude/skills/`, `~/.agents/skills/`, and `~/.codex/skills/` as described in `AGENTS.md`. Run [`scripts/sync-matt-pocock-skills.sh`](scripts/sync-matt-pocock-skills.sh) after cloning or updating the upstream vendor pin.
+- **Claude Code, Codex, and T3 Code:** repo-owned skill folders are linked into `~/.claude/skills/`, `~/.agents/skills/`, and `~/.codex/skills/` as described in `AGENTS.md`. T3 Code reads those native provider roots directly; it has no separate skill copy to maintain. Run [`scripts/sync-matt-pocock-skills.sh`](scripts/sync-matt-pocock-skills.sh) after cloning or updating the upstream vendor pin.
 - **Hermes profiles:** clone this repository on the machine, then add the checkout as an external skill directory in that profile's `config.yaml`:
 
   ```yaml

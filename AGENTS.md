@@ -7,11 +7,14 @@ This repo is the source of truth for personal agent skills and shared agent-home
 This repo keeps Burooj-owned skills in one place. Codex and Claude make those same repo-owned skills available by symlinking from their skill directories:
 
 - `/Users/burooj/.codex/skills/<skill-name>` -> `/Users/burooj/Projects/skills/<skill-name>`
+- `/Users/burooj/.agents/skills/<skill-name>` -> `/Users/burooj/Projects/skills/<skill-name>`
 - `/Users/burooj/.claude/skills/<skill-name>` -> `/Users/burooj/Projects/skills/<skill-name>`
+
+T3 Code discovers skills through the active provider's native directories above. Keep all three roots aligned; T3 Code then exposes the same suite without a separate T3-specific skill root.
 
 Vendored Matt Pocock skills use the same agent-home directories but point into `vendor/mattpocock-skills/skills/<bucket>/<skill-name>` instead.
 
-When adding, renaming, or removing a Burooj-owned skill, update the repo-owned folder first, then refresh both agent-home symlinks. Do not edit the symlink target as if it were a generated copy; the target in this repo is the source of truth.
+When adding, renaming, or removing a Burooj-owned skill, update the repo-owned folder first, then refresh all three agent-home symlinks. Do not edit the symlink target as if it were a generated copy; the target in this repo is the source of truth.
 
 ## Vendored Matt Pocock Skills
 
