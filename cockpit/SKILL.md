@@ -37,7 +37,7 @@ Every cockpit concern lives in exactly one layer; when unsure where something be
 | Truth | Linear board — `linear` skill |
 | Actuator + ledger | `cockpit.py` — this skill |
 | Session plane | acpx (ACP control plane) + native provider tools; the `acpx` skill's `profiles.json` picks the model; `sessions` discovery feeds this ledger |
-| Workflow discipline | The pinned upstream Matt Pocock suite: `triage`, `grilling`, `grill-me`/`grill-with-docs`, `to-spec`, `to-tickets`, `implement`, `tdd`, `code-review`, `diagnosing-bugs`, `prototype`, `wayfinder`, and their shared primitives |
+| Workflow discipline | The pinned upstream Matt Pocock suite, routed by `ask-matt` |
 | Intelligence | the scout pass (§5) |
 | Operator | Burooj live/async; scheduled scout sessions; Hermes/OpenClaw candidate, gated on the scout pass being doctrine |
 
@@ -46,6 +46,12 @@ Every cockpit concern lives in exactly one layer; when unsure where something be
 ## 2. Depends on
 
 Cockpit depends on the `linear` skill for board ontology, lane meanings, label taxonomy, issue body shape, and the comment model. Do not restate those rules here; reference that skill.
+
+### Generic tracker boundary
+
+Upstream workflows are tracker-agnostic. Cockpit supplies a generic Linear adapter: full issue reads, creation and editing, parent/child hierarchy, assignment, native typed relations, labels, comments, and workflow-state moves. Upstream owns every workflow concept built from those primitives — maps, tickets, frontiers, claims, grilling, triage, implementation, and resolution logic do not belong in `cockpit.py`.
+
+Run `ask-matt` to select and compose upstream workflows. Link the whole promoted suite so its routes resolve; do not duplicate its routing table here. For the per-project Linear contract that `setup-matt-pocock-skills` writes, use [references/matt-linear-tracker.md](references/matt-linear-tracker.md).
 
 ---
 
@@ -82,7 +88,7 @@ Linear state must not be more confident than the artifacts.
 
 - Move to `In Progress` only when a worker/session is actually bound and executing.
 - Move implementation work to `In Review` only when the review artifact exists. For git worktree implementation, the normal artifact is a pushed branch plus draft/ready PR.
-- Move to `Done` only after the review artifact is merged/accepted, or Burooj explicitly says to close without review.
+- Move to `Done` only when the issue's own completion evidence is accepted. Implementation work requires its review artifact to be merged/accepted; planning, research, and decision issues instead require their promised answer/artifact plus a resolution comment.
 - Local commits, launch success, or a worker saying "done" are not enough for `Done`.
 - Do not archive/release the worker session until the PR/review artifact exists and the Linear issue has a receipt naming it.
 - Worker final receipts should include: branch, commit, pushed yes/no, PR/review artifact URL, checks run, residual risks, and recommended next state.
@@ -139,6 +145,15 @@ A scheduled scout session (codex automation) runs this same pass and ends with a
 ./cockpit.py board
 ./cockpit.py issue BJS-X
 ./cockpit.py issue BJS-X --show-cockpit   # include cockpit-authored comments/receipts
+./cockpit.py issue BJS-X --json           # full generic issue graph + comments
+
+# Generic issue-tracker adapter
+./cockpit.py create --title "..." --parent BJS-X --label wayfinder:research
+./cockpit.py update BJS-X --description-file /path/to/body.md --expected-updated-at <timestamp>
+./cockpit.py assign BJS-X <user-id-or-exact-name-or-email>
+./cockpit.py assign BJS-X --clear
+./cockpit.py relation-add BJS-X blocks BJS-Y
+./cockpit.py relation-remove <relation-id>
 
 # Triage / inbox
 ./cockpit.py inbox
@@ -223,14 +238,8 @@ Stop and ask Burooj before:
 
 - `linear` skill — board ontology, lane semantics, labels, issue body shape, comment model. Read it before creating or editing issues.
 - `acpx` skill — mechanics for reaching other models/providers over ACP (sessions, exec, permissions, flows), the launch recipes, plus the model-taste roster (`profiles.json`); native provider CLIs are the fallback pipe. Policy stays here: premium tokens for judgment, cheap classes for execution, briefs written so the smallest sufficient model can execute.
-- `triage` skill — use for inbox sorting, issue clarification, duplicate/out-of-scope checks, and agent-ready briefs. Cockpit maps its tracker roles onto local lanes; upstream does not own Cockpit's lane semantics.
-- `grill-me` skill — use when the issue needs interactive design/plan stress-testing with Burooj. Route the issue to `Grilling`; work dependency-ready questions in rounds, and inspect code instead of asking when the answer is discoverable.
-- `grill-with-docs` skill — use for `Grilling` when the project has domain docs, `CONTEXT.md`, `CONTEXT-MAP.md`, or ADRs and the session should sharpen language against those docs. It composes `grilling` with `domain-modeling` and may update project docs during the session when explicitly in execution scope.
-- `to-spec` then `to-tickets` — upstream's multi-session planning flow. Cockpit's `Ready for agent` gate still requires its own goal-grade Done-when, executor class, and no hidden blocker.
-- `implement` — the upstream worker discipline; Cockpit adds its issue binding, artifact gate, and final receipt around it.
-- `code-review` — upstream Standards + Spec review of a diff; the normal review shape before `In Review`.
-- `wayfinder`, `research`, `handoff`, `domain-modeling`, and `codebase-design` — upstream planning and knowledge primitives. Cockpit supplies the Linear/session adapter; it does not fork their workflow logic.
-- `tdd`, `diagnosing-bugs`, `prototype` skills — execution-support disciplines workers reach for during implementation, debugging, and design questions.
+- `ask-matt` — the sole router for the pinned upstream suite. Cockpit adds the Linear/session transport and local readiness/artifact gates around whichever upstream flow it selects; it does not maintain a second copy of that flow graph.
+- [references/matt-linear-tracker.md](references/matt-linear-tracker.md) — the generic Linear contract and Cockpit lane/label translation for upstream workflows.
 - [references/linear-discipline.md](references/linear-discipline.md) — cockpit's write-auth config and session-binding mechanics (verbatim app-actor rules).
 - [references/session-discipline.md](references/session-discipline.md) — native orchestration boundary, session lifecycle, review, and cleanup.
 - [references/execution-sites.md](references/execution-sites.md) — concrete launch targets behind `site:*`, including native clouds, Sprites, bjslab, and MacBook.

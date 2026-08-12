@@ -1200,6 +1200,7 @@ def load_linear_issue_graphql(issue_id: str) -> dict[str, Any]:
             title
             description
             url
+            updatedAt
             state { id name type }
             team { id key name }
             project { name }
@@ -1213,6 +1214,208 @@ def load_linear_issue_graphql(issue_id: str) -> dict[str, Any]:
     if not isinstance(issue, dict):
         raise RuntimeError(f"Linear GraphQL could not load issue {issue_id}.")
     return issue
+
+
+def load_linear_issue_tracker_graphql(issue_id: str) -> dict[str, Any]:
+    """Load the tracker-neutral issue graph needed by planning workflows."""
+    data = run_linear_graphql(
+        """
+        query CockpitTrackerIssue($id: String!) {
+          issue(id: $id) {
+            id
+            identifier
+            title
+            description
+            url
+            createdAt
+            updatedAt
+            sortOrder
+            state { id name type }
+            team { id key name }
+            project { id name }
+            assignee { id name displayName email }
+            parent { id identifier title }
+            labels { nodes { id name } }
+            children(first: 100) {
+              nodes {
+                id identifier title createdAt subIssueSortOrder
+                state { id name type }
+                assignee { id name displayName email }
+              }
+              pageInfo { hasNextPage endCursor }
+            }
+            relations(first: 100) {
+              nodes {
+                id type
+                issue { id identifier title }
+                relatedIssue { id identifier title state { id name type } }
+              }
+              pageInfo { hasNextPage endCursor }
+            }
+            inverseRelations(first: 100) {
+              nodes {
+                id type
+                issue { id identifier title state { id name type } }
+                relatedIssue { id identifier title }
+              }
+              pageInfo { hasNextPage endCursor }
+            }
+          }
+        }
+        """,
+        {"id": issue_id},
+    )
+    issue = data.get("issue") if isinstance(data, dict) else None
+    if not isinstance(issue, dict):
+        raise RuntimeError(f"Linear GraphQL could not load issue {issue_id}.")
+    issue_id = str(issue["id"])
+    for connection_name in ("children", "relations", "inverseRelations"):
+        connection = issue.get(connection_name)
+        if not isinstance(connection, dict):
+            continue
+        nodes = connection.get("nodes")
+        if not isinstance(nodes, list):
+            nodes = []
+            connection["nodes"] = nodes
+        page_info = connection.get("pageInfo")
+        while isinstance(page_info, dict) and page_info.get("hasNextPage"):
+            after = page_info.get("endCursor")
+            if not after:
+                raise RuntimeError(
+                    f"Linear returned an incomplete {connection_name} page without an end cursor."
+                )
+            next_page = load_issue_tracker_connection_page(
+                issue_id,
+                connection_name,
+                str(after),
+            )
+            next_nodes = next_page.get("nodes")
+            if isinstance(next_nodes, list):
+                nodes.extend(node for node in next_nodes if isinstance(node, dict))
+            page_info = next_page.get("pageInfo")
+            connection["pageInfo"] = page_info
+        if connection_name == "children":
+            connection["nodes"] = sorted(
+                nodes,
+                key=tracker_child_order_key,
+            )
+    issue["comments"] = load_issue_comments_graphql(issue_id)
+    return issue
+
+
+def tracker_child_order_key(issue: dict[str, Any]) -> tuple[Any, ...]:
+    order = issue.get("subIssueSortOrder")
+    has_no_order = not isinstance(order, (int, float))
+    return (
+        has_no_order,
+        float(order) if not has_no_order else 0.0,
+        str(issue.get("createdAt") or ""),
+        str(issue.get("identifier") or issue.get("id") or ""),
+    )
+
+
+def load_issue_tracker_connection_page(
+    issue_id: str,
+    connection_name: str,
+    after: str,
+) -> dict[str, Any]:
+    selections = {
+        "children": """
+          nodes {
+            id identifier title createdAt subIssueSortOrder
+            state { id name type }
+            assignee { id name displayName email }
+          }
+        """,
+        "relations": """
+          nodes {
+            id type
+            issue { id identifier title }
+            relatedIssue { id identifier title state { id name type } }
+          }
+        """,
+        "inverseRelations": """
+          nodes {
+            id type
+            issue { id identifier title state { id name type } }
+            relatedIssue { id identifier title }
+          }
+        """,
+    }
+    selection = selections.get(connection_name)
+    if selection is None:
+        raise ValueError(f"Unsupported Linear issue connection: {connection_name}")
+    data = run_linear_graphql(
+        f"""
+        query CockpitTrackerIssueConnection($id: String!, $after: String!) {{
+          issue(id: $id) {{
+            {connection_name}(first: 100, after: $after) {{
+              {selection}
+              pageInfo {{ hasNextPage endCursor }}
+            }}
+          }}
+        }}
+        """,
+        {"id": issue_id, "after": after},
+    )
+    issue = data.get("issue") if isinstance(data, dict) else None
+    connection = issue.get(connection_name) if isinstance(issue, dict) else None
+    if not isinstance(connection, dict):
+        raise RuntimeError(f"Linear GraphQL returned no {connection_name} page for {issue_id}.")
+    return connection
+
+
+def load_linear_users() -> list[dict[str, Any]]:
+    users: list[dict[str, Any]] = []
+    after: str | None = None
+    while True:
+        data = run_linear_graphql(
+            """
+            query CockpitUsers($after: String) {
+              users(first: 100, after: $after) {
+                nodes { id name displayName email }
+                pageInfo { hasNextPage endCursor }
+              }
+            }
+            """,
+            {"after": after},
+        )
+        conn = data.get("users") if isinstance(data, dict) else None
+        nodes = conn.get("nodes") if isinstance(conn, dict) else None
+        if not isinstance(nodes, list):
+            raise RuntimeError("Linear GraphQL returned no users.")
+        users.extend(user for user in nodes if isinstance(user, dict))
+        page_info = conn.get("pageInfo") if isinstance(conn, dict) else None
+        if not isinstance(page_info, dict) or not page_info.get("hasNextPage"):
+            return users
+        after = page_info.get("endCursor")
+        if not after:
+            return users
+
+
+def linear_user_id(user_ref: str) -> str:
+    if re.fullmatch(r"[0-9a-fA-F-]{36}", user_ref):
+        return user_ref
+    target = user_ref.strip().casefold()
+    matches = [
+        user
+        for user in load_linear_users()
+        if target
+        in {
+            str(user.get("name") or "").strip().casefold(),
+            str(user.get("displayName") or "").strip().casefold(),
+            str(user.get("email") or "").strip().casefold(),
+        }
+    ]
+    if not matches:
+        raise CockpitUsageError(f"Linear user `{user_ref}` not found.")
+    if len(matches) > 1:
+        choices = ", ".join(
+            f"{user.get('displayName') or user.get('name')} ({user.get('email') or user.get('id')})"
+            for user in matches
+        )
+        raise CockpitUsageError(f"Linear user `{user_ref}` is ambiguous: {choices}")
+    return str(matches[0]["id"])
 
 
 def linear_team_metadata() -> dict[str, Any]:
@@ -1296,7 +1499,7 @@ def ensure_linear_label_with_app_actor(label: str) -> str:
                 "input": {
                     "name": label,
                     "color": "#5E6AD2",
-                    "description": "Cockpit session binding label.",
+                    "description": "Managed by Cockpit.",
                 }
             },
         )
@@ -1569,6 +1772,8 @@ def create_issue_with_app_actor(
     state: str | None = None,
     description: str | None = None,
     labels: list[str] | None = None,
+    parent: str | None = None,
+    assignee: str | None = None,
 ) -> dict[str, Any]:
     team_id = linear_team_metadata().get("id")
     if not team_id:
@@ -1582,6 +1787,10 @@ def create_issue_with_app_actor(
         input_payload["projectId"] = project_id_by_name(project)
     if labels:
         input_payload["labelIds"] = [ensure_linear_label_with_app_actor(label) for label in labels]
+    if parent:
+        input_payload["parentId"] = linear_issue_uuid(parent)
+    if assignee:
+        input_payload["assigneeId"] = linear_user_id(assignee)
     data = run_linear_graphql(
         """
         mutation CockpitIssueCreate($input: IssueCreateInput!) {
@@ -1598,6 +1807,99 @@ def create_issue_with_app_actor(
     if not isinstance(result, dict) or not result.get("success") or not isinstance(created, dict):
         raise RuntimeError(f"Linear issueCreate did not succeed: {result}")
     return created
+
+
+def create_issue_relation_with_app_actor(
+    issue_id: str,
+    related_issue_id: str,
+    relation_type: str,
+) -> dict[str, Any]:
+    source_id = linear_issue_uuid(issue_id)
+    target_id = linear_issue_uuid(related_issue_id)
+    relations = load_issue_relations_graphql(source_id)
+    for relation in relations["relations"]:
+        related = relation.get("relatedIssue") if isinstance(relation, dict) else None
+        if (
+            isinstance(related, dict)
+            and related.get("id") == target_id
+            and relation.get("type") == relation_type
+        ):
+            return relation
+    data = run_linear_graphql(
+        """
+        mutation CockpitIssueRelationCreate($input: IssueRelationCreateInput!) {
+          issueRelationCreate(input: $input) {
+            success
+            issueRelation {
+              id type
+              issue { id identifier title }
+              relatedIssue { id identifier title }
+            }
+          }
+        }
+        """,
+        {
+            "input": {
+                "issueId": source_id,
+                "relatedIssueId": target_id,
+                "type": relation_type,
+            }
+        },
+    )
+    result = data.get("issueRelationCreate") if isinstance(data, dict) else None
+    relation = result.get("issueRelation") if isinstance(result, dict) else None
+    if not isinstance(result, dict) or not result.get("success") or not isinstance(relation, dict):
+        raise RuntimeError(f"Linear issueRelationCreate did not succeed: {result}")
+    return relation
+
+
+def load_issue_relations_graphql(issue_id: str) -> dict[str, list[dict[str, Any]]]:
+    data = run_linear_graphql(
+        """
+        query CockpitIssueRelations($id: String!) {
+          issue(id: $id) {
+            relations(first: 100) {
+              nodes {
+                id type
+                issue { id identifier title }
+                relatedIssue { id identifier title }
+              }
+            }
+            inverseRelations(first: 100) {
+              nodes {
+                id type
+                issue { id identifier title }
+                relatedIssue { id identifier title }
+              }
+            }
+          }
+        }
+        """,
+        {"id": issue_id},
+    )
+    issue = data.get("issue") if isinstance(data, dict) else None
+    if not isinstance(issue, dict):
+        raise RuntimeError(f"Linear GraphQL could not load issue relations for {issue_id}.")
+    result: dict[str, list[dict[str, Any]]] = {}
+    for key in ("relations", "inverseRelations"):
+        conn = issue.get(key)
+        nodes = conn.get("nodes") if isinstance(conn, dict) else None
+        result[key] = [node for node in nodes or [] if isinstance(node, dict)]
+    return result
+
+
+def delete_issue_relation_with_app_actor(relation_id: str) -> None:
+    data = run_linear_graphql(
+        """
+        mutation CockpitIssueRelationDelete($id: String!) {
+          issueRelationDelete(id: $id) { success }
+        }
+        """,
+        {"id": relation_id},
+    )
+    result = data.get("issueRelationDelete") if isinstance(data, dict) else None
+    if not isinstance(result, dict) or not result.get("success"):
+        raise RuntimeError(f"Linear issueRelationDelete did not succeed: {result}")
 
 
 def add_issue_label_with_app_actor(issue_id: str, label: str) -> None:
@@ -3015,6 +3317,8 @@ def create_issue_command(
     state: str | None = None,
     description: str | None = None,
     labels: list[str] | None = None,
+    parent: str | None = None,
+    assignee: str | None = None,
 ) -> int:
     try:
         created = create_issue_with_app_actor(
@@ -3023,6 +3327,8 @@ def create_issue_command(
             state=state,
             description=description,
             labels=labels,
+            parent=parent,
+            assignee=assignee,
         )
     except Exception as exc:
         print(f"Create failed: {exc}")
@@ -3033,6 +3339,91 @@ def create_issue_command(
         print(f"- url: {created['url']}")
     if isinstance(created.get("state"), dict):
         print(f"- lane: {created['state'].get('name')}")
+    return 0
+
+
+def update_issue_command(
+    issue_id: str,
+    *,
+    title: str | None = None,
+    description: str | None = None,
+    parent: str | None = None,
+    clear_parent: bool = False,
+    expected_updated_at: str | None = None,
+) -> int:
+    try:
+        payload: dict[str, Any] = {}
+        if expected_updated_at is not None:
+            current = load_linear_issue_graphql(issue_id)
+            actual_updated_at = str(current.get("updatedAt") or "")
+            if actual_updated_at != expected_updated_at:
+                print(
+                    f"Update refused: {issue_id} changed since it was read "
+                    f"(expected {expected_updated_at}, found {actual_updated_at or 'unknown'})."
+                )
+                return 3
+        if title is not None:
+            payload["title"] = title
+        if description is not None:
+            payload["description"] = description
+        if parent is not None:
+            payload["parentId"] = linear_issue_uuid(parent)
+        elif clear_parent:
+            payload["parentId"] = None
+        if not payload:
+            print(
+                "Nothing to do: pass --title, --description/--description-file, "
+                "--parent, or --clear-parent."
+            )
+            return 2
+        updated = update_issue_with_app_actor(issue_id, payload)
+    except Exception as exc:
+        print(f"Update failed: {exc}")
+        print(linear_app_auth_hint())
+        return 1
+    print(f"Updated {updated.get('identifier') or issue_id}.")
+    return 0
+
+
+def assign_issue_command(issue_id: str, assignee: str | None) -> int:
+    try:
+        assignee_id = linear_user_id(assignee) if assignee else None
+        updated = update_issue_with_app_actor(issue_id, {"assigneeId": assignee_id})
+    except Exception as exc:
+        print(f"Assignment failed: {exc}")
+        print(linear_app_auth_hint())
+        return 1
+    action = f"assigned to {assignee}" if assignee else "unassigned"
+    print(f"{updated.get('identifier') or issue_id} {action}.")
+    return 0
+
+
+def add_relation_command(source_issue_id: str, relation_type: str, target_issue_id: str) -> int:
+    try:
+        relation = create_issue_relation_with_app_actor(
+            source_issue_id,
+            target_issue_id,
+            relation_type,
+        )
+    except Exception as exc:
+        print(f"Relation add failed: {exc}")
+        print(linear_app_auth_hint())
+        return 1
+    print(
+        f"Relation {relation.get('id')}: {source_issue_id} "
+        f"{relation_type} {target_issue_id}."
+    )
+    return 0
+
+
+def remove_relation_command(relation_id: str) -> int:
+    try:
+        delete_issue_relation_with_app_actor(relation_id)
+    except Exception as exc:
+        print(f"Relation remove failed: {exc}")
+        print(linear_app_auth_hint())
+        return 1
+    print(f"Removed relation {relation_id}.")
     return 0
 
 
@@ -3118,6 +3509,11 @@ def main(argv: list[str] | None = None) -> int:
     issue_parser.add_argument("issue_id")
     issue_parser.add_argument("--full", action="store_true", help="Print the full untruncated description.")
     issue_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print the full issue, comments, parent/children, assignee, and relations as JSON.",
+    )
+    issue_parser.add_argument(
         "--show-cockpit",
         action="store_true",
         help="Also show unresolved cockpit-authored comments and run receipts.",
@@ -3181,6 +3577,36 @@ def main(argv: list[str] | None = None) -> int:
     create_parser.add_argument("--description", help="Issue body markdown.")
     create_parser.add_argument("--description-file", help="Read the issue body from a markdown/text file.")
     create_parser.add_argument("--label", action="append", dest="labels", help="Label to attach (repeatable).")
+    create_parser.add_argument("--parent", help="Parent issue identifier for a native sub-issue.")
+    create_parser.add_argument("--assignee", help="Linear user id, name, display name, or email.")
+    update_parser = sub.add_parser("update", help="Update generic Linear issue fields as Cockpit.")
+    update_parser.add_argument("issue_id")
+    update_parser.add_argument("--title")
+    update_parser.add_argument("--description", help="Issue body markdown.")
+    update_parser.add_argument("--description-file", help="Read the issue body from a markdown/text file.")
+    parent_group = update_parser.add_mutually_exclusive_group()
+    parent_group.add_argument("--parent", help="Set the parent issue identifier.")
+    parent_group.add_argument("--clear-parent", action="store_true", help="Remove the parent issue.")
+    update_parser.add_argument(
+        "--expected-updated-at",
+        help="Best-effort stale-read check against Linear's updatedAt before the write.",
+    )
+    assign_parser = sub.add_parser("assign", help="Assign or unassign an issue as Cockpit.")
+    assign_parser.add_argument("issue_id")
+    assign_parser.add_argument("assignee", nargs="?", help="Linear user id, name, display name, or email.")
+    assign_parser.add_argument("--clear", action="store_true", help="Unassign the issue.")
+    relation_add_parser = sub.add_parser("relation-add", help="Add a native Linear issue relation.")
+    relation_add_parser.add_argument("source_issue_id")
+    relation_add_parser.add_argument(
+        "relation_type",
+        choices=["blocks", "related", "duplicate", "similar"],
+    )
+    relation_add_parser.add_argument("target_issue_id")
+    relation_remove_parser = sub.add_parser(
+        "relation-remove",
+        help="Remove a native Linear issue relation by relation id.",
+    )
+    relation_remove_parser.add_argument("relation_id")
     comment_parser = sub.add_parser("comment", help="Add a Cockpit-authored Linear issue comment.")
     comment_parser.add_argument("issue_id")
     comment_parser.add_argument("body", nargs="?")
@@ -3236,6 +3662,13 @@ def main(argv: list[str] | None = None) -> int:
     if command == "board":
         return print_linear_board(limit=args.limit, project=args.project)
     if command == "issue":
+        if args.json:
+            try:
+                print(json.dumps(load_linear_issue_tracker_graphql(args.issue_id), indent=2))
+                return 0
+            except Exception as exc:
+                print(f"Issue read failed: {exc}", file=sys.stderr)
+                return 1
         return print_linear_issue(args.issue_id, full=args.full, show_cockpit=args.show_cockpit)
     if command == "inbox":
         return print_inbox(limit=args.limit)
@@ -3303,7 +3736,41 @@ def main(argv: list[str] | None = None) -> int:
             state=args.state,
             description=description,
             labels=args.labels,
+            parent=args.parent,
+            assignee=args.assignee,
         )
+    if command == "update":
+        description = args.description
+        if args.description_file:
+            try:
+                description = Path(args.description_file).read_text()
+            except OSError as exc:
+                print(f"Update failed: could not read {args.description_file}: {exc}")
+                return 1
+        return update_issue_command(
+            args.issue_id,
+            title=args.title,
+            description=description,
+            parent=args.parent,
+            clear_parent=args.clear_parent,
+            expected_updated_at=args.expected_updated_at,
+        )
+    if command == "assign":
+        if args.clear and args.assignee:
+            print("Assignment failed: pass an assignee or --clear, not both.")
+            return 2
+        if not args.clear and not args.assignee:
+            print("Assignment failed: pass an assignee or --clear.")
+            return 2
+        return assign_issue_command(args.issue_id, None if args.clear else args.assignee)
+    if command == "relation-add":
+        return add_relation_command(
+            args.source_issue_id,
+            args.relation_type,
+            args.target_issue_id,
+        )
+    if command == "relation-remove":
+        return remove_relation_command(args.relation_id)
     if command == "comment":
         exclusive_flags = [
             name

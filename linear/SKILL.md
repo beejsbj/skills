@@ -74,7 +74,7 @@ Title discipline: plain verb + object + outcome. Prefer repo/path names when the
 | `Blocked` | Real external dependency (another issue or outside party). NOT "needs investigation." |
 | `In Progress` | A worker session is executing it. Exactly one `session:*` label must be present. |
 | `In Review` | PR / checks / review phase. |
-| `Done` | Accepted closure: review artifact merged/accepted, or Burooj explicitly accepts closure without review. No `session:*` label. Final receipt left in the Cockpit Thread. |
+| `Done` | Accepted closure with evidence appropriate to the issue kind. Implementation requires merged/accepted review evidence; planning, research, and decisions require their promised answer/artifact plus a resolution comment. No `session:*` label. |
 | `Canceled` | Dead idea (Linear-native). |
 
 Lane invariants:
@@ -96,6 +96,7 @@ Labels encode metadata, never workflow position.
 | `executor:*` | Smallest model class the brief is written for | `frontier` (Sol/opus/fable judgment or hard execution), `standard` (Terra/gpt-5.5/sonnet/glm/minimax implementation), `small` (Luna/haiku/flash bulk work) |
 | `site:*` | Minimum execution site the work requires | `cloud`, `bjslab`, `macbook`, `multi` — see below |
 | `session:<provider>:<id>` | Active session binding | Live issues only; remove on `Done`/`Canceled` |
+| `<skill-namespace>:*` | Opaque metadata owned by an installed workflow | Cockpit transports but does not interpret it; for example `wayfinder:map` and `wayfinder:{research,prototype,grilling,task}` |
 
 `site:*` encodes *where the work can physically run*, as a capability ladder — label the **minimum** site required, not every site that would work. One `site:*` label per issue; absent means site-untriaged. Anything `site:cloud` is by definition phone-driveable, so there is no separate `site:phone` label.
 
@@ -109,6 +110,14 @@ Labeling criteria — walk the ladder top-down and stop at the first "yes":
 Site labels are **claims about requirements, not history**. The board was built on the MacBook, so "it has always been done on the Mac" is not evidence for `site:macbook` — most repo work is movable. When in doubt between two rungs, take the more portable one (lower rung) and let execution prove otherwise.
 
 `formation:*`, `mode:*`, `agent:*`, and `workflow:*` labels are **removed** (mode/agent encoded dispatch-era routing that lanes now carry; `workflow:issue-pr` was an opaque, unused training rail) — do not read, write, or reference them. Use `type:*` instead of Linear's default `Feature`/`Improvement`/`Bug` labels.
+
+Here `workflow:*` means that retired literal prefix, not every workflow-owned namespace. A promoted skill may own a narrow namespace such as `wayfinder:*`; treat it as opaque metadata and do not turn it into Cockpit lane logic.
+
+## Generic tracker operations
+
+Cockpit exposes the Linear issue graph without encoding any upstream workflow: full JSON reads (including comments, parent/children, assignee, and both relation directions), root/child creation, title/body/parent edits, assignment, typed relation add/remove, labels, comments, and state moves. `SOURCE blocks TARGET` is the native blocker direction.
+
+Upstream skills compose these primitives. A frontier, claim, map, ticket, or resolution algorithm belongs to the workflow skill, never to Linear or `cockpit.py`. See [the Cockpit tracker reference](../cockpit/references/matt-linear-tracker.md) for the project-local contract written by `setup-matt-pocock-skills`.
 
 ---
 
