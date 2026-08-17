@@ -1,0 +1,4 @@
+interface:
+  display_name: "Book Grabber"
+  short_description: "Safe private book-grabber CLI workflows"
+  default_prompt: "Use $book-grabber to inspect the book-grabber service safely and report the JSON result."
