@@ -40,7 +40,7 @@ bjslab-context doctor
 | --- | --- |
 | Environment and authority capsule | `bjslab-context` |
 | K3, DeepSeek, Terra/Luna, OpenCode, Hermes routes | `bjslab-context agents` |
-| Codex/OpenCodex worker | `bjslab-codex-worker ...` |
+| Codex/OpenCodex worker | `codex exec -m <model> ...` |
 | Installed wrappers and capability handles | `bjslab-context tools` |
 | Handbook routing | `bjslab-context handbook` |
 | Read-only installation and health checks | `bjslab-context doctor` |
@@ -59,10 +59,11 @@ bjslab-context doctor
 
 ## Pitfalls
 
-- OpenCodex model availability means the model can run through the Codex harness. It does not guarantee that the current native `spawn_agent` tool advertises that model as an override.
-- Use `bjslab-codex-worker` for a headless Codex worker. It selects OpenCodex's HTTP Responses transport; bare `codex exec` currently attempts an unsupported WebSocket route.
+- OpenCodex and Codex advertise at most five native subagent overrides. On the released Codex 0.148 runtime, bjslab's live sixth-model probe still returned `model not found`; rotate a frequent model into the five slots or launch a separate `codex exec -m <exact-id>` worker.
+- Plain `codex exec` is the canonical headless worker. With OpenCodex WebSockets disabled, Codex may log an initial HTTP 426 and then fall back successfully to HTTP/SSE.
 - The restricted Codex CLI sandbox on bjslab currently fails while creating its loopback namespace. Tool-using workers need the verified `-s danger-full-access` route, but only for work Burooj already authorized; constrain the worker with a narrow cwd, explicit scope, and validation.
-- For K3, use the route printed by `bjslab-context agents`. Catalog presence alone is not a health check; the direct `kimi/k3` route currently returns a provider 402 while the preferred Nous alias works.
+- Use `opencode-go/kimi-k3` and `opencode-go/deepseek-v4-flash` for the featured routed workers. They remain Codex-harness subagents through OpenCodex; OpenCode Go is the upstream account, not the agent harness.
+- Keep new sessions on OpenCodex v1 while native-to-routed v2 tasks arrive backend-encrypted. `ocx agent subagents set` currently restores the mode defaults, so re-run `ocx v2 mode v1` after changing the roster and verify with `ocx v2 status`.
 - T3 Connect carries control and events. It does not mount or synchronize Mac files onto bjslab.
 - A remembered path, old session cwd, issue body, or capability note can be stale. Verify the live owner before acting.
 - The wrappers expose credentials only to their child process. Do not print their environment or replace them with inline tokens.

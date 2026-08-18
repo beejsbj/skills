@@ -26,11 +26,23 @@ project_root() {
 
 catalog_status() {
   local slug=$1
-  if [[ -r "$catalog" ]] && jq -e --arg slug "$slug" '.models[] | select(.slug == $slug)' "$catalog" >/dev/null 2>&1; then
-    printf '%s' cataloged
-  else
+  local priority
+  if [[ ! -r "$catalog" ]]; then
     printf '%s' unavailable
+    return
   fi
+  priority="$(jq -r --arg slug "$slug" 'first(.models[] | select(.slug == $slug) | (.priority // 999)) // empty' "$catalog" 2>/dev/null)"
+  if [[ -z "$priority" ]]; then
+    printf '%s' unavailable
+  elif [[ "$priority" =~ ^[0-9]+$ && "$priority" -lt 5 ]]; then
+    printf '%s' featured
+  else
+    printf '%s' cataloged
+  fi
+}
+
+command_version() {
+  "$@" 2>/dev/null | head -1 || printf '%s' '<unavailable>'
 }
 
 show_banner() {
@@ -53,18 +65,21 @@ show_agents() {
   cat <<EOF
 worker policy: delegate bounded reasoning, research, verification, and execution without waiting for Burooj to repeat the request
 native Codex harness: preferred when Codex tools and behavior are wanted; OpenCodex supplies extra model routes
+  runtime:  $(command_version codex --version); $(command_version ocx --version)
+  roster:   at most five model overrides are advertised by native spawn_agent
   Terra:    gpt-5.6-terra ($(catalog_status gpt-5.6-terra))
   Luna:     gpt-5.6-luna ($(catalog_status gpt-5.6-luna))
-  K3:       nous/moonshotai-kimi-k3 ($(catalog_status nous/moonshotai-kimi-k3); verified 2026-08-18)
-  direct:   kimi/k3 ($(catalog_status kimi/k3); provider 402 on 2026-08-18, so do not prefer it)
-  1M:      kimi/k3[1m] ($(catalog_status 'kimi/k3[1m]'); catalog presence only)
-  DeepSeek: nous/deepseek-deepseek-v4-flash-0731 ($(catalog_status nous/deepseek-deepseek-v4-flash-0731))
-            nous/deepseek-deepseek-v4-pro-0813 ($(catalog_status nous/deepseek-deepseek-v4-pro-0813))
-  one-shot: bjslab-codex-worker -C <project-root> -m <model> -s danger-full-access - < runbook.md
+  K3:       opencode-go/kimi-k3 ($(catalog_status opencode-go/kimi-k3); native spawn verified 2026-08-18)
+  DeepSeek: opencode-go/deepseek-v4-flash ($(catalog_status opencode-go/deepseek-v4-flash); native spawn verified 2026-08-18)
+  long tail: rotate a frequent model into the five slots, or launch it directly through Codex
+  rotate:   ocx agent subagents set <comma-separated-five>; ocx v2 mode v1
+  direct:   codex exec -C <project-root> -m opencode-go/deepseek-v4-pro -s danger-full-access - < runbook.md
+  note:     released Codex 0.148 rejects an unadvertised sixth native spawn override on this host
+  one-shot: codex exec -C <project-root> -m <model> -s danger-full-access - < runbook.md
   sandbox:  bjslab's restricted Codex sandbox cannot currently initialize loopback; full access is verified
             use it only for an already-authorized task, with a narrow cwd and self-contained runbook
-native subagents: use spawn_agent/Task when the active harness exposes it; use only the model overrides listed by that tool
-  catalog membership is not a spawn_agent allowlist; when K3/Luna is absent there, launch a Codex CLI worker with the model above
+native subagents: use spawn_agent/Task when exposed; current bjslab catalogue forces v1 for reliable cross-provider task delivery
+  after changing the roster, re-run 'ocx v2 mode v1' and verify 'ocx v2 status'; roster writes currently restore mode defaults
 OpenCode native:
   K3:       opencode run --format json --dir <project-root> --model opencode-go/kimi-k3 '<prompt>'
   DeepSeek: opencode run --format json --dir <project-root> --model opencode-go/deepseek-v4-pro '<prompt>'
@@ -87,7 +102,6 @@ Cockpit:         $(command_path bjslab-cockpit)
 BWS:             $(command_path bjslab-bws)
 Hermes:          $(command_path hermes) (home /home/admin/.hermes)
 Codex/OpenCodex: $(command_path codex) (catalog $catalog)
-Codex worker:    $(command_path bjslab-codex-worker)
 OpenCode:        $(command_path opencode)
 acpx:            $(acpx_route)
 workspace:       $workspace_root
@@ -130,14 +144,15 @@ show_doctor() {
   check context-command /home/admin/.local/bin/bjslab-context || failed=1
   check cockpit-wrapper /home/admin/.local/bin/bjslab-cockpit || failed=1
   check bws-wrapper /home/admin/.local/bin/bjslab-bws || failed=1
-  check codex-worker /home/admin/.local/bin/bjslab-codex-worker || failed=1
   check bws-token /home/admin/.config/bjslab/bws-token || failed=1
   check cockpit-env /home/admin/.config/cockpit/env || failed=1
   check codex-rules /home/admin/.codex/AGENTS.md || failed=1
   check opencode-rules /home/admin/.config/opencode/AGENTS.md || failed=1
   check hermes-skill /home/admin/.hermes/skills/bjslab-context/SKILL.md || failed=1
-  printf '%-25s %s\n' 'model K3 (Nous)' "$(catalog_status nous/moonshotai-kimi-k3)"
-  printf '%-25s %s\n' 'model DeepSeek Pro' "$(catalog_status nous/deepseek-deepseek-v4-pro-0813)"
+  printf '%-25s %s\n' 'Codex runtime' "$(command_version codex --version)"
+  printf '%-25s %s\n' 'OpenCodex runtime' "$(command_version ocx --version)"
+  printf '%-25s %s\n' 'model K3' "$(catalog_status opencode-go/kimi-k3)"
+  printf '%-25s %s\n' 'model DeepSeek Flash' "$(catalog_status opencode-go/deepseek-v4-flash)"
   return "$failed"
 }
 

@@ -63,7 +63,6 @@ links=(
   "/home/admin/.local/bin/bjslab-context|$script_dir/bjslab-context"
   "/home/admin/.local/bin/bjslab-cockpit|$script_dir/bjslab-cockpit"
   "/home/admin/.local/bin/bjslab-bws|$script_dir/bjslab-bws"
-  "/home/admin/.local/bin/bjslab-codex-worker|$script_dir/bjslab-codex-worker"
   "/home/admin/.config/bjslab/terminal-context.sh|$script_dir/terminal-context.sh"
   "/home/admin/.codex/AGENTS.md|$soul"
   "/home/admin/.claude/CLAUDE.md|$soul"
@@ -76,6 +75,12 @@ for mapping in "${links[@]}"; do
   report_link "$target" "$source"
   [[ "$mode" == --install ]] && install_link "$target" "$source"
 done
+
+retired_worker=/home/admin/.local/bin/bjslab-codex-worker
+if [[ -L "$retired_worker" && "$(readlink "$retired_worker")" == "$script_dir/bjslab-codex-worker" ]]; then
+  printf 'remove  %s (retired compatibility wrapper)\n' "$retired_worker"
+  [[ "$mode" == --install ]] && unlink "$retired_worker"
+fi
 
 for shell_file in /home/admin/.bashrc /home/admin/.zshrc; do
   report_hook "$shell_file"
