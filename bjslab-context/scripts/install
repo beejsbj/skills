@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+mode=${1:---check}
+[[ "$mode" == --check || "$mode" == --install ]] || { printf 'Usage: install [--check|--install]\n' >&2; exit 2; }
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+skill_dir="$(dirname "$script_dir")"
+skills_root="$(dirname "$skill_dir")"
+soul="$skills_root/souls/prime/soul.md"
+stamp="$(date +%Y%m%d-%H%M%S)"
+
+report_link() {
+  local target=$1
+  local source=$2
+  if [[ -L "$target" && "$(readlink -f "$target")" == "$(readlink -f "$source")" ]]; then
+    printf 'ok      %s -> %s\n' "$target" "$source"
+  elif [[ -e "$target" || -L "$target" ]]; then
+    printf 'replace %s -> %s\n' "$target" "$source"
+  else
+    printf 'create  %s -> %s\n' "$target" "$source"
+  fi
+}
+
+install_link() {
+  local target=$1
+  local source=$2
+  mkdir -p "$(dirname "$target")"
+  if [[ -L "$target" && "$(readlink -f "$target")" == "$(readlink -f "$source")" ]]; then
+    return 0
+  fi
+  if [[ -e "$target" || -L "$target" ]]; then
+    mv -- "$target" "$target.pre-bjslab-context-$stamp"
+  fi
+  ln -s -- "$source" "$target"
+}
+
+shell_hook='[ -r /home/admin/.config/bjslab/terminal-context.sh ] && . /home/admin/.config/bjslab/terminal-context.sh'
+
+report_hook() {
+  local target=$1
+  if [[ -f "$target" ]] && grep -Fqx "$shell_hook" "$target"; then
+    printf 'ok      %s contains bjslab terminal hook\n' "$target"
+  else
+    printf 'append  %s with bjslab terminal hook\n' "$target"
+  fi
+}
+
+install_hook() {
+  local target=$1
+  touch "$target"
+  grep -Fqx "$shell_hook" "$target" && return 0
+  printf '\n# bjslab environment pointer\n%s\n' "$shell_hook" >> "$target"
+}
+
+links=(
+  "/home/admin/.codex/skills/bjslab-context|$skill_dir"
+  "/home/admin/.agents/skills/bjslab-context|$skill_dir"
+  "/home/admin/.claude/skills/bjslab-context|$skill_dir"
+  "/home/admin/.hermes/skills/bjslab-context|$skill_dir"
+  "/home/admin/.hermes/skills/cockpit-linear-board|$skill_dir/hermes-adapters/cockpit-linear-board"
+  "/home/admin/.hermes/skills/bjslab-ops|$skill_dir/hermes-adapters/bjslab-ops"
+  "/home/admin/.local/bin/bjslab-context|$script_dir/bjslab-context"
+  "/home/admin/.local/bin/bjslab-cockpit|$script_dir/bjslab-cockpit"
+  "/home/admin/.local/bin/bjslab-bws|$script_dir/bjslab-bws"
+  "/home/admin/.local/bin/bjslab-codex-worker|$script_dir/bjslab-codex-worker"
+  "/home/admin/.config/bjslab/terminal-context.sh|$script_dir/terminal-context.sh"
+  "/home/admin/.codex/AGENTS.md|$soul"
+  "/home/admin/.claude/CLAUDE.md|$soul"
+  "/home/admin/.config/opencode/AGENTS.md|$soul"
+)
+
+for mapping in "${links[@]}"; do
+  target=${mapping%%|*}
+  source=${mapping#*|}
+  report_link "$target" "$source"
+  [[ "$mode" == --install ]] && install_link "$target" "$source"
+done
+
+for shell_file in /home/admin/.bashrc /home/admin/.zshrc; do
+  report_hook "$shell_file"
+  [[ "$mode" == --install ]] && install_hook "$shell_file"
+done
+
+if [[ "$mode" == --check ]]; then
+  printf 'check only; run with --install to apply\n'
+fi

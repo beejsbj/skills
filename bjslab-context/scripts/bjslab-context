@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+handbook_root=/home/admin/bjslab
+workspace_root=/mnt/server-ssd/BJsWorkspace
+skills_root=/mnt/server-ssd/BJsWorkspace/Projects/skills
+catalog=/home/admin/.codex/opencodex-catalog.json
+
+command_path() {
+  command -v "$1" 2>/dev/null || printf '%s' '<missing>'
+}
+
+acpx_route() {
+  if command -v acpx >/dev/null 2>&1; then
+    command -v acpx
+  elif command -v bunx >/dev/null 2>&1; then
+    printf '%s --bun acpx' "$(command -v bunx)"
+  else
+    printf '%s' '<missing>'
+  fi
+}
+
+project_root() {
+  git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || printf '%s\n' "$PWD"
+}
+
+catalog_status() {
+  local slug=$1
+  if [[ -r "$catalog" ]] && jq -e --arg slug "$slug" '.models[] | select(.slug == $slug)' "$catalog" >/dev/null 2>&1; then
+    printf '%s' cataloged
+  else
+    printf '%s' unavailable
+  fi
+}
+
+show_banner() {
+  printf 'bjslab · handbook %s/AGENTS.md · help: bjslab-context\n' "$handbook_root"
+}
+
+show_brief() {
+  printf 'environment: bjslab\n'
+  printf 'host: %s\n' "$(hostname -s)"
+  printf 'user: %s\n' "$(id -un)"
+  printf 'cwd: %s\n' "$PWD"
+  printf 'project_root: %s\n' "$(project_root)"
+  printf 'workspace_root: %s\n' "$workspace_root"
+  printf 'handbook: %s/AGENTS.md\n' "$handbook_root"
+  printf 'rule: read the handbook route for bjslab/Hermes/T3/ops work; verify live authority before mutation\n'
+  printf 'help: bjslab-context {agents|tools|handbook|doctor}\n'
+}
+
+show_agents() {
+  cat <<EOF
+worker policy: delegate bounded reasoning, research, verification, and execution without waiting for Burooj to repeat the request
+native Codex harness: preferred when Codex tools and behavior are wanted; OpenCodex supplies extra model routes
+  Terra:    gpt-5.6-terra ($(catalog_status gpt-5.6-terra))
+  Luna:     gpt-5.6-luna ($(catalog_status gpt-5.6-luna))
+  K3:       nous/moonshotai-kimi-k3 ($(catalog_status nous/moonshotai-kimi-k3); verified 2026-08-18)
+  direct:   kimi/k3 ($(catalog_status kimi/k3); provider 402 on 2026-08-18, so do not prefer it)
+  1M:      kimi/k3[1m] ($(catalog_status 'kimi/k3[1m]'); catalog presence only)
+  DeepSeek: nous/deepseek-deepseek-v4-flash-0731 ($(catalog_status nous/deepseek-deepseek-v4-flash-0731))
+            nous/deepseek-deepseek-v4-pro-0813 ($(catalog_status nous/deepseek-deepseek-v4-pro-0813))
+  one-shot: bjslab-codex-worker -C <project-root> -m <model> -s danger-full-access - < runbook.md
+  sandbox:  bjslab's restricted Codex sandbox cannot currently initialize loopback; full access is verified
+            use it only for an already-authorized task, with a narrow cwd and self-contained runbook
+native subagents: use spawn_agent/Task when the active harness exposes it; use only the model overrides listed by that tool
+  catalog membership is not a spawn_agent allowlist; when K3/Luna is absent there, launch a Codex CLI worker with the model above
+OpenCode native:
+  K3:       opencode run --format json --dir <project-root> --model opencode-go/kimi-k3 '<prompt>'
+  DeepSeek: opencode run --format json --dir <project-root> --model opencode-go/deepseek-v4-pro '<prompt>'
+  Flash:    opencode run --format json --dir <project-root> --model opencode-go/deepseek-v4-flash '<prompt>'
+Hermes resident runtime:
+  home:     /home/admin/.hermes
+  CLI:      hermes
+  ACP:      /home/admin/.local/bin/hermes-acp
+  note:     Hermes is a bjslab tenant/resident assistant, not the homelab control-plane authority
+acpx: use intentionally for ACP session control or ACP-only agents; it is not required to reach K3 or DeepSeek through Codex/OpenCodex
+roster: $skills_root/acpx/profiles.json
+EOF
+}
+
+show_tools() {
+  cat <<EOF
+handbook:        $handbook_root/AGENTS.md
+capabilities:    $handbook_root/capabilities/README.md
+Cockpit:         $(command_path bjslab-cockpit)
+BWS:             $(command_path bjslab-bws)
+Hermes:          $(command_path hermes) (home /home/admin/.hermes)
+Codex/OpenCodex: $(command_path codex) (catalog $catalog)
+Codex worker:    $(command_path bjslab-codex-worker)
+OpenCode:        $(command_path opencode)
+acpx:            $(acpx_route)
+workspace:       $workspace_root
+Cockpit source:  $skills_root/cockpit
+skills source:   $skills_root
+EOF
+}
+
+show_handbook() {
+  cat <<EOF
+router:           $handbook_root/AGENTS.md
+host access:      $handbook_root/connection-map.md
+services:         $handbook_root/service-map.md
+active drift:     $handbook_root/current-drift-and-cautions.md
+T3/OpenCodex:     $handbook_root/capabilities/t3-code.md
+Hermes:           $handbook_root/hermes.md
+capability index: $handbook_root/capabilities/README.md
+Mac -> bjslab:    $handbook_root/capabilities/remote-ssh-access.md
+bjslab -> Mac:    $handbook_root/capabilities/macbook-ssh-access.md
+network changes:  $handbook_root/runbooks/network-access-operating-pipeline.md
+EOF
+}
+
+check() {
+  local label=$1
+  local target=$2
+  if [[ -e "$target" || -L "$target" ]]; then
+    printf 'ok   %-20s %s\n' "$label" "$target"
+    return 0
+  fi
+  printf 'FAIL %-20s %s\n' "$label" "$target"
+  return 1
+}
+
+show_doctor() {
+  local failed=0
+  [[ "$(hostname -s)" == bjslab ]] && printf 'ok   %-20s %s\n' host bjslab || { printf 'FAIL %-20s %s\n' host "$(hostname -s)"; failed=1; }
+  check handbook "$handbook_root/AGENTS.md" || failed=1
+  check skills-source "$skills_root/bjslab-context/SKILL.md" || failed=1
+  check context-command /home/admin/.local/bin/bjslab-context || failed=1
+  check cockpit-wrapper /home/admin/.local/bin/bjslab-cockpit || failed=1
+  check bws-wrapper /home/admin/.local/bin/bjslab-bws || failed=1
+  check codex-worker /home/admin/.local/bin/bjslab-codex-worker || failed=1
+  check bws-token /home/admin/.config/bjslab/bws-token || failed=1
+  check cockpit-env /home/admin/.config/cockpit/env || failed=1
+  check codex-rules /home/admin/.codex/AGENTS.md || failed=1
+  check opencode-rules /home/admin/.config/opencode/AGENTS.md || failed=1
+  check hermes-skill /home/admin/.hermes/skills/bjslab-context/SKILL.md || failed=1
+  printf '%-25s %s\n' 'model K3 (Nous)' "$(catalog_status nous/moonshotai-kimi-k3)"
+  printf '%-25s %s\n' 'model DeepSeek Pro' "$(catalog_status nous/deepseek-deepseek-v4-pro-0813)"
+  return "$failed"
+}
+
+case "${1:-brief}" in
+  brief|--brief) show_brief ;;
+  agents) show_agents ;;
+  tools) show_tools ;;
+  handbook) show_handbook ;;
+  doctor) show_doctor ;;
+  --banner|banner) show_banner ;;
+  -h|--help|help)
+    printf 'Usage: bjslab-context [brief|agents|tools|handbook|doctor|banner]\n'
+    ;;
+  *)
+    printf 'Unknown view: %s\n' "$1" >&2
+    exit 2
+    ;;
+esac

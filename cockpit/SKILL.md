@@ -28,6 +28,8 @@ You  <->  Cockpit (manager-coworker / Linear truth layer)  <->  Native orchestra
 
 `cockpit.py` is an actuator and ledger: inspect, prepare, comment, question, bind, release, move, audit. It is not the orchestration brain and should not hide provider-specific lifecycle logic that the active environment can perform natively.
 
+On bjslab, invoke every command as `bjslab-cockpit ...`. That wrapper loads the app-actor environment and calls the shared script with the server's Python. The `./cockpit.py` examples below are the source-checkout form used where its shebang is valid.
+
 ### Layers
 
 Every cockpit concern lives in exactly one layer; when unsure where something belongs, name its layer first.

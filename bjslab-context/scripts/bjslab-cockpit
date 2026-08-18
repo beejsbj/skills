@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+cockpit_script=/mnt/server-ssd/BJsWorkspace/Projects/skills/cockpit/scripts/cockpit.py
+cockpit_env=/home/admin/.config/cockpit/env
+
+[[ -r "$cockpit_script" ]] || { printf 'Cockpit script unavailable: %s\n' "$cockpit_script" >&2; exit 2; }
+[[ -r "$cockpit_env" ]] || { printf 'Cockpit app-actor environment unavailable: %s\n' "$cockpit_env" >&2; exit 2; }
+
+set -a
+# shellcheck disable=SC1090
+. "$cockpit_env"
+set +a
+
+exec /usr/bin/python3 "$cockpit_script" "$@"

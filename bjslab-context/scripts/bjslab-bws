@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+bws_bin=/home/admin/.local/bin/bws
+bws_token_file=/home/admin/.config/bjslab/bws-token
+
+[[ -x "$bws_bin" ]] || { printf 'BWS CLI unavailable: %s\n' "$bws_bin" >&2; exit 2; }
+
+if [[ -z "${BWS_ACCESS_TOKEN:-}" ]]; then
+  [[ -r "$bws_token_file" ]] || { printf 'BWS machine token unavailable: %s\n' "$bws_token_file" >&2; exit 2; }
+  BWS_ACCESS_TOKEN="$(<"$bws_token_file")"
+  BWS_ACCESS_TOKEN="${BWS_ACCESS_TOKEN#BWS_ACCESS_TOKEN=}"
+  [[ -n "$BWS_ACCESS_TOKEN" ]] || { printf 'BWS machine token is empty\n' >&2; exit 2; }
+  export BWS_ACCESS_TOKEN
+fi
+
+exec "$bws_bin" "$@"
