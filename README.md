@@ -45,7 +45,7 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`tldw/`** — imported from the live OpenClaw host for extracting and summarizing YouTube transcripts with `yt-dlp`.
 
-**`unslop/`** — semantic prose review for skills, agent instructions, technical docs, and handbook material. It removes language that hides meaning while preserving informative metaphors, stable terminology, and the author's register.
+**`unslop/`** — semantic prose review for skills and agent instructions, operational handbooks and runbooks, and human-facing technical prose. It removes language that hides meaning while preserving informative metaphors, stable terminology, and the author's register.
 
 **`gsap-skills/`** — imported GSAP AI skills bundle: core GSAP, timelines, ScrollTrigger, plugins, framework usage, examples, and plugin metadata.
 

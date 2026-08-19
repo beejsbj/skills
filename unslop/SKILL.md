@@ -1,6 +1,6 @@
 ---
 name: unslop
-description: Review or revise prose for semantic slop while preserving load-bearing terminology, metaphors, voice, and document function. Use for skills, agent instructions, technical documentation, handbook material, or explicit requests to unslop or tighten writing.
+description: Semantic prose review that preserves load-bearing language, metaphor, voice, and document function. Use for skills and agent instructions, operational handbooks and runbooks, human-facing technical prose, or explicit requests to unslop or tighten writing.
 ---
 
 # Unslop
@@ -28,7 +28,7 @@ Change prose when one of these failures is present:
 - **Reader tax:** throat-clearing, repeated conclusions, stacked hedges, redundant transitions, or syntactic density makes the reader retain more than the idea requires.
 - **Terminology drift:** several names refer to one concept, or one name silently refers to several concepts.
 - **Formula over thought:** a stock contrast, tidy grouping, or canned conclusion distorts the natural shape of the material.
-- **Social residue:** sycophancy, chatbot ceremony, or unearned reassurance distracts from the response.
+- **Unearned ceremony:** praise, reassurance, or ritual politeness distracts from the response or claims a relationship the evidence does not support.
 
 Prefer concrete actors and mechanisms when they matter. Preserve passive voice when the actor is unknown or irrelevant. Replace qualitative magnitude with measurements when the text makes an empirical claim and measurements are available.
 
@@ -66,7 +66,7 @@ The revision is complete only when:
 - no change rests only on a word blacklist, punctuation preference, or claim that a pattern "sounds AI";
 - every load-bearing term and metaphor retains the distinction it carried;
 - all facts, qualifications, commands, paths, links, and authority boundaries still mean what they meant;
-- the result performs the original document's job with less reader load or greater precision.
+- every marked defect is gone, and the revision introduces no new defect from this skill's categories.
 
 When asked for an audit rather than a rewrite, report only high-signal findings. For each finding, quote the passage, name the defect, explain the lost meaning or reader cost, and propose the smallest correction. A clean audit may conclude that no change is warranted.
 
