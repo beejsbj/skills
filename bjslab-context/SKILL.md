@@ -59,7 +59,7 @@ bjslab-context doctor
 
 ## Pitfalls
 
-- OpenCodex and Codex advertise at most five native subagent overrides. On the released Codex 0.148 runtime, bjslab's live sixth-model probe still returned `model not found`; rotate a frequent model into the five slots or launch a separate `codex exec -m <exact-id>` worker.
+- Codex keeps its native `spawn_agent`/Task subagent system when model requests route through OpenCodex. The active Codex tool advertises at most five model overrides; on the released Codex 0.148 runtime, bjslab's live sixth-model probe still returned `model not found`. Rotate a frequent model into those five slots or launch a separate `codex exec -m <exact-id>` worker.
 - Plain `codex exec` is the canonical headless worker. With OpenCodex WebSockets disabled, Codex may log an initial HTTP 426 and then fall back successfully to HTTP/SSE.
 - The restricted Codex CLI sandbox on bjslab currently fails while creating its loopback namespace. Tool-using workers need the verified `-s danger-full-access` route, but only for work Burooj already authorized; constrain the worker with a narrow cwd, explicit scope, and validation.
 - Route K3 through Hermes with provider `nous` and model `moonshotai/kimi-k3`. Pin both flags and verify the resulting `--usage-file`; an answer without that receipt does not prove which provider served it.

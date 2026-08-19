@@ -64,7 +64,9 @@ show_brief() {
 show_agents() {
   cat <<EOF
 worker policy: delegate bounded reasoning, research, verification, and execution without waiting for Burooj to repeat the request
-native Codex harness: preferred when Codex tools and behavior are wanted; OpenCodex supplies extra model routes
+Codex harness + OpenCodex routing:
+  harness:  Codex owns the agent loop, tools, sessions, and native spawn_agent/Task subagents
+  routing:  OpenCodex adds upstream model routes without replacing the Codex harness
   runtime:  $(command_version codex --version); $(command_version ocx --version)
   roster:   at most five model overrides are advertised by native spawn_agent
   Terra:    gpt-5.6-terra ($(catalog_status gpt-5.6-terra))
@@ -77,7 +79,8 @@ native Codex harness: preferred when Codex tools and behavior are wanted; OpenCo
   one-shot: codex exec -C <project-root> -m <model> -s danger-full-access - < runbook.md
   sandbox:  bjslab's restricted Codex sandbox cannot currently initialize loopback; full access is verified
             use it only for an already-authorized task, with a narrow cwd and self-contained runbook
-native subagents: use spawn_agent/Task when exposed; current bjslab catalogue forces v1 for reliable cross-provider task delivery
+native subagents: Codex spawn_agent/Task works with OpenCodex-routed models advertised by the active tool
+  current bjslab catalogue forces v1 for reliable cross-provider task delivery
   after changing the roster, re-run 'ocx v2 mode v1' and verify 'ocx v2 status'; roster writes currently restore mode defaults
 Hermes/Nous:
   K3:       moonshotai/kimi-k3 (verified 2026-08-19 by Hermes usage receipt)
