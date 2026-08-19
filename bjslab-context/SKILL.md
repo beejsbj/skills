@@ -15,7 +15,7 @@ Use this skill for work involving bjslab, Mac-to-bjslab boundaries, T3 Code, Her
 
 - Run on bjslab with the `terminal` tool.
 - Prefer the installed commands. If installation drifted, invoke the scripts from `/mnt/server-ssd/BJsWorkspace/Projects/skills/bjslab-context/scripts/`.
-- Treat `/home/admin/bjslab/AGENTS.md` as the handbook router. Read only the task-relevant files it names.
+- Treat `/mnt/server-ssd/BJsWorkspace/Projects/bjslab/AGENTS.md` as the handbook router. Read only the task-relevant files it names.
 
 ## How to Run
 
@@ -62,7 +62,8 @@ bjslab-context doctor
 - OpenCodex and Codex advertise at most five native subagent overrides. On the released Codex 0.148 runtime, bjslab's live sixth-model probe still returned `model not found`; rotate a frequent model into the five slots or launch a separate `codex exec -m <exact-id>` worker.
 - Plain `codex exec` is the canonical headless worker. With OpenCodex WebSockets disabled, Codex may log an initial HTTP 426 and then fall back successfully to HTTP/SSE.
 - The restricted Codex CLI sandbox on bjslab currently fails while creating its loopback namespace. Tool-using workers need the verified `-s danger-full-access` route, but only for work Burooj already authorized; constrain the worker with a narrow cwd, explicit scope, and validation.
-- Use `opencode-go/kimi-k3` and `opencode-go/deepseek-v4-flash` for the featured routed workers. They remain Codex-harness subagents through OpenCodex; OpenCode Go is the upstream account, not the agent harness.
+- Route K3 through Hermes with provider `nous` and model `moonshotai/kimi-k3`. Pin both flags and verify the resulting `--usage-file`; an answer without that receipt does not prove which provider served it.
+- Use `opencode-go/deepseek-v4-flash` for the featured DeepSeek route through Codex/OpenCodex. OpenCode Go is the upstream account, not the agent harness.
 - Keep new sessions on OpenCodex v1 while native-to-routed v2 tasks arrive backend-encrypted. `ocx agent subagents set` currently restores the mode defaults, so re-run `ocx v2 mode v1` after changing the roster and verify with `ocx v2 status`.
 - T3 Connect carries control and events. It does not mount or synchronize Mac files onto bjslab.
 - A remembered path, old session cwd, issue body, or capability note can be stale. Verify the live owner before acting.

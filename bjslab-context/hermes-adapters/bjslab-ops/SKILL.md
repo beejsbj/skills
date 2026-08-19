@@ -16,7 +16,7 @@ bjslab-context
 bjslab-context handbook
 ```
 
-Read `/home/admin/bjslab/AGENTS.md` first, then only the task-relevant map, runbook, or capability file it names. Verify live host, authority, backup posture, and current config before a persistent change.
+Read `/mnt/server-ssd/BJsWorkspace/Projects/bjslab/AGENTS.md` first, then only the task-relevant map, runbook, or capability file it names. Verify live host, authority, backup posture, and current config before a persistent change.
 
 ## Pitfalls
 

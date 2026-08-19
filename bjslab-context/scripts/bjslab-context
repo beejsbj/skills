@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-handbook_root=/home/admin/bjslab
+handbook_root=/mnt/server-ssd/BJsWorkspace/Projects/bjslab
 workspace_root=/mnt/server-ssd/BJsWorkspace
 skills_root=/mnt/server-ssd/BJsWorkspace/Projects/skills
 catalog=/home/admin/.codex/opencodex-catalog.json
@@ -69,7 +69,6 @@ native Codex harness: preferred when Codex tools and behavior are wanted; OpenCo
   roster:   at most five model overrides are advertised by native spawn_agent
   Terra:    gpt-5.6-terra ($(catalog_status gpt-5.6-terra))
   Luna:     gpt-5.6-luna ($(catalog_status gpt-5.6-luna))
-  K3:       opencode-go/kimi-k3 ($(catalog_status opencode-go/kimi-k3); native spawn verified 2026-08-18)
   DeepSeek: opencode-go/deepseek-v4-flash ($(catalog_status opencode-go/deepseek-v4-flash); native spawn verified 2026-08-18)
   long tail: rotate a frequent model into the five slots, or launch it directly through Codex
   rotate:   ocx agent subagents set <comma-separated-five>; ocx v2 mode v1
@@ -80,8 +79,12 @@ native Codex harness: preferred when Codex tools and behavior are wanted; OpenCo
             use it only for an already-authorized task, with a narrow cwd and self-contained runbook
 native subagents: use spawn_agent/Task when exposed; current bjslab catalogue forces v1 for reliable cross-provider task delivery
   after changing the roster, re-run 'ocx v2 mode v1' and verify 'ocx v2 status'; roster writes currently restore mode defaults
+Hermes/Nous:
+  K3:       moonshotai/kimi-k3 (verified 2026-08-19 by Hermes usage receipt)
+  one-shot: hermes --provider nous -m moonshotai/kimi-k3 --reasoning <level> --usage-file <path> --in <project-root> -t <toolsets> -z '<prompt>'
+  verify:   read the usage receipt; provider must be nous, model must be moonshotai/kimi-k3, and error must be empty
+  note:     K3 is not an opencode-go route on bjslab
 OpenCode native:
-  K3:       opencode run --format json --dir <project-root> --model opencode-go/kimi-k3 '<prompt>'
   DeepSeek: opencode run --format json --dir <project-root> --model opencode-go/deepseek-v4-pro '<prompt>'
   Flash:    opencode run --format json --dir <project-root> --model opencode-go/deepseek-v4-flash '<prompt>'
 Hermes resident runtime:
@@ -89,7 +92,7 @@ Hermes resident runtime:
   CLI:      hermes
   ACP:      /home/admin/.local/bin/hermes-acp
   note:     Hermes is a bjslab tenant/resident assistant, not the homelab control-plane authority
-acpx: use intentionally for ACP session control or ACP-only agents; it is not required to reach K3 or DeepSeek through Codex/OpenCodex
+acpx: use intentionally for ACP session control or ACP-only agents; K3 runs through Hermes/Nous, not acpx
 roster: $skills_root/acpx/profiles.json
 EOF
 }
@@ -142,6 +145,7 @@ show_doctor() {
   check handbook "$handbook_root/AGENTS.md" || failed=1
   check skills-source "$skills_root/bjslab-context/SKILL.md" || failed=1
   check context-command /home/admin/.local/bin/bjslab-context || failed=1
+  check hermes-cli /home/admin/.local/bin/hermes || failed=1
   check cockpit-wrapper /home/admin/.local/bin/bjslab-cockpit || failed=1
   check bws-wrapper /home/admin/.local/bin/bjslab-bws || failed=1
   check bws-token /home/admin/.config/bjslab/bws-token || failed=1
@@ -151,7 +155,7 @@ show_doctor() {
   check hermes-skill /home/admin/.hermes/skills/bjslab-context/SKILL.md || failed=1
   printf '%-25s %s\n' 'Codex runtime' "$(command_version codex --version)"
   printf '%-25s %s\n' 'OpenCodex runtime' "$(command_version ocx --version)"
-  printf '%-25s %s\n' 'model K3' "$(catalog_status opencode-go/kimi-k3)"
+  printf '%-25s %s\n' 'Hermes K3 route' 'nous / moonshotai/kimi-k3 (verify with --usage-file)'
   printf '%-25s %s\n' 'model DeepSeek Flash' "$(catalog_status opencode-go/deepseek-v4-flash)"
   return "$failed"
 }

@@ -370,25 +370,18 @@
     }
   },
   {
-    "provider": "opencode",
-    "model": "opencode-go/kimi-k3",
+    "provider": "nous",
+    "model": "moonshotai/kimi-k3",
     "executor_class": "frontier",
     "good_for": "Premium long-horizon agent and coding work where a new Kimi-family frontier perspective is worth a deliberately bounded scout or implementation pass.",
-    "avoid_for": "Cheap iteration or loosely bounded execution: its Go allowance is much smaller than Kimi K2.7 Code and K2.6.",
+    "avoid_for": "Cheap iteration or loosely bounded execution. Hermes one-shot calls load substantial agent context, and K3 can take several minutes before returning final text.",
     "default_effort": "high",
     "cost": {
       "relative": "premium",
-      "access": "OpenCode Go subscription",
-      "subscription_usd_per_month": 10.0,
-      "api_usd_per_million_tokens": {
-        "input": 3.0,
-        "cached_input": 0.3,
-        "output": 15.0
-      },
-      "estimated_requests_per_5_hours": 110,
-      "note": "$5 introductory first month, then $10/month. Go currently assigns this model $15 of monthly included usage rather than the usual $60.",
-      "checked": "2026-07-20",
-      "source": "https://dev.opencode.ai/docs/go/"
+      "access": "Hermes through the Nous OAuth catalog",
+      "note": "Invoke with provider nous and model moonshotai/kimi-k3, then confirm both fields in the Hermes --usage-file receipt. No stable per-token price is recorded for this routed access.",
+      "checked": "2026-08-19",
+      "source": "Live Nous model catalog and verified Hermes usage receipt"
     }
   },
   {
