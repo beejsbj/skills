@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-handbook_root=/mnt/server-ssd/BJsWorkspace/Projects/bjslab
+handbook_root=/mnt/server-ssd/BJsWorkspace/cockpit/handbook/bjslab
+cockpit_root=/mnt/server-ssd/BJsWorkspace/cockpit
 workspace_root=/mnt/server-ssd/BJsWorkspace
 skills_root=/mnt/server-ssd/BJsWorkspace/Projects/skills
 catalog=/home/admin/.codex/opencodex-catalog.json
@@ -111,7 +112,7 @@ Codex/OpenCodex: $(command_path codex) (catalog $catalog)
 OpenCode:        $(command_path opencode)
 acpx:            $(acpx_route)
 workspace:       $workspace_root
-Cockpit source:  $skills_root/cockpit
+Cockpit source:  $cockpit_root
 skills source:   $skills_root
 EOF
 }
@@ -149,6 +150,7 @@ show_doctor() {
   check skills-source "$skills_root/bjslab-context/SKILL.md" || failed=1
   check context-command /home/admin/.local/bin/bjslab-context || failed=1
   check hermes-cli /home/admin/.local/bin/hermes || failed=1
+  check cockpit-command /home/admin/.local/bin/cockpit || failed=1
   check cockpit-wrapper /home/admin/.local/bin/bjslab-cockpit || failed=1
   check bws-wrapper /home/admin/.local/bin/bjslab-bws || failed=1
   check bws-token /home/admin/.config/bjslab/bws-token || failed=1
