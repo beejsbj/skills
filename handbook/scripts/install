@@ -32,7 +32,7 @@ install_link() {
     return 0
   fi
   if [[ -e "$target" || -L "$target" ]]; then
-    mv -- "$target" "$target.pre-bjslab-context-$stamp"
+    mv -- "$target" "$target.pre-handbook-$stamp"
   fi
   ln -s -- "$source" "$target"
 }
@@ -52,14 +52,14 @@ install_hook() {
   local target=$1
   touch "$target"
   grep -Fqx "$shell_hook" "$target" && return 0
-  printf '\n# bjslab environment pointer\n%s\n' "$shell_hook" >> "$target"
+  printf '\n# bjslab handbook pointer\n%s\n' "$shell_hook" >> "$target"
 }
 
 links=(
-  "/home/admin/.codex/skills/bjslab-context|$skill_dir"
-  "/home/admin/.agents/skills/bjslab-context|$skill_dir"
-  "/home/admin/.claude/skills/bjslab-context|$skill_dir"
-  "/home/admin/.hermes/skills/bjslab-context|$skill_dir"
+  "/home/admin/.codex/skills/handbook|$skill_dir"
+  "/home/admin/.agents/skills/handbook|$skill_dir"
+  "/home/admin/.claude/skills/handbook|$skill_dir"
+  "/home/admin/.hermes/skills/handbook|$skill_dir"
   "/home/admin/.hermes/skills/cockpit-linear-board|$skill_dir/hermes-adapters/cockpit-linear-board"
   "/home/admin/.hermes/skills/bjslab-ops|$skill_dir/hermes-adapters/bjslab-ops"
   "/home/admin/.codex/skills/cockpit|$cockpit_skill"
@@ -67,7 +67,7 @@ links=(
   "/home/admin/.claude/skills/cockpit|$cockpit_skill"
   "/home/admin/.hermes/skills/cockpit|$cockpit_skill"
   "/home/admin/.local/bin/cockpit|$cockpit_cli"
-  "/home/admin/.local/bin/bjslab-context|$script_dir/bjslab-context"
+  "/home/admin/.local/bin/handbook|$script_dir/handbook"
   "/home/admin/.local/bin/bjslab-cockpit|$script_dir/bjslab-cockpit"
   "/home/admin/.local/bin/bjslab-bws|$script_dir/bjslab-bws"
   "/home/admin/.config/bjslab/terminal-context.sh|$script_dir/terminal-context.sh"
@@ -81,6 +81,23 @@ for mapping in "${links[@]}"; do
   source=${mapping#*|}
   report_link "$target" "$source"
   [[ "$mode" == --install ]] && install_link "$target" "$source"
+done
+
+retired_links=(
+  "/home/admin/.codex/skills/bjslab-context|$skills_root/bjslab-context"
+  "/home/admin/.agents/skills/bjslab-context|$skills_root/bjslab-context"
+  "/home/admin/.claude/skills/bjslab-context|$skills_root/bjslab-context"
+  "/home/admin/.hermes/skills/bjslab-context|$skills_root/bjslab-context"
+  "/home/admin/.local/bin/bjslab-context|$skills_root/bjslab-context/scripts/bjslab-context"
+)
+
+for mapping in "${retired_links[@]}"; do
+  target=${mapping%%|*}
+  source=${mapping#*|}
+  if [[ -L "$target" && "$(readlink "$target")" == "$source" ]]; then
+    printf 'remove  %s (renamed to handbook)\n' "$target"
+    [[ "$mode" == --install ]] && unlink "$target"
+  fi
 done
 
 retired_worker=/home/admin/.local/bin/bjslab-codex-worker

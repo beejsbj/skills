@@ -1,4 +1,4 @@
 interface:
-  display_name: "Bjslab Context"
+  display_name: "Handbook"
   short_description: "Route bjslab work to the Cockpit handbook"
   default_prompt: "Use $cockpit and read `cockpit handbook bjslab` before acting on this bjslab task."

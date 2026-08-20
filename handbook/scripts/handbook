@@ -12,10 +12,10 @@ case "${1:-}" in
     printf 'bjslab · handbook %s · command: cockpit handbook bjslab\n' "$handbook"
     ;;
   -h|--help|help)
-    printf 'Usage: bjslab-context [--banner]\nUse: cockpit handbook bjslab\n'
+    printf 'Usage: handbook [--banner]\nUse: cockpit handbook bjslab\n'
     ;;
   *)
-    printf 'Usage: bjslab-context [--banner]\nUse: cockpit handbook bjslab\n' >&2
+    printf 'Usage: handbook [--banner]\nUse: cockpit handbook bjslab\n' >&2
     exit 2
     ;;
 esac
