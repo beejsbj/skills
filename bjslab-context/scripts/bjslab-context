@@ -1,7 +1,21 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-[[ $# -eq 0 ]] || { printf 'Usage: bjslab-context\nUse: cockpit handbook bjslab\n' >&2; exit 2; }
 command -v cockpit >/dev/null 2>&1 || { printf 'Cockpit CLI unavailable: cockpit\n' >&2; exit 2; }
 
-exec cockpit handbook bjslab
+case "${1:-}" in
+  "")
+    exec cockpit handbook bjslab
+    ;;
+  --banner|banner)
+    handbook=$(cockpit handbook bjslab)
+    printf 'bjslab · handbook %s · command: cockpit handbook bjslab\n' "$handbook"
+    ;;
+  -h|--help|help)
+    printf 'Usage: bjslab-context [--banner]\nUse: cockpit handbook bjslab\n'
+    ;;
+  *)
+    printf 'Usage: bjslab-context [--banner]\nUse: cockpit handbook bjslab\n' >&2
+    exit 2
+    ;;
+esac

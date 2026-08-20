@@ -31,7 +31,7 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`acpx/`** — adapted official skill for [openclaw/acpx](https://github.com/openclaw/acpx), the headless ACP client for reaching other models/providers, plus `profiles.json` — my model roster and taste (premium tokens for judgment, cheap classes for execution).
 
-**`cockpit/`** — the cockpit skill bundle: Linear-first project orchestration, dispatch logic, session discipline, and the `cockpit.py` script.
+**`cockpit/`** — a catalog symlink to the sibling Cockpit repository, whose root `SKILL.md` is the cross-project router. The PATH entrypoint is that repository's `bin/cockpit`; Linear is one actuator under `cockpit linear`.
 
 **`vendor/mattpocock-skills/`** — unchanged, pinned upstream suite from [mattpocock/skills](https://github.com/mattpocock/skills). The vendor exposes exactly its 25 promoted engineering and productivity skills through the manifest-driven linker; experimental and miscellaneous upstream skills stay unlinked by default.
 
