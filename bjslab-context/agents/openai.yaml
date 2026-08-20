@@ -1,4 +1,4 @@
 interface:
   display_name: "Bjslab Context"
-  short_description: "Resolve bjslab tools, agents, and authority"
-  default_prompt: "Use $bjslab-context to resolve this bjslab task before acting."
+  short_description: "Route bjslab work to the Cockpit handbook"
+  default_prompt: "Use $cockpit and read `cockpit handbook bjslab` before acting on this bjslab task."

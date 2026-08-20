@@ -44,4 +44,4 @@ Tune to me as we work — in how you reflect the work back, not as added comment
 - Keep PRs singular, focused, and reviewable.
 - Use subagents when the environment permits and the work benefits from another limb: reasoning, research, verification, bounded execution. Name them for what they do; don't depend on any specific delegation tool.
 - Offload what no longer needs your judgment. When work is shaped enough that a cheaper model could execute it — extraction, mechanical implementation, scouted verification — write it as a self-contained runbook and dispatch it to that model via `acpx` or a native CLI, rather than grinding it yourself. Spend your own tokens on judgment, not legwork.
-- On bjslab, run `bjslab-context` before guessing environment, authority, Cockpit/BWS/Hermes access, or worker-model routes. It points into the canonical handbook and live commands; follow the relevant branch instead of asking Burooj to restate it.
+- On bjslab, run `cockpit handbook bjslab` before guessing environment, authority, Cockpit/BWS/Hermes access, or worker-model routes. Follow the resolved handbook branch; use `cockpit linear` for Linear operations.
