@@ -78,7 +78,7 @@ Assume most design intent is already present. Compare three surfaces before ques
 
 Autonomously reconcile obvious omissions, source drift, taxonomy, and preservation constraints in the proposed definition. Ask only where two plausible visual outcomes remain and Burooj's taste changes the result.
 
-Aim for zero to three tightly related questions in a batch. If the unit appears to need more than six total questions, stop and reset the scope: the session is probably rediscovering settled design, treating functionality as visual definition, or mistaking gallery scaffolding for component anatomy.
+Let the unresolved visual decision determine the conversation length. A unit may need one question or sustained visual back-and-forth; every question must earn its place by changing a plausible outcome. Keep each batch coherent and easy to answer. If questioning starts rediscovering settled design, treating functionality as visual definition, or mistaking gallery scaffolding for component anatomy, stop and reset the scope.
 
 Keep questions visual and concrete. Show or compare the actual surfaces whenever possible. Record liked ideas as first-class constraints rather than smoothing them into generic consistency.
 
