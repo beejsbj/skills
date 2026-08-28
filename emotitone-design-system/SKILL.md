@@ -31,7 +31,11 @@ Raise a material contradiction instead of quietly choosing a convenient source. 
 
 ## Hold one unit
 
-One session owns one design unit and one mode: **Define**, **Formalize and adopt**, or **Verify and hand off**. Derive the unit from the tracker unless Burooj names it.
+One session owns one design unit. It starts at that unit's earliest unresolved mode—**Define**, **Formalize and adopt**, or **Verify and hand off**—and may continue through later modes in the same session once their gates are genuinely met. Derive the unit from the tracker unless Burooj names it.
+
+If Burooj names a unit later than the tracker’s active frontier, proceed with that unit unless an unresolved dependency would change its visual definition. Name the dependency and risk in the unit brief; do not block on it by default.
+
+If the tracker names a coupled unit, inventory each artifact separately: current source, current specimen, current production host, and any missing surface. Declare the temporary session boundary before asking taste questions.
 
 Before acting, state a compact unit brief:
 
@@ -78,9 +82,13 @@ Aim for zero to three tightly related questions in a batch. If the unit appears 
 
 Keep questions visual and concrete. Show or compare the actual surfaces whenever possible. Record liked ideas as first-class constraints rather than smoothing them into generic consistency.
 
+In the first response, name the exact surfaces to compare—component files and routes when known. If an expected surface does not exist, say so and treat the absence as a scoping fact, not an invitation to redesign from zero.
+
 Update the tracker after each settled batch: replace resolved frontier questions with current truth and expose only the next unresolved visual frontier. Do not turn the tracker into a transcript. An agent recommendation becomes definition truth only after Burooj explicitly accepts the shared-understanding summary.
 
 No component implementation begins before that acceptance.
+
+When Burooj asks for definition through production adoption in one request, begin at the earliest unresolved mode and queue later modes behind their gates. Continue within the same unit session after acceptance; do not prematurely implement or end the session merely because the mode changed.
 
 ## Formalize and adopt
 
