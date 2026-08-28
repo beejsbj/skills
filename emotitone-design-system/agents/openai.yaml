@@ -1,0 +1,4 @@
+interface:
+  display_name: "EmotiTone Design System"
+  short_description: "Finish the production visual-system pass"
+  default_prompt: "Use $emotitone-design-system to continue one EmotiTone visual-design unit through its current definition, adoption, or verification gate."
