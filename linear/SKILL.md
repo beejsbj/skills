@@ -117,6 +117,19 @@ Here `workflow:*` means that retired literal prefix, not every workflow-owned na
 
 Cockpit exposes the Linear issue graph without encoding any upstream workflow: full JSON reads (including comments, parent/children, assignee, and both relation directions), root/child creation, title/body/parent edits, assignment, typed relation add/remove, labels, comments, and state moves. `SOURCE blocks TARGET` is the native blocker direction.
 
+### Settled history and archiving
+
+Use `cockpit linear board --settled` when the full record of completed and abandoned work matters; it lists `Done` and `Canceled` issues together and automatically includes archived issues. The narrower `cockpit linear board --state Done` and `cockpit linear board --state Canceled` views also include archives. The unfiltered `cockpit linear board` remains the current, unarchived board.
+
+Archive only settled work through the Cockpit app actor:
+
+```bash
+cockpit linear archive BJS-123
+cockpit linear unarchive BJS-123
+cockpit linear archive-settled       # preview Done + Canceled count
+cockpit linear archive-settled --yes # perform the reversible bulk archive
+```
+
 Upstream skills compose these primitives. A frontier, claim, map, ticket, or resolution algorithm belongs to the workflow skill, never to Linear or `cockpit.py`. See [the Cockpit tracker reference](../cockpit/references/matt-linear-tracker.md) for the project-local contract written by `setup-matt-pocock-skills`.
 
 ---
