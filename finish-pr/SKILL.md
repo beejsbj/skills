@@ -9,13 +9,13 @@ Own the pull request until the user's requested finish line is true. Start from 
 
 ## Set the finish line
 
-Read the current request before mutating anything:
+Resolve the exact pull request and feature branch, then read the active request and session authorization before mutating anything:
 
 - **Create or open** ends with a pushed branch and an accurate open PR.
 - **Babysit** ends at the review-loop stability criterion below.
-- **Finish, land, merge,** or an unqualified explicit `$finish-pr` runs the full lifecycle through ordinary merge and exact post-merge cleanup.
+- **Finish, land, merge,** or an unqualified explicit `$finish-pr` runs that PR's full lifecycle through ordinary merge and safe removal of its feature branch and owned worktree.
 
-A nearer bound from the user wins. Force operations, bypassing protections, and cleanup beyond the exact merged branch or owned worktree require separate authorization.
+Earlier authorization in the active session remains valid until the user supersedes it; a nearer bound wins. Force operations, bypassing protections, and cleanup beyond the resolved PR's exact merged branch or owned worktree require separate authorization.
 
 ## Reconcile current state
 
@@ -31,7 +31,7 @@ This stage is complete when the PR URL, base, and displayed head SHA match the p
 
 ## Run the review loop
 
-For a full finish, invoke `$consult` against the stable diff before declaring the PR ready. Treat its output as candidate findings: verify each one against the source and tests.
+For a full finish, invoke `$consult` against the stable diff before declaring the PR ready and record the consulted head SHA. Treat its output as candidate findings: verify each one against the source and tests. Consult the new head again only when later changes materially alter the reviewed logic or behavior, or invalidate an earlier finding.
 
 Establish a review horizon at the current head SHA, then repeatedly refresh all review surfaces the host exposes: required checks, review decisions, inline threads, general comments, and bot findings. Consider only events that still apply to the latest code.
 
@@ -40,11 +40,13 @@ Establish a review horizon at the current head SHA, then repeatedly refresh all 
 - Surface a finding that requires product judgment or authority instead of guessing.
 - After every push, move the horizon to the new head and restart check and review observation for that SHA.
 
-Use the environment's recurring wait or monitoring mechanism while checks or reviewers are active. The loop is complete only when every known automated review job and required check for the latest head has reached a terminal state, the required checks are green, every actionable item observed in scope has a disposition, and one final refresh after those terminal results shows no newer actionable event. When the user sets a watch boundary for human review, that boundary is part of this criterion.
+Use the environment's recurring wait or monitoring mechanism while checks or reviewers are active. The latest reviewed head is ready to land only when every known automated review job and required check has reached a terminal state, all required checks and approvals pass, no blocking review remains unresolved, every other actionable item observed in scope has a disposition, and one final refresh after those terminal results shows no newer actionable event. When the user sets a watch boundary for human review, that boundary is part of this criterion.
 
 ## Land and clean up
 
-When the finish line includes landing, verify that the reviewed head is still current and mergeable, then use the repository's normal merge method. After the host records the PR as merged, remove only the exact merged feature branch and owned worktree that are safe to remove. Preserve unmatched branches, dirty worktrees, and recovery refs.
+When the finish line includes landing, verify that the reviewed head is still current, satisfies the ready-to-land criterion, and meets the repository's merge policy, then use its normal merge method. After the host records the PR as merged, remove only the exact merged feature branch and owned worktree that are safe to remove. Preserve unmatched branches, dirty worktrees, and recovery refs.
+
+## Complete or block
 
 The full workflow is complete when the host reports the PR merged, the intended mainline contains the result, exact authorized cleanup is verified, and no required monitoring process remains running.
 
