@@ -35,6 +35,8 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`finish-pr/`** — state-aware pull-request completion from branch preparation and PR creation through active review babysitting, authorized merge, and exact cleanup.
 
+**`search-party/`** — parallel candidate discovery across source ecosystems, including dedicated computer-use scouts for rendered human-facing results and evidence-graded synthesis.
+
 **`cockpit/`** — a catalog symlink to the sibling Cockpit repository, whose root `SKILL.md` is the cross-project router. The PATH entrypoint is that repository's `bin/cockpit`; Linear is one actuator under `cockpit linear`.
 
 **`vendor/mattpocock-skills/`** — unchanged, pinned upstream suite from [mattpocock/skills](https://github.com/mattpocock/skills). The vendor exposes exactly its 25 promoted engineering and productivity skills through the manifest-driven linker; experimental and miscellaneous upstream skills stay unlinked by default.
