@@ -11,7 +11,7 @@ Bring back an independent judgment, not another pair of hands and not automatic 
 
 Name the decision, verdict, or uncertainty the consultant must address. Assemble the smallest seed packet that lets a fresh model begin cold: relevant artifacts, constraints, observed behavior, and the requested output. Keep the framing neutral. Include the root agent's conclusion only when the task is explicitly to critique it, and label it as a hypothesis.
 
-Dispatch the consultation read-only unless the user separately requested delegated implementation. Tell the consultant to inspect the essential evidence itself, conduct the independent investigation needed to test the packet and uncover omissions, and return findings and reasoning that could change the decision. Broad candidate collection remains a search task; the consultant investigates only as far as its judgment requires.
+Dispatch the investigation read-only. When the user or invoking workflow names an authorized review surface, have the consultant publish its judgment there; publication is part of the consultation, not delegated implementation. Keep any write confined to that surface. Tell the consultant to inspect the essential evidence itself, conduct the independent investigation needed to test the packet and uncover omissions, and return findings and reasoning that could change the decision. Broad candidate collection remains a search task; the consultant investigates only as far as its judgment requires.
 
 The brief is ready when a fresh model can locate the evidence, investigate the question independently, and produce the requested judgment without inheriting this conversation.
 
@@ -23,7 +23,7 @@ Choose model class and reasoning effort separately. Default a bounded consultati
 
 Prefer the environment's native subagent mechanism when it advertises the requested model. When it does not, try one appropriate authorized fallback and follow its governing skill or handbook.
 
-The dispatch is complete when the requested model and effort, fresh context, access to the essential evidence, independent checks, and an answer to the question are all present. Otherwise report the concrete inability to obtain the requested consultation after the preferred route and appropriate fallback. Do not recurse into consultations about the consultation.
+The dispatch is complete when the requested model and effort, fresh context, access to the essential evidence, independent checks, and an answer to the question are all present. When a delivery surface was named, the judgment must also be visible there with its authorship clear. Otherwise report the concrete inability to obtain the requested consultation after the preferred route and appropriate fallback. Do not recurse into consultations about the consultation.
 
 ## Reconcile
 

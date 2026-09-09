@@ -1,17 +1,16 @@
 ---
 name: finish-pr
-description: Carry a pull request from the branch's current state through creation, active review, new comments and checks, authorized merge, and exact cleanup. Use when the user asks to create, finish, land, merge, or babysit a PR; exclude requests for read-only code review.
+description: Carry an existing pull request through independent review, active babysitting of new comments and checks, authorized merge, and exact cleanup. Use when the user asks to finish, land, merge, or babysit a PR; exclude PR creation and read-only code review.
 ---
 
 # Finish a PR
 
-Own the pull request until the user's requested finish line is true. Start from current state and skip completed stages.
+Own an existing pull request until the user's requested finish line is true. Start from its current state and skip completed stages.
 
 ## Set the finish line
 
-Resolve the exact pull request and feature branch, then read the active request and session authorization before mutating anything:
+Resolve the exact existing pull request and feature branch, then read the active request and session authorization before mutating anything:
 
-- **Create or open** ends with a pushed branch and an accurate open PR.
 - **Babysit** ends at the review-loop stability criterion below.
 - **Finish, land, merge,** or an unqualified explicit `$finish-pr` runs that PR's full lifecycle through ordinary merge and safe removal of its feature branch and owned worktree.
 
@@ -19,19 +18,13 @@ Earlier authorization in the active session remains valid until the user superse
 
 ## Reconcile current state
 
-Read the repository instructions and inspect the branch, base, upstream, worktree, remotes, existing PRs, and host authentication. Separate owned changes from unrelated dirty-tree work. Reuse an existing PR for the branch instead of opening a duplicate.
+Read the repository instructions and inspect the PR, branch, base, upstream, worktree, remotes, and host authentication. Separate owned changes from unrelated dirty-tree work. If no matching PR exists, stop with that prerequisite instead of creating one.
 
-This stage is complete when the current head, intended base, existing PR state, owned changes, and requested finish line are all known from live evidence.
-
-## Prepare and open
-
-Bring only the owned change to a reviewable state. Verify it in proportion to its risk, create coherent commits, push the branch, then create or update the PR using the repository's title, body, evidence, and hosting conventions. Do not manufacture an empty PR or silently fold unrelated changes into it.
-
-This stage is complete when the PR URL, base, and displayed head SHA match the pushed branch and its checks have been triggered.
+This stage is complete when the PR URL, current head, intended base, PR state, owned changes, and requested finish line are all known from live evidence. Before review, ensure the intended changes are committed and pushed and the PR's displayed head matches the branch.
 
 ## Run the review loop
 
-For a full finish, invoke `$consult` against the stable diff before declaring the PR ready and record the consulted head SHA. Treat its output as candidate findings: verify each one against the source and tests. Consult the new head again only when later changes materially alter the reviewed logic or behavior, or invalidate an earlier finding.
+For a full finish, invoke `$consult` against the stable diff as an independent PR reviewer. Give it the resolved PR as the authorized delivery surface and require its verified findings and verdict to be submitted there as a review. Record the consulted head SHA and review URL. The consultation is complete only when its review is visible on the PR. Consult the new head again only when later changes materially alter the reviewed logic or behavior, or invalidate an earlier finding.
 
 Establish a review horizon at the current head SHA, then repeatedly refresh all review surfaces the host exposes: required checks, review decisions, inline threads, general comments, and bot findings. Consider only events that still apply to the latest code.
 
@@ -40,7 +33,7 @@ Establish a review horizon at the current head SHA, then repeatedly refresh all 
 - Surface a finding that requires product judgment or authority instead of guessing.
 - After every push, move the horizon to the new head and restart check and review observation for that SHA.
 
-Use the environment's recurring wait or monitoring mechanism while checks or reviewers are active. The latest reviewed head is ready to land only when every known automated review job and required check has reached a terminal state, all required checks and approvals pass, no blocking review remains unresolved, every other actionable item observed in scope has a disposition, and one final refresh after those terminal results shows no newer actionable event. When the user sets a watch boundary for human review, that boundary is part of this criterion.
+Use the environment's recurring wait or monitoring mechanism while checks or reviewers are active. The latest reviewed head is ready to land only when the consultation review covers it under the reconsultation rule, every known automated review job and required check has reached a terminal state, all required checks and approvals pass, no blocking review remains unresolved, every other actionable item observed in scope has a disposition, and one final refresh after those terminal results shows no newer actionable event. When the user sets a watch boundary for human review, that boundary is part of this criterion.
 
 ## Land and clean up
 

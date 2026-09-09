@@ -33,7 +33,7 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`consult/`** — independent model judgment: frame a neutral evidence packet, select a live frontier route and effort, and reconcile the consultant's verdict without surrendering the root decision.
 
-**`finish-pr/`** — state-aware pull-request completion from branch preparation and PR creation through active review babysitting, authorized merge, and exact cleanup.
+**`finish-pr/`** — carries an existing pull request through independent review, active babysitting, authorized merge, and exact cleanup.
 
 **`cockpit/`** — a catalog symlink to the sibling Cockpit repository, whose root `SKILL.md` is the cross-project router. The PATH entrypoint is that repository's `bin/cockpit`; Linear is one actuator under `cockpit linear`.
 
