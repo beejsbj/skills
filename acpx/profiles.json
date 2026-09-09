@@ -1,6 +1,21 @@
 [
   {
     "provider": "chatgpt",
+    "model": "gpt-6-astra",
+    "executor_class": "frontier",
+    "good_for": "Highest-capability independent judgment: architecture, visual taste, ambiguous decisions, difficult diagnosis, and acceptance review.",
+    "avoid_for": "Mechanical execution, bulk work, or broad unattended autonomy without explicit bounds and a stopping condition.",
+    "default_effort": "low",
+    "cost": {
+      "relative": "unknown",
+      "access": "Route-dependent; currently exposed through the bjslab T3/Codex OpenCodex catalog",
+      "note": "Treat class and effort separately: low effort is the default for a bounded consultation, not a claim that Astra is a small model. Live harness availability outranks this roster.",
+      "checked": "2026-09-09",
+      "source": "cockpit handbook bjslab capabilities/t3-code.md"
+    }
+  },
+  {
+    "provider": "chatgpt",
     "model": "gpt-5.6-sol",
     "executor_class": "frontier",
     "good_for": "Frontier workhorse: hard implementation, architecture, difficult debugging, review, and long tool-heavy execution where both judgment and follow-through matter.",
