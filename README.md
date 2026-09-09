@@ -33,7 +33,7 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`consult/`** — independent model judgment: frame a neutral evidence packet, select a live frontier route and effort, and reconcile the consultant's verdict without surrendering the root decision.
 
-**`finish-pr/`** — state-aware pull-request completion from branch preparation and PR creation through active review babysitting, authorized merge, and exact cleanup.
+**`finish-pr/`** — carries an existing pull request through independent review, active babysitting, authorized merge, and exact cleanup.
 
 **`search-party/`** — parallel candidate discovery across source ecosystems, including dedicated computer-use scouts for rendered human-facing results and evidence-graded synthesis.
 
