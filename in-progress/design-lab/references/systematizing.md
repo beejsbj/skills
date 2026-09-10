@@ -42,6 +42,16 @@ Residue scan (each must be 0 or justified):
 
 If a built composition re-declares a primitive's markup instead of importing it, that is drift — fix it by importing.
 
+## Reuse decision
+
+This is a second axis to the boundary rubric above: taxonomy chooses the layer; this chooses whether a difference deserves reuse. Make the call while classifying each artifact, without inventing a reuse quota or flattening creative intent.
+
+- **Snap** to an existing component when its identity, anatomy, behavior, and meaning are already covered; change only content or allowed configuration. If the new Sprout status is just another instance of `Chip`, use `<Chip tone="sage">Needs water</Chip>` rather than making `CareTag`.
+- **Promote as a variant** when it is the same concept and contract, but a recurring, named difference needs a stable axis with its own states or semantics. If Sprout needs a second muted status, add a `muted` `Chip` tone with explicit tokens and states; do not create a separate `DormantChip`.
+- **Promote as new** when the artifact has a distinct identity, behavior, child contract, or content role that would make the existing component misleading or force dead variants. A `GardenView` that owns plant data, page hierarchy, and several `PlantCard` children is a new composition; it may reuse `PlantCard` and `Chip`, but it is not a `PlantCard` variant.
+
+Bad choices erase information: a bespoke `CareTag` duplicates `Chip`, a `DormantChip` hides a recurring semantic axis, and a `GardenView` forced into `PlantCard` confuses screen orchestration with a reusable card. Good choices preserve the smallest sufficient reuse while leaving a genuinely different concept singular and expressive.
+
 ## Anatomy
 
 Formalize each non-trivial component by capturing (inline beside it, or in its specimen):
