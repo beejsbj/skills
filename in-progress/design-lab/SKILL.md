@@ -56,7 +56,7 @@ The scaffold you compose into (source of truth, low → high):
 
 `tokens` → `primitives` → `unique specimens` → `compounds` → `compositions`
 
-Boundary rules ("which layer is this?") live in `references/systematizing.md`. During that classification, also decide whether the artifact should **snap** to an existing component, be **promoted as a variant**, or be **promoted as new**; the reuse decision is about sameness and difference, not taxonomy layer. The decision rule and Sprout examples live in `references/systematizing.md` under **Reuse decision**.
+During classification, use `references/systematizing.md`: **Boundary rubric** chooses the layer; **Reuse decision** chooses snap, promote-as-variant, or promote-as-new when a surface needs something close to an existing component.
 
 ## Framework policy
 

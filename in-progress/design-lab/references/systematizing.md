@@ -44,13 +44,13 @@ If a built composition re-declares a primitive's markup instead of importing it,
 
 ## Reuse decision
 
-This is a second axis to the boundary rubric above: taxonomy chooses the layer; this chooses whether a difference deserves reuse. Make the call while classifying each artifact, without inventing a reuse quota or flattening creative intent.
+When a surface needs something close to an existing component, decide whether the difference earns a variant or a separate identity. Apply the boundary rubric above to classify the result.
 
-- **Snap** to an existing component when its identity, anatomy, behavior, and meaning are already covered; change only content or allowed configuration. If the new Sprout status is just another instance of `Chip`, use `<Chip tone="sage">Needs water</Chip>` rather than making `CareTag`.
+- **Snap** to an existing component when its identity, anatomy, behavior, and meaning are already covered; change only content or allowed configuration. Sprout's “Needs water” status fits `<Chip tone="clay">Needs water</Chip>`; making a second `CareTag` would duplicate the same contract.
 - **Promote as a variant** when it is the same concept and contract, but a recurring, named difference needs a stable axis with its own states or semantics. If Sprout needs a second muted status, add a `muted` `Chip` tone with explicit tokens and states; do not create a separate `DormantChip`.
-- **Promote as new** when the artifact has a distinct identity, behavior, child contract, or content role that would make the existing component misleading or force dead variants. A `GardenView` that owns plant data, page hierarchy, and several `PlantCard` children is a new composition; it may reuse `PlantCard` and `Chip`, but it is not a `PlantCard` variant.
+- **Promote as new** when sharing the existing component would obscure a distinct identity or force incompatible anatomy or behavior into its API. Sprout's `MoistureMeter` may be as compact as `Chip`, but its range, fill, and current-value semantics need their own contract; create a meter that shares foundation tokens instead of a `Chip mode="meter"` with irrelevant label states.
 
-Bad choices erase information: a bespoke `CareTag` duplicates `Chip`, a `DormantChip` hides a recurring semantic axis, and a `GardenView` forced into `PlantCard` confuses screen orchestration with a reusable card. Good choices preserve the smallest sufficient reuse while leaving a genuinely different concept singular and expressive.
+Preserve a singular artifact as a unique specimen when the taxonomy calls for it; a new identity does not automatically need a reusable family or standard variants.
 
 ## Anatomy
 
