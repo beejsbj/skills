@@ -42,6 +42,16 @@ Residue scan (each must be 0 or justified):
 
 If a built composition re-declares a primitive's markup instead of importing it, that is drift — fix it by importing.
 
+## Reuse decision
+
+When a surface needs something close to an existing component, decide whether the difference earns a variant or a separate identity. Apply the boundary rubric above to classify the result.
+
+- **Snap** to an existing component when its identity, anatomy, behavior, and meaning are already covered; change only content or allowed configuration. Sprout's “Needs water” status fits `<Chip tone="clay">Needs water</Chip>`; making a second `CareTag` would duplicate the same contract.
+- **Promote as a variant** when it is the same concept and contract, but a recurring, named difference needs a stable axis with its own states or semantics. If Sprout needs a second muted status, add a `muted` `Chip` tone with explicit tokens and states; do not create a separate `DormantChip`.
+- **Promote as new** when sharing the existing component would obscure a distinct identity or force incompatible anatomy or behavior into its API. Sprout's `MoistureMeter` may be as compact as `Chip`, but its range, fill, and current-value semantics need their own contract; create a meter that shares foundation tokens instead of a `Chip mode="meter"` with irrelevant label states.
+
+Preserve a singular artifact as a unique specimen when the taxonomy calls for it; a new identity does not automatically need a reusable family or standard variants.
+
 ## Anatomy
 
 Formalize each non-trivial component by capturing (inline beside it, or in its specimen):

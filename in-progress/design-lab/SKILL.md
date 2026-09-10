@@ -56,7 +56,7 @@ The scaffold you compose into (source of truth, low → high):
 
 `tokens` → `primitives` → `unique specimens` → `compounds` → `compositions`
 
-Boundary rules ("which layer is this?") live in `references/systematizing.md`.
+During classification, use `references/systematizing.md`: **Boundary rubric** chooses the layer; **Reuse decision** chooses snap, promote-as-variant, or promote-as-new when a surface needs something close to an existing component.
 
 ## Framework policy
 
