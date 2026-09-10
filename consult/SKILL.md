@@ -17,7 +17,7 @@ The brief is ready when a fresh model can locate the evidence, investigate the q
 
 ## Route the consultation
 
-An explicitly requested model and effort win, including when that model matches the root. Otherwise, inspect the live tool or harness catalog first, then use [`../acpx/profiles.json`](../acpx/profiles.json) for model taste. Availability is environment truth; the roster is not an availability cache. On bjslab, resolve `cockpit handbook bjslab capabilities/t3-code.md` before choosing a route.
+An explicitly requested model and effort win, including when that model matches the root. Otherwise, use [`../model-taste/SKILL.md`](../model-taste/SKILL.md) and its [roster](../model-taste/references/roster.md): inspect the live tool or harness catalog first, then apply the roster's model taste. Availability is environment truth; the roster is not an availability cache. On bjslab, resolve `cockpit handbook bjslab capabilities/t3-code.md` before choosing a route.
 
 Choose model class and reasoning effort separately. Default a bounded consultation to an available frontier judgment model at low effort. Raise effort when the ambiguity or stakes require deeper reasoning. Answer a request for another or smarter model with a qualifying model distinct from the root; report the limitation when none is available. Same-model consultation still uses a fresh context and discloses the overlap. Use a small or standard worker for extraction and mechanical execution, which is delegation rather than consultation.
 
