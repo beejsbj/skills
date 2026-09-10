@@ -22,15 +22,11 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `low`
 - **cost:**
 
-```json
-{
-  "relative": "unknown",
-  "access": "Route-dependent; currently exposed through the bjslab T3/Codex OpenCodex catalog",
-  "note": "Treat class and effort separately: low effort is the default for a bounded consultation, not a claim that Astra is a small model. Live harness availability outranks this roster.",
-  "checked": "2026-09-09",
-  "source": "cockpit handbook bjslab capabilities/t3-code.md"
-}
-```
+- **relative:** unknown
+- **access:** Route-dependent; currently exposed through the bjslab T3/Codex OpenCodex catalog
+- **note:** Treat class and effort separately: low effort is the default for a bounded consultation, not a claim that Astra is a small model. Live harness availability outranks this roster.
+- **checked:** 2026-09-09
+- **source:** cockpit handbook bjslab capabilities/t3-code.md
 
 
 ### chatgpt — gpt-5.6-sol
@@ -43,27 +39,21 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "premium",
-  "access": "Codex/ChatGPT plan limits or OpenAI API",
-  "api_usd_per_million_tokens": {
-    "input": 5,
-    "cached_input": 0.5,
-    "cache_write": 6.25,
-    "output": 30
-  },
-  "long_context_api_usd_per_million_tokens": {
-    "input": 10,
-    "cached_input": 1,
-    "cache_write": 12.5,
-    "output": 45
-  },
-  "note": "Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.",
-  "checked": "2026-07-20",
-  "source": "https://developers.openai.com/api/docs/pricing"
-}
-```
+- **relative:** premium
+- **access:** Codex/ChatGPT plan limits or OpenAI API
+- **api_usd_per_million_tokens:**
+  - **input:** `5`
+  - **cached_input:** `0.5`
+  - **cache_write:** `6.25`
+  - **output:** `30`
+- **long_context_api_usd_per_million_tokens:**
+  - **input:** `10`
+  - **cached_input:** `1`
+  - **cache_write:** `12.5`
+  - **output:** `45`
+- **note:** Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.
+- **checked:** 2026-07-20
+- **source:** https://developers.openai.com/api/docs/pricing
 
 
 ### chatgpt — gpt-5.6-terra
@@ -76,27 +66,21 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "mid",
-  "access": "Codex/ChatGPT plan limits or OpenAI API",
-  "api_usd_per_million_tokens": {
-    "input": 2.5,
-    "cached_input": 0.25,
-    "cache_write": 3.125,
-    "output": 15
-  },
-  "long_context_api_usd_per_million_tokens": {
-    "input": 5,
-    "cached_input": 0.5,
-    "cache_write": 6.25,
-    "output": 22.5
-  },
-  "note": "Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.",
-  "checked": "2026-07-20",
-  "source": "https://developers.openai.com/api/docs/pricing"
-}
-```
+- **relative:** mid
+- **access:** Codex/ChatGPT plan limits or OpenAI API
+- **api_usd_per_million_tokens:**
+  - **input:** `2.5`
+  - **cached_input:** `0.25`
+  - **cache_write:** `3.125`
+  - **output:** `15`
+- **long_context_api_usd_per_million_tokens:**
+  - **input:** `5`
+  - **cached_input:** `0.5`
+  - **cache_write:** `6.25`
+  - **output:** `22.5`
+- **note:** Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.
+- **checked:** 2026-07-20
+- **source:** https://developers.openai.com/api/docs/pricing
 
 
 ### chatgpt — gpt-5.6-luna
@@ -109,27 +93,21 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `low`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "Codex/ChatGPT plan limits or OpenAI API",
-  "api_usd_per_million_tokens": {
-    "input": 1,
-    "cached_input": 0.1,
-    "cache_write": 1.25,
-    "output": 6
-  },
-  "long_context_api_usd_per_million_tokens": {
-    "input": 2,
-    "cached_input": 0.2,
-    "cache_write": 2.5,
-    "output": 9
-  },
-  "note": "Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.",
-  "checked": "2026-07-20",
-  "source": "https://developers.openai.com/api/docs/pricing"
-}
-```
+- **relative:** low
+- **access:** Codex/ChatGPT plan limits or OpenAI API
+- **api_usd_per_million_tokens:**
+  - **input:** `1`
+  - **cached_input:** `0.1`
+  - **cache_write:** `1.25`
+  - **output:** `6`
+- **long_context_api_usd_per_million_tokens:**
+  - **input:** `2`
+  - **cached_input:** `0.2`
+  - **cache_write:** `2.5`
+  - **output:** `9`
+- **note:** Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.
+- **checked:** 2026-07-20
+- **source:** https://developers.openai.com/api/docs/pricing
 
 
 ### chatgpt — gpt-5.5
@@ -142,25 +120,19 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "premium",
-  "access": "Codex/ChatGPT plan limits or OpenAI API",
-  "api_usd_per_million_tokens": {
-    "input": 5,
-    "cached_input": 0.5,
-    "output": 30
-  },
-  "long_context_api_usd_per_million_tokens": {
-    "input": 10,
-    "cached_input": 1,
-    "output": 45
-  },
-  "note": "Standard API pricing; long-context eligibility/thresholds are model-specific. Keep for behavioral familiarity and compatibility, not a price advantage over Sol.",
-  "checked": "2026-07-20",
-  "source": "https://developers.openai.com/api/docs/pricing"
-}
-```
+- **relative:** premium
+- **access:** Codex/ChatGPT plan limits or OpenAI API
+- **api_usd_per_million_tokens:**
+  - **input:** `5`
+  - **cached_input:** `0.5`
+  - **output:** `30`
+- **long_context_api_usd_per_million_tokens:**
+  - **input:** `10`
+  - **cached_input:** `1`
+  - **output:** `45`
+- **note:** Standard API pricing; long-context eligibility/thresholds are model-specific. Keep for behavioral familiarity and compatibility, not a price advantage over Sol.
+- **checked:** 2026-07-20
+- **source:** https://developers.openai.com/api/docs/pricing
 
 
 ### claude — fable
@@ -173,20 +145,15 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `high`
 - **cost:**
 
-```json
-{
-  "relative": "very-premium",
-  "access": "Claude usage credits or Anthropic API",
-  "api_usd_per_million_tokens": {
-    "input": 10,
-    "cached_input": 1,
-    "output": 50
-  },
-  "note": "API model id: claude-fable-5. Fable requires 30-day data retention for safety monitoring; US-only inference is 1.1x. Anthropic positions it above Opus for ambitious, long-running asynchronous work.",
-  "checked": "2026-07-20",
-  "source": "https://www.anthropic.com/claude/fable"
-}
-```
+- **relative:** very-premium
+- **access:** Claude usage credits or Anthropic API
+- **api_usd_per_million_tokens:**
+  - **input:** `10`
+  - **cached_input:** `1`
+  - **output:** `50`
+- **note:** API model id: claude-fable-5. Fable requires 30-day data retention for safety monitoring; US-only inference is 1.1x. Anthropic positions it above Opus for ambitious, long-running asynchronous work.
+- **checked:** 2026-07-20
+- **source:** https://www.anthropic.com/claude/fable
 
 
 ### claude — opus
@@ -199,15 +166,11 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `high`
 - **cost:**
 
-```json
-{
-  "relative": "premium",
-  "access": "Claude plan quota or Anthropic API",
-  "note": "The unversioned Claude CLI alias can move between model versions; consult live Anthropic pricing before estimating token cost.",
-  "checked": "2026-07-20",
-  "source": "https://docs.anthropic.com/en/docs/about-claude/pricing"
-}
-```
+- **relative:** premium
+- **access:** Claude plan quota or Anthropic API
+- **note:** The unversioned Claude CLI alias can move between model versions; consult live Anthropic pricing before estimating token cost.
+- **checked:** 2026-07-20
+- **source:** https://docs.anthropic.com/en/docs/about-claude/pricing
 
 
 ### claude — sonnet
@@ -220,15 +183,11 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "mid",
-  "access": "Claude plan quota or Anthropic API",
-  "note": "The unversioned Claude CLI alias can move between model versions; consult live Anthropic pricing before estimating token cost.",
-  "checked": "2026-07-20",
-  "source": "https://docs.anthropic.com/en/docs/about-claude/pricing"
-}
-```
+- **relative:** mid
+- **access:** Claude plan quota or Anthropic API
+- **note:** The unversioned Claude CLI alias can move between model versions; consult live Anthropic pricing before estimating token cost.
+- **checked:** 2026-07-20
+- **source:** https://docs.anthropic.com/en/docs/about-claude/pricing
 
 
 ### claude — haiku
@@ -241,15 +200,11 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `low`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "Claude plan quota or Anthropic API",
-  "note": "The unversioned Claude CLI alias can move between model versions; consult live Anthropic pricing before estimating token cost.",
-  "checked": "2026-07-20",
-  "source": "https://docs.anthropic.com/en/docs/about-claude/pricing"
-}
-```
+- **relative:** low
+- **access:** Claude plan quota or Anthropic API
+- **note:** The unversioned Claude CLI alias can move between model versions; consult live Anthropic pricing before estimating token cost.
+- **checked:** 2026-07-20
+- **source:** https://docs.anthropic.com/en/docs/about-claude/pricing
 
 
 ### opencode — opencode-go/deepseek-v4-flash
@@ -262,22 +217,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `low`
 - **cost:**
 
-```json
-{
-  "relative": "very-low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.14,
-    "cached_input": 0.0028,
-    "output": 0.28
-  },
-  "estimated_requests_per_5_hours": 31650,
-  "note": "$5 introductory first month, then $10/month; one of Go's highest-throughput lanes by its published request estimate.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** very-low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.14`
+  - **cached_input:** `0.0028`
+  - **output:** `0.28`
+- **estimated_requests_per_5_hours:** `31650`
+- **note:** $5 introductory first month, then $10/month; one of Go's highest-throughput lanes by its published request estimate.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/glm-5.2
@@ -290,22 +240,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 1.4,
-    "cached_input": 0.26,
-    "output": 4.4
-  },
-  "estimated_requests_per_5_hours": 880,
-  "note": "$5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `1.4`
+  - **cached_input:** `0.26`
+  - **output:** `4.4`
+- **estimated_requests_per_5_hours:** `880`
+- **note:** $5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/kimi-k2.7-code
@@ -318,22 +263,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.95,
-    "cached_input": 0.19,
-    "output": 4
-  },
-  "estimated_requests_per_5_hours": 1350,
-  "note": "$5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.95`
+  - **cached_input:** `0.19`
+  - **output:** `4`
+- **estimated_requests_per_5_hours:** `1350`
+- **note:** $5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/kimi-k2.6
@@ -346,22 +286,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.95,
-    "cached_input": 0.16,
-    "output": 4
-  },
-  "estimated_requests_per_5_hours": 1150,
-  "note": "$5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.95`
+  - **cached_input:** `0.16`
+  - **output:** `4`
+- **estimated_requests_per_5_hours:** `1150`
+- **note:** $5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/minimax-m3
@@ -374,22 +309,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.3,
-    "cached_input": 0.06,
-    "output": 1.2
-  },
-  "estimated_requests_per_5_hours": 3200,
-  "note": "$5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.3`
+  - **cached_input:** `0.06`
+  - **output:** `1.2`
+- **estimated_requests_per_5_hours:** `3200`
+- **note:** $5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/minimax-m2.7
@@ -402,23 +332,18 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "very-low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.3,
-    "cached_input": 0.06,
-    "cache_write": 0.375,
-    "output": 1.2
-  },
-  "estimated_requests_per_5_hours": 3400,
-  "note": "$5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** very-low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.3`
+  - **cached_input:** `0.06`
+  - **cache_write:** `0.375`
+  - **output:** `1.2`
+- **estimated_requests_per_5_hours:** `3400`
+- **note:** $5 introductory first month, then $10/month; included allowance is $60 of monthly model usage.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/deepseek-v4-pro
@@ -431,22 +356,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `high`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.435,
-    "cached_input": 0.003625,
-    "output": 0.87
-  },
-  "estimated_requests_per_5_hours": 3450,
-  "note": "$5 introductory first month, then $10/month. Go currently assigns this model $15 of monthly included usage; the frontier role is about capability, not a premium per-token bill on this access path.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.435`
+  - **cached_input:** `0.003625`
+  - **output:** `0.87`
+- **estimated_requests_per_5_hours:** `3450`
+- **note:** $5 introductory first month, then $10/month. Go currently assigns this model $15 of monthly included usage; the frontier role is about capability, not a premium per-token bill on this access path.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/grok-4.5
@@ -459,22 +379,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `high`
 - **cost:**
 
-```json
-{
-  "relative": "premium",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 2,
-    "cached_input": 0.3,
-    "output": 6
-  },
-  "estimated_requests_per_5_hours": 120,
-  "note": "$5 introductory first month, then $10/month. Go currently assigns this model $15 of monthly included usage rather than the usual $60.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** premium
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `2`
+  - **cached_input:** `0.3`
+  - **output:** `6`
+- **estimated_requests_per_5_hours:** `120`
+- **note:** $5 introductory first month, then $10/month. Go currently assigns this model $15 of monthly included usage rather than the usual $60.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/glm-5.1
@@ -487,22 +402,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 1.4,
-    "cached_input": 0.26,
-    "output": 4.4
-  },
-  "estimated_requests_per_5_hours": 880,
-  "note": "$5 introductory first month, then $10/month; current published pricing and request estimates match GLM-5.2.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `1.4`
+  - **cached_input:** `0.26`
+  - **output:** `4.4`
+- **estimated_requests_per_5_hours:** `880`
+- **note:** $5 introductory first month, then $10/month; current published pricing and request estimates match GLM-5.2.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### nous — moonshotai/kimi-k3
@@ -515,15 +425,11 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `high`
 - **cost:**
 
-```json
-{
-  "relative": "premium",
-  "access": "Hermes through the Nous OAuth catalog",
-  "note": "Invoke with provider nous and model moonshotai/kimi-k3, then confirm both fields in the Hermes --usage-file receipt. No stable per-token price is recorded for this routed access.",
-  "checked": "2026-08-19",
-  "source": "Live Nous model catalog and verified Hermes usage receipt"
-}
-```
+- **relative:** premium
+- **access:** Hermes through the Nous OAuth catalog
+- **note:** Invoke with provider nous and model moonshotai/kimi-k3, then confirm both fields in the Hermes --usage-file receipt. No stable per-token price is recorded for this routed access.
+- **checked:** 2026-08-19
+- **source:** Live Nous model catalog and verified Hermes usage receipt
 
 
 ### opencode — opencode-go/mimo-v2.5
@@ -536,22 +442,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `low`
 - **cost:**
 
-```json
-{
-  "relative": "very-low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.14,
-    "cached_input": 0.0028,
-    "output": 0.28
-  },
-  "estimated_requests_per_5_hours": 30100,
-  "note": "$5 introductory first month, then $10/month; one of Go's highest-throughput lanes by its published request estimate.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** very-low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.14`
+  - **cached_input:** `0.0028`
+  - **output:** `0.28`
+- **estimated_requests_per_5_hours:** `30100`
+- **note:** $5 introductory first month, then $10/month; one of Go's highest-throughput lanes by its published request estimate.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/mimo-v2.5-pro
@@ -564,22 +465,17 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "very-low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.435,
-    "cached_input": 0.003625,
-    "output": 0.87
-  },
-  "estimated_requests_per_5_hours": 3250,
-  "note": "$5 introductory first month, then $10/month. Go currently assigns this model $15 of monthly included usage rather than the usual $60.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** very-low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.435`
+  - **cached_input:** `0.003625`
+  - **output:** `0.87`
+- **estimated_requests_per_5_hours:** `3250`
+- **note:** $5 introductory first month, then $10/month. Go currently assigns this model $15 of monthly included usage rather than the usual $60.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/qwen3.7-max
@@ -592,23 +488,18 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `high`
 - **cost:**
 
-```json
-{
-  "relative": "mid",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 2.5,
-    "cached_input": 0.5,
-    "cache_write": 3.125,
-    "output": 7.5
-  },
-  "estimated_requests_per_5_hours": 950,
-  "note": "$5 introductory first month, then $10/month; included request allowance reflects its higher per-token rate.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** mid
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `2.5`
+  - **cached_input:** `0.5`
+  - **cache_write:** `3.125`
+  - **output:** `7.5`
+- **estimated_requests_per_5_hours:** `950`
+- **note:** $5 introductory first month, then $10/month; included request allowance reflects its higher per-token rate.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/qwen3.7-plus
@@ -621,29 +512,23 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "very-low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.4,
-    "cached_input": 0.04,
-    "cache_write": 0.5,
-    "output": 1.6
-  },
-  "long_context_api_usd_per_million_tokens": {
-    "input": 1.2,
-    "cached_input": 0.12,
-    "cache_write": 1.5,
-    "output": 4.8
-  },
-  "estimated_requests_per_5_hours": 4300,
-  "note": "$5 introductory first month, then $10/month; long-context pricing applies above 256K tokens.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** very-low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.4`
+  - **cached_input:** `0.04`
+  - **cache_write:** `0.5`
+  - **output:** `1.6`
+- **long_context_api_usd_per_million_tokens:**
+  - **input:** `1.2`
+  - **cached_input:** `0.12`
+  - **cache_write:** `1.5`
+  - **output:** `4.8`
+- **estimated_requests_per_5_hours:** `4300`
+- **note:** $5 introductory first month, then $10/month; long-context pricing applies above 256K tokens.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### opencode — opencode-go/qwen3.6-plus
@@ -656,29 +541,23 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "OpenCode Go subscription",
-  "subscription_usd_per_month": 10,
-  "api_usd_per_million_tokens": {
-    "input": 0.5,
-    "cached_input": 0.05,
-    "cache_write": 0.625,
-    "output": 3
-  },
-  "long_context_api_usd_per_million_tokens": {
-    "input": 2,
-    "cached_input": 0.2,
-    "cache_write": 2.5,
-    "output": 6
-  },
-  "estimated_requests_per_5_hours": 3300,
-  "note": "$5 introductory first month, then $10/month; long-context pricing applies above 256K tokens.",
-  "checked": "2026-07-20",
-  "source": "https://dev.opencode.ai/docs/go/"
-}
-```
+- **relative:** low
+- **access:** OpenCode Go subscription
+- **subscription_usd_per_month:** `10`
+- **api_usd_per_million_tokens:**
+  - **input:** `0.5`
+  - **cached_input:** `0.05`
+  - **cache_write:** `0.625`
+  - **output:** `3`
+- **long_context_api_usd_per_million_tokens:**
+  - **input:** `2`
+  - **cached_input:** `0.2`
+  - **cache_write:** `2.5`
+  - **output:** `6`
+- **estimated_requests_per_5_hours:** `3300`
+- **note:** $5 introductory first month, then $10/month; long-context pricing applies above 256K tokens.
+- **checked:** 2026-07-20
+- **source:** https://dev.opencode.ai/docs/go/
 
 
 ### cursor — composer-2.5-fast
@@ -691,19 +570,14 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "mid",
-  "access": "Cursor included usage pool, then on-demand",
-  "api_usd_per_million_tokens": {
-    "input": 3,
-    "output": 15
-  },
-  "note": "Fast changes throughput, not intelligence; Cursor may expose it as a variant rather than a distinct picker entry.",
-  "checked": "2026-07-20",
-  "source": "https://cursor.com/composer"
-}
-```
+- **relative:** mid
+- **access:** Cursor included usage pool, then on-demand
+- **api_usd_per_million_tokens:**
+  - **input:** `3`
+  - **output:** `15`
+- **note:** Fast changes throughput, not intelligence; Cursor may expose it as a variant rather than a distinct picker entry.
+- **checked:** 2026-07-20
+- **source:** https://cursor.com/composer
 
 
 ### cursor — composer-2.5
@@ -716,17 +590,12 @@ This is the source-dated model judgment roster. Provider identifies the model fa
 - **default_effort:** `medium`
 - **cost:**
 
-```json
-{
-  "relative": "low",
-  "access": "Cursor included usage pool, then on-demand",
-  "api_usd_per_million_tokens": {
-    "input": 0.5,
-    "output": 2.5
-  },
-  "note": "Standard and Fast use the same model intelligence; this is the cheaper throughput tier.",
-  "checked": "2026-07-20",
-  "source": "https://cursor.com/composer"
-}
-```
+- **relative:** low
+- **access:** Cursor included usage pool, then on-demand
+- **api_usd_per_million_tokens:**
+  - **input:** `0.5`
+  - **output:** `2.5`
+- **note:** Standard and Fast use the same model intelligence; this is the cheaper throughput tier.
+- **checked:** 2026-07-20
+- **source:** https://cursor.com/composer
 
