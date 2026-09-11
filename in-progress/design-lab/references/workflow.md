@@ -47,12 +47,14 @@ Keep these claims independent:
 
 | Claim | Record | Does not establish |
 | --- | --- | --- |
-| Definition | Proposed, accepted with a receipt, disputed, or not yet defined | A file or render does not establish user acceptance |
+| Definition | Proposed, chosen under delegated authority, user-accepted with a receipt, disputed, or not yet defined | A file or render does not establish user acceptance |
 | Authoritative source | Exact owner/public seam, competing source if unresolved | A tidy component does not establish adoption |
 | Real demonstration | Workbench and final-guide example paths/status separately; each imports the real source | A mock or copied renderer does not establish a real example |
 | Production adoption | Named actual consumers; partial, complete, deferred, or not in scope | An importable library or greenfield demo does not establish production use |
 
 For example, a Button can have a proposed definition, a working source, and a real workbench while its guide entry is pending and production adoption is out of scope. That is a valid intermediate state, not an accepted or fully delivered unit. Conversely, existing production use does not settle a disputed definition.
+
+When the user delegates creative choices (for example, “make the creative calls”), record **chosen under delegated authority** and the instruction that grants it. Continue within that scope without inventing an acceptance gate. Reserve **user-accepted** for an actual acceptance of the result; delegated choice and personal taste approval are different claims.
 
 Update current truth after settled decisions, promotions, meaningful verification, and handoff. Replace resolved frontier questions rather than appending the conversation. A short acceptance receipt records what was accepted and its source; silence or an agent recommendation is not that receipt. Maintain named design constraints at the level needed to prevent their loss; keep implementation detail and historical receipts in sources, Git, or an existing `DESIGN_LOG.md`. Add a separate log only when chronology outgrows the tracker.
 
