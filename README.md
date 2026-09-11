@@ -57,6 +57,8 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`in-progress/diglot-weave/`** — recovered packet for a future `diglot-weave` skill, including source transcripts, raw zip artifacts, recovered skill drafts, and prior-art notes.
 
+**`in-progress/visual-workshop/`** — candidate packet for a domain-general shared visual surface; evidence, implementation form, persistence, and skill boundaries remain under investigation.
+
 ---
 
 ## Credits / inspiration
