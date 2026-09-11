@@ -1,92 +1,97 @@
-# Creative Floor (Taste Axis Reference)
+# Creative floor
 
-The Creative axis is the user's to review — but only **once, at the end**, and only at taste altitude. Before that handoff the skill guarantees a floor: the work must read as a *chosen* direction, not the model's default. This file holds the two things that keep it there — how to **explore** before committing, and the **floor self-audit** that runs before handoff. Like `systematizing.md`, none of this becomes a user question: explore, decide, fix, assert it done.
+Use this during exploration and on rendered compositions before handoff. The review checks whether the work follows an intentional direction, leads the eye, and gives meaningful feedback. It supports the user's taste judgment; it cannot guarantee that the user will like the result.
 
-Cohesion (`systematizing.md`) asks *is it systematized*. The floor asks *is it any good*. They are orthogonal — a system can pass cohesion perfectly, every value tokenized and every primitive imported, and still be slop: the default cream-and-terracotta look, flat hierarchy, dead buttons. The floor is what catches that. Don't re-audit token tracing here; that's cohesion's job.
+Ownership and token tracing belong to `systematizing.md`. Here, examine the actual experience. A coherent import graph does not make an indistinct or poorly composed interface good.
 
-## Exploring directions
+## Explore before committing
 
-**Variety is written, not rolled.** These models have no temperature knob — you cannot sample your way to range. If you don't *specify* distinct directions, you get one safe default dressed three ways. So spec them.
+Specify variety deliberately rather than expecting repeated attempts to produce range.
 
-Before composing, diverge:
+- **Established direction:** preserve accepted palette, type, doctrine, and liked details. Explore treatments within the unresolved space. A conflicting source export does not automatically supersede accepted intent.
+- **Open direction:** develop 3–4 genuinely distinct candidates, each tied to the brief. Specify ground/accent values, named display/body type, density, geometry/elevation, and interaction character. Make at least one a plausible departure from your reflexive choice. Different shades of one palette are not distinct directions.
 
-- **If the material pins a direction** (brand, existing tokens, Claude Design HTML, a doctrine) — stay inside it. Explore a few *treatments* within the given palette/type, not away from it. Don't invent a rival brand.
-- **If it doesn't** — generate **3–4 genuinely distinct directions**. Each is a concrete spec, not an adjective:
-  - **ground + accent** — background and one or two accent colors, as real values (lean `oklch()` for harmony)
-  - **type** — named display + body faces, with intent (not "a sans")
-  - **density** — tight / normal / loose, on a 4 or 8px base
-  - **geometry + elevation** — radius and shadow as one committed system (sharp / soft / pill)
-  - **motion + component style** — quiet / expressive / playful; filled / ghost / outlined / elevated
+Use a small temporary workbench to render consequential comparisons or a representative composition. Written specs guide the work; they are not visual evidence. When an unresolved intent decision would materially change the system, show the concrete alternatives and ask before dependent construction. Otherwise choose, state the rationale, and proceed.
 
-  Rules: the directions **must not share a palette family** — four takes on warm-cream is *one* direction, not four. Make **at least one off-distribution** (a bet you wouldn't reach for by reflex). Tie each to the brief in one line of rationale.
+Freeze one direction in the tracker, keeping alternatives as short notes. Record accepted intent separately from the agent's proposal. Preserve distinctive details through systematization; a reuse decision should not flatten a meaningful creative difference. Reopen the direction for new evidence or user steering, not restless mid-build restyling.
 
-Then **freeze one** as the visible direction block and record the alternates for the report. The user re-runs for a different bet; you do not stop to ask which.
+## Review the rendered result
 
-## The floor self-audit
+Inspect the real composition and later the final guide at representative sizes and states. Record concrete findings and fix them at their owners:
 
-Run before the taste handoff. Every hit is fixed, not reported as a question — symmetric to the cohesion residue scan.
+- **Unchosen house style.** Cream ground, serif display, terracotta/amber, and italic word accents reached for together without a brief-specific reason. The same applies to any habitual palette/type package. A calm organic direction can earn these choices; their presence alone is not a failure.
+- **Generic defaults.** Decorative gradients, emoji labels, stock card recipes, placeholder illustration, or an unconsidered font stack replacing a deliberate decision. Familiar elements are legitimate when they serve the brief. Ask what the choice contributes rather than banning a color or typeface.
+- **Flat hierarchy.** A first look cannot find the main purpose or action. Use scale, weight, tone, position, and density to establish a path; not every distinction needs all five. Check realistic long and empty content, not only the ideal hero.
+- **Unclear feedback.** Interactive states are difficult to perceive, focus is lost, or transitions obscure cause and effect. Use motion only where it helps; immediate updates and Reduced Motion stillness are valid. Decorative movement on a noninteractive status does not make it a better control.
+- **No point of view.** Nothing in color, type, layout, imagery, or interaction connects the result to this brief. Distinctiveness can be quiet and functional; it need not force spectacle into a dense tool.
 
-Floor residue (each must be 0 or deliberately justified by the brief):
+Treat a failed review as a concrete design problem, not a score to assert away. If the direction itself is the problem, revise it and record the reason. If implementation drifted from a sound direction, correct the affected source. Keep existing behavior intact unless a change is in scope.
 
-- **House-style default.** The editorial-warm look — cream `#f4f1ea`-family ground + serif display (Georgia / Playfair / Fraunces) + terracotta/amber accent + italic word-accents — reached for *without the brief calling for it*. Any one can be a choice; all of them together on a dashboard, dev-tool, fintech, or enterprise surface is the default-template look, today's purple gradient. If the frozen direction itself drifted here with no reason, **re-pick**; if a surface drifted here off the frozen direction, **pull it back** to the direction.
-- **Generic tropes as defaults.** Trendy multi-stop / neon gradients on large surfaces; emoji as decoration (🚀 ✅ prepending labels the brand doesn't use); rounded-corner + `border-left: 4px` as the *default* card; placeholder-grade hand-drawn SVG of people or scenes presented as final; Inter / Roboto / bare system stack as an *unconsidered* default. (Cohesion owns whether values are tokenized; the floor owns whether the *choice* was made.)
-- **Flat hierarchy.** Primary / secondary / tertiary not separated by size + weight + color + position + density; the hero composition doesn't lead the eye; the 5-second test fails (a first look can't find the one thing that matters).
-- **Dead interaction.** Interactive primitives with no hover / active / focus feedback, or state changes with no transition. The state *matrix* is cohesion's anatomy; the floor asks whether those states actually **read as feedback** in the realized UI.
-- **Safe everywhere.** No axis — color, type, layout, or motion — where the direction commits boldly. The result is generically pleasant and forgettable. One strong choice beats many safe ones; if nothing is chosen with conviction, the bet wasn't placed.
+## Worked example: chosen hierarchy
 
-## Worked examples
+Sprout is the invented plant-care system in `systematizing.md`. Warm paper and organic accents can express its natural, unhurried brief. The same treatment on a log viewer needs its own rationale; a domain label alone neither earns nor forbids a palette.
 
-Same invented system as `systematizing.md` — **Sprout**, a calm plant-care app — so the references interlock. Foundation tokens as defined there (`--paper:#f4f1ea; --ink:#2b2a26; --sage:#7c9885; --clay:#c9785b; …`).
+Suppose Sprout's garden view sets the kicker, heading, and summary at nearly equal size/weight, with an action that visually recedes. The hierarchy fails even when every value is a token. A better composition gives the task one clear headline and the primary action one clear visual role.
 
-### 1. Default vs. chosen — the same palette, judged by the brief
-
-Sprout's warm-organic palette (cream paper, sage, clay) is **not** house-style residue — a calm plant-care app earns warm-organic; it traces to the brief (natural, unhurried, tactile). The floor passes it.
-
-The *same* palette on a different brief fails:
-
-❌ Floor residue — a developer-tooling dashboard handed Sprout's cream/serif/clay because it's the reflex:
+These excerpts show the ownership: shared recipes in tokens, action feedback in Button, and arrangement in the composition. Existing sources are extended rather than re-declared inside the guide.
 
 ```css
-/* LogStream.astro — a CLI log viewer */
-.viewport { background:#f4f1ea; font-family:Georgia, serif; }
-.tail-btn { background:#c9785b; }
+/* tokens.css — additional shared type, action, and motion roles */
+:root {
+  --text-sm: .875rem;
+  --text-lg: 1.125rem;
+  --text-hero: clamp(2rem, 5vw, 4rem);
+  --weight-strong: 700;
+  --leading-tight: 1.05;
+  --tracking-label: .08em;
+  --text-muted: #59574f;
+  --action-bg: var(--ink);
+  --action-fg: var(--paper);
+  --action-hover-bg: #45433d;
+  --focus-width: 2px;
+  --focus-offset: 3px;
+  --dur-feedback: 160ms;
+  --ease-feedback: ease-out;
+}
+
+/* Inside the authoritative Button: relevant excerpt, not its whole API. */
+.button {
+  color: var(--action-fg);
+  background: var(--action-bg);
+  transition: background-color var(--dur-feedback) var(--ease-feedback);
+}
+.button:enabled:hover { background: var(--action-hover-bg); }
+.button:focus-visible {
+  outline: var(--focus-width) solid var(--ink);
+  outline-offset: var(--focus-offset);
+}
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+}
 ```
-- cream ground + serif display + terracotta on a dense, technical, monospace-native surface is the default look wearing the wrong brief — it reads as "AI made a dashboard," not as a chosen tool. **Re-pick:** a cool, near-black ground, a real mono/grotesk, one functional accent for the live state.
-
-The lesson the floor encodes: warm-editorial is a **legitimate choice** and a **lazy default** — the only difference is whether the brief asked for it.
-
-### 2. Flat vs. leading hierarchy in the hero
-
-❌ Flat — the hero composition treats every element at one altitude:
 
 ```astro
-<section class="hero">
+---
+// compositions/GardenHero.astro
+import Button from '../primitives/Button.astro';
+---
+<section>
   <p class="kicker">Your garden</p>
   <h1>Water Monstera today</h1>
-  <p class="sub">3 plants need attention this week</p>
-  <button>Open garden</button>
+  <p class="summary">3 plants need attention this week</p>
+  <Button>Open garden</Button>
 </section>
 <style>
-  .kicker,.sub { font-size:18px; color:var(--ink); }
-  h1 { font-size:22px; font-weight:500; }
-  button { background:var(--sage-1); color:var(--ink); }
+  .kicker { font-size: var(--text-sm); letter-spacing: var(--tracking-label);
+            text-transform: uppercase; color: var(--text-muted); }
+  h1 { font-size: var(--text-hero); font-weight: var(--weight-strong);
+       line-height: var(--leading-tight); text-wrap: balance; }
+  .summary { font-size: var(--text-lg); color: var(--text-muted); }
 </style>
 ```
-- 18 / 22 / 18px at near-equal weight and one flat tone — nothing leads; the eye has to hunt. The CTA recedes into a tint. 5-second test fails.
 
-✅ Leading — size + weight + tone + a committed primary action create a path:
+The intended path is kicker → task → summary → action. Render it to check that this path actually reads, that the headline fits narrow hosts, and that focus/feedback remains visible. Tokenized CSS alone establishes none of those outcomes. The final guide imports GardenHero and Button rather than reproducing this markup.
 
-```astro
-<style>
-  .kicker { font-size:var(--text-sm); letter-spacing:.08em; text-transform:uppercase; color:var(--sage); }
-  h1      { font-size:var(--text-5xl); font-weight:700; line-height:1.05; text-wrap:balance; }
-  .sub    { font-size:var(--text-lg); color:color-mix(in oklch, var(--ink), transparent 35%); }
-  .cta    { background:var(--clay); color:var(--paper); padding:var(--space-md) var(--space-xl);
-            transition:transform var(--dur-calm) var(--ease-gentle); }
-  .cta:hover { transform:translateY(-1px); }
-  .cta:focus-visible { outline:2px solid var(--clay); outline-offset:2px; }
-</style>
-```
-- one large bold headline carries the eye; the kicker recedes by size and the muted accent; the sub is de-emphasized by tone; the CTA is the single saturated, lifted, focus-ringed element. Hierarchy *leads*, and the interaction is alive — values still all trace to tokens, so cohesion holds too.
+## Attribution
 
-**Test the floor with one question per surface:** could a stranger, in five seconds, name the one thing this is for — and does it look like *a* decision rather than *the* decision every model makes? If no, the floor isn't met yet.
+The exploration and creative-floor approach was informed by [Trystan-SA/claude-design-system-prompt](https://github.com/Trystan-SA/claude-design-system-prompt), as recorded in this repository's June 28 rebuild commit `7417f97`. The current rules are adapted to Design Lab's workbench, ownership, and review workflow.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Lab"
-  short_description: "Compose raw design material into a cohesive, importable design system."
-  default_prompt: "Use design-lab to compose a cohesive design system from the provided repo, references, moodboards, screenshots, words, or partial components. Generate or extend one design direction and realize it (including a hero composition), then systematize it autonomously into the taxonomy — every value a token, every component imported not copied, cohesion self-audited. Match source-of-truth components to the consuming app's framework; default the style-guide surface to Astro static. Run with no systematizing gates and stop at one final taste review."
+  short_description: "Build a cohesive system and publish its style guide."
+  default_prompt: "Use $design-lab to develop the provided material into one cohesive design system: explore in a temporary workbench, track decisions and source ownership, verify real components and compositions, and assemble the final style guide for taste review."
