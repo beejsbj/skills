@@ -1,4 +1,4 @@
 interface:
   display_name: "Remember"
-  short_description: "Recover evidence from your personal history"
-  default_prompt: "Use $remember to recover what I previously said, saw, saved, planned, or did."
+  short_description: "Find past conversations, resources, and events"
+  default_prompt: "Use $remember to find the personal records behind my recollection and answer with sources and any remaining uncertainty."

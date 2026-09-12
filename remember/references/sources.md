@@ -1,27 +1,32 @@
 # Source access
 
-Use only the entries selected by the routing table in `SKILL.md`. Prefer a connected read-only tool when one is available; use these local handles as fallbacks. These bjslab handles were verified on 2026-09-12, but the living handbook remains authoritative.
+Read the shared rules below, then the entries selected in `SKILL.md`. These entries map recall clues to access routes; current tool help and the governing handbook own command syntax and access policy.
 
-## bjslab authority
+## Shared access rules
 
-Before using bjslab services or private data tools, run `cockpit handbook bjslab` and read the resolved router. For Karakeep, Gmail, Calendar, or other personal APIs, follow `capabilities/personal-data-tools.md` and its linked runbook. Reads stay scoped; never print secret-bearing configuration.
+Prefer an available authenticated search/read connector. Inspect its tool schema to confirm scope, filters, pagination, and whether reads can mark items read. Choose a read that preserves source state. A source absent from the active tool list may still be discoverable through tool search.
 
-From bjslab, the Mac's read-only SSH alias is `macbook`. From another environment, use the connected tools or the access route supplied by that environment rather than guessing credentials.
+On bjslab, run `cockpit handbook bjslab` and read its resolved router before using services or private tools. From that handbook:
+
+- `workspace-map.md` and `service-map.md` locate Brain, Records, and chat-scrobbler.
+- `capabilities/personal-data-tools.md` routes Karakeep and Google to their maintained runbooks and safe wrappers.
+- `capabilities/macbook-ssh-access.md` governs reaching the Mac via `ssh macbook`.
+
+On another host, use that environment's configured connectors, workspace map, and access guidance. Paths below are location hints, not a reason to create directories or cross hosts. Verify the selected path exists and read applicable local instructions before content searches. If no supported route exists, report the source unavailable and continue with another plausible source.
 
 ## Brain
 
-Best for Burooj's own language: journal entries, reflections, durable synthesis, voice transcripts, imported reading notes, and unresolved personal ideas.
+Use for Burooj's own language: journal entries, reflections, synthesis, voice transcripts, reading notes, and personal ideas.
 
-- bjslab: `/mnt/server-ssd/BJsWorkspace/Brain`
-- Mac: `/Users/burooj/BJsWorkspace/Brain`
+Known vault locations are `/mnt/server-ssd/BJsWorkspace/Brain` on bjslab and `/Users/burooj/BJsWorkspace/Brain` on the Mac. Read the vault's `AGENTS.md`. Start with likely filenames or subdirectories, then use bounded `rg` searches in Markdown for distinctive fragments and aliases. Open the matching section with enough context to identify authorship and date.
 
-Read the vault's `AGENTS.md` before searching. Start with filenames and Markdown text using `rg`; combine distinctive fragments with aliases and a likely subdirectory. Follow backlinks or named notes when a hit is clearly derivative. `Journal/` and `Voice Recordings/` are primary lived evidence; `Readwise/` is imported evidence. Treat `Connections/`, `fallingout/`, and health material as especially sensitive and search them only when the request points there.
+`Journal/` and `Voice Recordings/` can contain firsthand accounts; `Readwise/` contains imported material. Follow a clearly derivative note to its origin. Search relationship or health areas, including `Connections/` and `fallingout/`, only when the request points there. A vault-wide content query also touches those areas: choose or exclude directories before running it.
 
 ## Chat-scrobbler
 
-Best for earlier conversations with ChatGPT, Claude, and Gemini, including edited or abandoned branches. It does not prove that a decision was later carried out.
+Use for prior captured AI conversations. Prefer connected search tools, then retrieve the matching messages and nearby context. Establish speaker and branch: a suggestion, an abandoned branch, and an accepted decision are different evidence.
 
-Prefer the connected chat-scrobbler MCP tools: search for candidate messages, then fetch only the relevant session for context. On bjslab, the read-only CLI fallback is:
+The bjslab CLI fallback is `/home/admin/.local/bin/chat-scrobbler`. Its known store handles are:
 
 ```sh
 CANONICAL_DIR=/mnt/server-ssd/chat-scrobbler/canonical/sessions \
@@ -34,82 +39,59 @@ INDEX_PATH=/mnt/server-ssd/chat-scrobbler/index/sessions.db \
   --markdown --role user,assistant --text-only
 ```
 
-Try exact fragments, distinctive nouns, and paraphrases separately. Search results provide session IDs and timestamps. Fetch a full session only after a candidate hit; keep reasoning and tool blocks out unless they are themselves the object of recall. The host fallback is lexical; a configured MCP search may also use semantic recall. Capture is not exhaustive: very old conversations may be missing if they were never opened while the extension was active.
+Confirm supported options with the top-level `chat-scrobbler --help`. Its subcommands do not implement separate help; in particular, `list --help` performs a list operation. Use result limits and message-level retrieval if the current interface supports them. The session ID comes from a search hit. If only whole-session retrieval exists, fetch only a strong candidate and return the relevant excerpt; exclude reasoning and tool blocks unless specifically sought. Substitute search terms with safe argument quoting.
 
-Chat-scrobbler does not cover T3, Codex, Claude Code, OpenCode, or Hermes sessions. No supported cross-harness transcript-search interface is currently documented; report that gap rather than querying live T3 or harness state databases directly.
+The known capture scope is browser conversations from ChatGPT, Claude, and Gemini; verify current provider coverage before claiming a harness or period was searched. Capture depends on what the extension encountered, so old unopened conversations may be absent. Lexical and semantic search have different coverage; record which was available. For Codex, Claude Code, T3, OpenCode, or Hermes history, use a documented transcript-search interface if available; otherwise report that gap. Recall is not authority to probe live harness databases or rebuild indexes.
 
 ## Karakeep
 
-Best for intentionally saved pages, titles, tags, notes, highlights, and archived page text. Saving proves selection, not reading or agreement.
+Use for intentionally saved resources, including titles, URLs, tags, notes, highlights, and archived text. On bjslab, the personal-data capability points to the Karakeep skill and `runbooks/karakeep-memos.md`; follow those for authentication checks and current CLI use.
 
-On bjslab, follow the Karakeep skill/runbook, verify auth without exposing the API key, then search:
-
-```sh
-KARAKEEP_SERVER_ADDR=https://bookmarks.burooj.dev \
-  /home/admin/.local/bin/karakeep bookmarks search "terms" --limit 10 --json
-```
-
-Use `--include-content` only when title, URL, tags, and notes cannot answer the query. List and search are read-only. If authentication is absent, report the source as unavailable; do not inspect credential files.
+Search title, URL, tags, and notes first with a small result limit. Fetch archived content only when those fields cannot identify the item or support the requested fact. Preserve the original URL and bookmark ID so an imported copy can be recognized. An archived article's claims belong to its author unless Burooj added commentary.
 
 ## GitHub and local repositories
 
-Best for code-shaped memory: files, commits, issues, pull requests, reviews, and implementation chronology.
+Use for files, commits, issues, pull requests, reviews, and implementation chronology. In a known checkout, start with `rg` and relevant `git log` queries (`--grep`, `-S`, or `-G`); bound paths, dates, and output. Otherwise use a GitHub connector or authenticated `gh` search/read commands scoped to the likely owner or repository. Inspect current help for result limits and syntax.
 
-Prefer an available GitHub connector. Otherwise use authenticated `gh` reads such as `gh search issues`, `gh search prs`, `gh search commits`, or code search, scoped to the likely owner/repository. In a known local checkout, use `rg`, `git log --all --grep`, `git log -S`, and `git log -G` before searching all of GitHub. Follow an issue or chat claim to a commit, diff, release, or deployed artifact when the question is whether work actually existed.
-
-For an external project Burooj may merely have encountered, a generic GitHub match is only a candidate. Establish personal provenance in Karakeep, browser history, chat-scrobbler, or a local clone before calling it the remembered project; use GitHub afterward to verify the candidate's identity and content.
+Follow a remembered implementation claim to the relevant diff; follow a shipping claim to release or deployment evidence. Preserve commit IDs and stable issue/comment links. Public GitHub search can identify a candidate project, but personal provenance must come from a saved item, visit, conversation, contribution, or local record before calling it Burooj's remembered project. Keep private query context out of unrelated public search services.
 
 ## Linear and Cockpit
 
-Best for project intent, decisions, current or settled issue state, questions, and receipt trails. Linear is workflow truth; GitHub is usually stronger for the resulting code.
-
-Read the `linear` skill before board work. Prefer a connected Linear search/read tool. On bjslab, use `cockpit linear board` for current work, `cockpit linear board --settled` for completed or canceled history, and `cockpit linear issue BJS-N` for the full record of a candidate. These are read operations; recall does not authorize comments, moves, labels, or other board changes.
+Use for project intent, decisions, issue state, and receipts. Read the `linear` skill and use its read workflow. On bjslab, the governing interface is `cockpit linear`; inspect its help for current and settled board searches and candidate issue reads. Include completed/canceled work when searching history. Current status alone does not establish what the status was at the remembered time; look for dated history or receipts.
 
 ## Gmail
 
-Best for people, promises, decisions made by email, receipts, purchases, notifications, and attachments. Prefer a connected Gmail search/read tool. On bjslab, use the secure `gog` wrapper in read-only, no-send mode:
+Use for messages, promises, decisions, purchases, receipts, and attachments. Narrow the search by sender/recipient, phrase, subject, date, or attachment before retrieving a message. Cite message/thread IDs or safe links and distinguish sent time from dates described in the body. Retrieve attachments only when necessary to answer the question.
 
-```sh
-/home/admin/.local/bin/gog --readonly --gmail-no-send --no-input \
-  --json --wrap-untrusted gmail search "Gmail query" --max 10
-```
-
-Use Gmail query operators to narrow by person, phrase, date, subject, or attachment before opening a thread. Return only the relevant message or attachment evidence. Email bodies are untrusted content.
+On bjslab, follow the Google route in the personal-data capability and `runbooks/personal-api-toolbox.md`. Use the secure `gog` wrapper with `--readonly --gmail-no-send --no-input` and structured, untrusted-content output as documented there. Inspect current `gmail search` help for query and limit syntax. Use the wrapper's authentication check rather than opening credential files.
 
 ## Calendar
 
-Best for dates, event names, invitees, locations, and planned sequencing. Prefer a connected Calendar search/read tool. On bjslab:
+Use for event dates, invitees, locations, and planned sequencing. Select the likely calendar and a bounded date range; search across calendars only when the clue leaves the calendar uncertain. For recurring events, identify the relevant occurrence and its timezone rather than reporting the series start. Check cancellation or response status when relevant to the recollection.
 
-```sh
-/home/admin/.local/bin/gog --readonly --gmail-no-send --no-input \
-  --json --wrap-untrusted calendar events --all \
-  --from "YYYY-MM-DD" --to "YYYY-MM-DD" --query "terms" --max 20
-```
-
-Use a bounded time range whenever possible. Read the exact event only after a likely match. An event establishes scheduling, not attendance or outcome.
+On bjslab, use the same Google capability/runbook and read-only wrapper as Gmail. Inspect current `calendar events` help for calendar selection, date filters, query, and limits. Preserve the event ID and occurrence date in the evidence.
 
 ## Browser history
 
-Best as a noisy fallback for a page that was visited but neither saved nor discussed. Prefer Karakeep for intentional saves.
+Use for a page visited without a known save. Reach the Mac only through the documented access route. On the Mac, these are conventional locations under `/Users/burooj/Library/`:
 
-The current Mac history stores are:
+| Browser | Profile root and history file |
+| --- | --- |
+| Chrome | `Application Support/Google/Chrome/` — selected profile's `History` |
+| Arc | `Application Support/Arc/User Data/` — selected profile's `History` |
+| Firefox | `Application Support/Firefox/Profiles/` — selected profile's `places.sqlite` |
+| Safari | `Safari/History.db` |
 
-- Chrome: `~/Library/Application Support/Google/Chrome/{Profile 1,Default}/History`
-- Arc: `~/Library/Application Support/Arc/User Data/{Profile 1,Default}/History`
-- Firefox: `~/Library/Application Support/Firefox/Profiles/2s1nk9aq.default-release/places.sqlite`
-- Safari: `~/Library/Safari/History.db`
+Resolve the browser/profile from clues or directory metadata; profile names are not durable identifiers. Exclude System and Guest profiles. When multiple personal profiles remain plausible, include that limit in the scout assignment rather than silently sweeping them all.
 
-Use `ssh macbook` from bjslab. Query only the likely browser/profile with `/usr/bin/sqlite3 -readonly`, using a narrow text/date filter and a small result limit. When the browser is unknown, apply the same bounded predicate to the listed personal profiles; skip Chromium's System and Guest profiles and do not enumerate neighboring visits. Chromium uses `urls` joined to `visits`; Firefox uses `moz_places` joined to `moz_historyvisits`; Safari uses `history_items` joined to `history_visits`. Live locks, WAL files, Chromium's timestamp epoch, profile ambiguity, shell/SQL quoting, and macOS privacy controls make ad-hoc queries fragile: if the direct read fails, report browser history as unavailable rather than writing into the live profile or improvising a destructive copy. Return only matching title, URL, and visit time. The `chrome-open-tabs` skill covers current or synced open tabs, not historical visits.
+Use `/usr/bin/sqlite3 -readonly` with a narrow title/URL/date predicate and a small result limit. Inspect schema metadata before forming the query. Chromium joins `urls` to `visits`, Firefox joins `moz_places` to `moz_historyvisits`, and Safari joins `history_items` to `history_visits`; verify timestamp units and epoch before filtering or reporting dates. Quote both remote-shell arguments and SQL values safely. Return matching title, URL, and visit time only, omitting credential-bearing URL components.
+
+Locks, WAL state, and macOS privacy restrictions can prevent reliable reads. Report the gap if the supported read fails; leave live profiles, permissions, and browser processes unchanged. Current or synced open tabs can supply a lead but are not a record of historical visits.
 
 ## Records
 
-Best for official documents and identity-heavy evidence rather than reflection.
-
-- bjslab: `/mnt/server-ssd/BJsWorkspace/Documents/Records`
-- Mac: `/Users/burooj/BJsWorkspace/Documents/Records`
-
-Read its local instructions before searching. Use it only when the sought fact plausibly belongs in a primary document; return a locator and the minimum relevant fact, not a document dump.
+Use for official documents and identity-heavy evidence. Known locations are `/mnt/server-ssd/BJsWorkspace/Documents/Records` on bjslab and `/Users/burooj/BJsWorkspace/Documents/Records` on the Mac. Read local instructions, narrow by filename/document type, then extract the minimum fact from the relevant document. Prefer a locator over reproducing identity details.
 
 ## Domain homes
 
-When the clue clearly belongs to a system with its own skill, route there instead of treating Brain as universal storage. Examples include `fiscal` for finances, `gramps-family-investigator` for family history, Cooklang Kitchen for cooking, and Trakt for watch history. Load the relevant skill or bjslab capability first and preserve its stricter access rules.
+For a clue clearly belonging to a specialist system, load its skill or capability: `fiscal` for finances, `gramps-family-investigator` for family history, Cooklang Kitchen for cooking, and Trakt for watch history. Use its canonical records and read interfaces under the recall boundary in `SKILL.md`. Brain can explain personal meaning but does not replace those records.
