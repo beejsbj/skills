@@ -23,13 +23,16 @@ Use the source map below to choose where to look. A source named by the user tak
 | --- | --- | --- |
 | Personal writing, reflection, or a remembered idea | Brain | chat-scrobbler |
 | “We talked about XYZ” | chat-scrobbler | Brain; Cockpit/Linear for project context |
-| Remembered project, decision, commitment, or work | Cockpit/Linear and chat-scrobbler | Brain; linked artifacts |
+| Remembered project, decision, commitment, or work | Cockpit/Linear and chat-scrobbler | GitHub/local repositories; Brain |
+| Implementation, code choice, review, or shipped work | GitHub and known local repositories | Cockpit/Linear; chat-scrobbler |
 | Intentionally saved article, quote, or tool | Karakeep | browser history |
 | Page visited without a known save | browser history | Karakeep |
+| Someone's recommendation, correspondence, receipt, booking, or attachment | Gmail | Calendar; linked resources |
+| Meeting, trip, workshop, date, attendees, or location | Calendar | Gmail; chats and notes around the event |
 
-The included sources are **Brain, chat-scrobbler, Karakeep, Cockpit/Linear, and browser histories**. The table gives starting points, not exclusive routes: a discussion about an article may leave traces in chat, saved links, notes, and visits. When several locations are plausible, send scouts across them before asking Burooj where it happened.
+The included sources are **Brain, chat-scrobbler, Karakeep, Cockpit/Linear, GitHub and local repositories, Gmail, Calendar, and browser histories**. The table gives starting points, not exclusive routes: a discussion about an article may leave traces in chat, saved links, notes, and visits. When several locations are plausible, send scouts across them before asking Burooj where it happened. Inclusion makes a source available to routing; search it when the recollection or a discovered clue makes it relevant.
 
-**Proposed additions:** GitHub, Gmail, and Calendar were suggested with question marks and remain undecided as default recall sources. Their access notes are retained for requests that explicitly put them in scope. Records and specialist systems are follow-up routes for a named document/domain or an actual source link, rather than additional default scouts. Tool availability alone does not add a source to the map.
+Records and specialist systems are follow-up routes for a named document/domain or an actual source link, rather than additional default scouts. Tool availability alone does not add a source to the map.
 
 Read the shared access rules and chosen entries in [Source access](references/sources.md). Resolve an available read interface for each source; mark unavailable sources as gaps. Access setup and service repair are separate work.
 

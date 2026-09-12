@@ -2,7 +2,7 @@
 
 Read the shared rules below, then the entries selected in `SKILL.md`. These entries map recall clues to access routes; current tool help and the governing handbook own command syntax and access policy.
 
-`SKILL.md` owns source inclusion. Access notes for proposed sources and follow-up routes below do not make them default search targets.
+`SKILL.md` owns source inclusion and routing. The additional Records and domain entries below support follow-up leads.
 
 ## Shared access rules
 
@@ -53,9 +53,9 @@ Search title, URL, tags, and notes first with a small result limit. Fetch archiv
 
 ## GitHub and local repositories
 
-Proposed addition. Use when the current request explicitly includes GitHub or a local repository, or to inspect a specific artifact linked by an included source.
-
 Use for files, commits, issues, pull requests, reviews, and implementation chronology. In a known checkout, start with `rg` and relevant `git log` queries (`--grep`, `-S`, or `-G`); bound paths, dates, and output. Otherwise use a GitHub connector or authenticated `gh` search/read commands scoped to the likely owner or repository. Inspect current help for result limits and syntax.
+
+Uncommitted or unpushed work may exist only in the local checkout. Distinguish working-tree content, committed history, and pushed GitHub records when establishing what happened.
 
 Follow a remembered implementation claim to the relevant diff; follow a shipping claim to release or deployment evidence. Preserve commit IDs and stable issue/comment links. Public GitHub search can identify a candidate project, but personal provenance must come from a saved item, visit, conversation, contribution, or local record before calling it Burooj's remembered project. Keep private query context out of unrelated public search services.
 
@@ -65,17 +65,15 @@ Use for project intent, decisions, issue state, and receipts. Cockpit's reposito
 
 ## Gmail
 
-Proposed addition. Use when the current request explicitly includes email.
-
 Use for messages, promises, decisions, purchases, receipts, and attachments. Narrow the search by sender/recipient, phrase, subject, date, or attachment before retrieving a message. Cite message/thread IDs or safe links and distinguish sent time from dates described in the body. Retrieve attachments only when necessary to answer the question.
 
 On bjslab, follow the Google route in the personal-data capability and `runbooks/personal-api-toolbox.md`. Use the secure `gog` wrapper with `--readonly --gmail-no-send --no-input` and structured, untrusted-content output as documented there. Inspect current `gmail search` help for query and limit syntax. Use the wrapper's authentication check rather than opening credential files.
 
 ## Calendar
 
-Proposed addition. Use when the current request explicitly includes calendar records.
-
 Use for event dates, invitees, locations, and planned sequencing. Select the likely calendar and a bounded date range; search across calendars only when the clue leaves the calendar uncertain. For recurring events, identify the relevant occurrence and its timezone rather than reporting the series start. Check cancellation or response status when relevant to the recollection.
+
+An event can supply a date, person, or location for a follow-up search in chat, notes, or email. Use those sources to recover the discussion or outcome when the event itself does not establish it.
 
 On bjslab, use the same Google capability/runbook and read-only wrapper as Gmail. Inspect current `calendar events` help for calendar selection, date filters, query, and limits. Preserve the event ID and occurrence date in the evidence.
 
