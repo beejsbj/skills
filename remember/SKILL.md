@@ -5,7 +5,7 @@ description: Personal recall — use when Burooj asks to recover a past conversa
 
 # Remember
 
-Recover the record behind a recollection. The result is an answer with provenance, or a precise account of what the search could not establish.
+Recover the record behind a recollection. This skill supplies the source map: Burooj can say “remember when we talked about XYZ?” or name a project without listing where to search. Infer plausible locations from the topic, send scouts, and bring back the evidence.
 
 ## 1. Frame the question
 
@@ -17,20 +17,19 @@ This step is complete when at least one discriminating query and an answer crite
 
 ## 2. Route and dispatch scouts
 
-Choose one to three sources using the clues below. A source named by the user takes priority. A known-source request usually needs only that source.
+Use the source map below to choose where to look. A source named by the user takes priority. Otherwise, consider every included source and search those that could hold the recollection; the user need not name a source or request a special breadth mode. Use relevance to decide coverage, not a fixed source count. A known-source request usually needs only that source.
 
 | Clue | First source | Follow a lead to |
 | --- | --- | --- |
 | Personal writing, reflection, or a remembered idea | Brain | chat-scrobbler |
-| Earlier AI conversation | chat-scrobbler | Brain, GitHub |
-| Code, implementation, or shipped work | Known local repository or GitHub | Linear, chat-scrobbler |
-| Project decision, commitment, or status | Linear/Cockpit | GitHub, chat-scrobbler |
+| “We talked about XYZ” | chat-scrobbler | Brain; Cockpit/Linear for project context |
+| Remembered project, decision, commitment, or work | Cockpit/Linear and chat-scrobbler | Brain; linked artifacts |
 | Intentionally saved article, quote, or tool | Karakeep | browser history |
-| Message, person, promise, receipt, or attachment | Gmail | Calendar |
-| Meeting, trip, appointment, or date | Calendar | Gmail |
 | Page visited without a known save | browser history | Karakeep |
-| Official document | Records | Gmail |
-| Finance, family, cooking, or viewing history | Domain's canonical system | Brain for personal interpretation |
+
+The included sources are **Brain, chat-scrobbler, Karakeep, Cockpit/Linear, and browser histories**. The table gives starting points, not exclusive routes: a discussion about an article may leave traces in chat, saved links, notes, and visits. When several locations are plausible, send scouts across them before asking Burooj where it happened.
+
+**Proposed additions:** GitHub, Gmail, and Calendar were suggested with question marks and remain undecided as default recall sources. Their access notes are retained for requests that explicitly put them in scope. Records and specialist systems are follow-up routes for a named document/domain or an actual source link, rather than additional default scouts. Tool availability alone does not add a source to the map.
 
 Read the shared access rules and chosen entries in [Source access](references/sources.md). Resolve an available read interface for each source; mark unavailable sources as gaps. Access setup and service repair are separate work.
 
@@ -60,7 +59,7 @@ A search snippet can nominate a candidate. Fetch enough of the underlying record
 
 Match records to the requested identity, time, and answer fields. Deduplicate copies and imported material by their underlying origin. A chat quoting a note and that note are one line of evidence.
 
-Use a second and final wave only for a specific unresolved field, competing candidate, contradiction, or strong lead. State what it will resolve; choose up to three source assignments with the same scout budget. A justified date expansion is part of this wave. If the first wave yields no candidates, try the next most plausible source or a revised query before concluding, when the clues support one.
+Use the scout reports to choose the next search: an unsearched plausible source, a specific unresolved field, a competing candidate, a contradiction, or a strong lead. State what it will resolve and give the assignment a bounded budget. Expand dates or query terms when evidence supports it. If a scout reaches its budget with promising unexplored results, decide whether another pass is useful; a per-scout cap is not a declaration that the source is exhausted.
 
 Judge evidence by what the record establishes:
 
@@ -74,7 +73,7 @@ Judge evidence by what the record establishes:
 
 One direct record can establish an answer. Multiple indirect records may support an inference, but their number cannot turn it into a direct fact. Preserve unresolved contradictions and distinguish changed plans from conflicting accounts. A later timestamp is not automatically more authoritative.
 
-Stop when the requested fields are supported, or the two-wave budget is spent and remaining uncertainty is explicit. Partial answers count as partial; missing indexed results do not establish that an event never happened.
+Stop when the requested fields are supported, or no plausible unsearched source or useful next query remains within the task's scope. Honor any user-specified search budget and report remaining coverage if it ends first. Partial answers count as partial; missing indexed results do not establish that an event never happened.
 
 ## 4. Answer with provenance
 

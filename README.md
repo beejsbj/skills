@@ -47,7 +47,7 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`linear/`** — Burooj's Linear board discipline and write path: lanes, labels, issue bodies, comments, dependencies, receipts, and cockpit app-actor commands.
 
-**`remember/`** — bounded personal recall across Brain, chat-scrobbler, Karakeep, GitHub, Linear, Gmail, Calendar, browser history, and domain records; dispatches source-specific scouts and synthesizes provenance without turning recall into a search of everything.
+**`remember/`** — personal recall with a source map for Brain, chat-scrobbler, Karakeep, Cockpit/Linear, and browser histories. Agents choose plausible sources and dispatch scouts from an ordinary recollection; proposed additions and source access notes live with the skill.
 
 **`zoom-out/`** — asks me to zoom out when I'm about to grind before naming the right problem.
 
