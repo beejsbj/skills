@@ -47,6 +47,8 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`linear/`** — Burooj's Linear board discipline and write path: lanes, labels, issue bodies, comments, dependencies, receipts, and cockpit app-actor commands.
 
+**`remember/`** — bounded personal recall across Brain, chat-scrobbler, Karakeep, GitHub, Linear, Gmail, Calendar, browser history, and domain records; dispatches source-specific scouts and synthesizes provenance without turning recall into a search of everything.
+
 **`zoom-out/`** — asks me to zoom out when I'm about to grind before naming the right problem.
 
 **`tldw/`** — imported from the live OpenClaw host for extracting and summarizing YouTube transcripts with `yt-dlp`.

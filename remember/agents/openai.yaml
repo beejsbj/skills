@@ -1,0 +1,4 @@
+interface:
+  display_name: "Remember"
+  short_description: "Recover evidence from your personal history"
+  default_prompt: "Use $remember to recover what I previously said, saw, saved, planned, or did."
