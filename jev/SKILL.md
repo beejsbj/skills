@@ -20,11 +20,15 @@ request with `schema_version: 1` and a meaningful `rubric_version`.
 jev evaluate --input /path/to/request.json --timeout-ms 10000
 ```
 
-Live calls need `TYPESAFE_API_KEY` from the authorized credential route. When
-credentials are missing, report that concrete blocker. Keep key values out of
+Live calls default to TypeSafe and need `TYPESAFE_API_KEY`. For OpenRouter use
+`--provider openrouter` with `OPENROUTER_API_KEY`, or the library option
+`{ provider: "openrouter" }`. Obtain the selected key through the authorized
+credential route; keys never fall back across providers. When credentials are
+missing, report the selected provider’s missing key. Keep key values out of
 commands, receipts, and conversation. Handle `ok: false` before reading answers;
-failure is not an unresolved judgment. Receipts identify model, rubric, evidence,
-questions, latency, and available usage without storing raw state.
+failure is not an unresolved judgment. Receipts identify provider, requested and
+resolved model, rubric, evidence, questions, latency, and available usage/cost
+without storing raw state.
 
 For a reproducible public demonstration with all three primitives:
 
@@ -37,7 +41,10 @@ jev evaluate \
 The fixture is **hand-authored synthetic contract data, not live inference**. Report
 its `source` and `fixture_kind`. It matches only the supplied example's state,
 questions, and model; it cannot judge a different record. To test that record live,
-omit `--fixture`. If `jev` is unavailable, invoke
+omit `--fixture`. For OpenRouter offline replay use `--provider openrouter` and
+`examples/synthetic.openrouter.fixture.json` in the same runtime checkout. Recorded
+fixtures retain their original provider and require the matching provider option.
+If `jev` is unavailable, invoke
 `node /mnt/server-ssd/BJsWorkspace/Projects/jev/dist/cli.js` with the same arguments;
 build/setup steps live in the runtime README.
 
@@ -47,7 +54,9 @@ Read the current [official TypeSafe skill](https://raw.githubusercontent.com/typ
 before designing an integration; follow its live documentation links for the
 relevant primitives and cookbook. It is the canonical provider reference.
 The runtime's `docs/provider-contract.md` records its pinned SDK/model and limits;
-changing versions requires refreshing validation and fixtures together.
+changing versions requires refreshing validation and fixtures together. Consult
+that contract for OpenRouter’s supported model identities, rounded answers, and
+criteria restrictions before adapting a direct TypeSafe request.
 
 Use `examples/synthetic.mjs` in the runtime for executable dynamic candidates and
 an explicit unresolved outcome. Code owns exact IDs, evidence retrieval, arithmetic,
@@ -61,6 +70,7 @@ returns explicit capacity failures. Keep Choice and Score distributions, Score's
 fractional meaning, and Noul's probability of yes; Noul has no separate confidence.
 
 Official sources: [TypeSafe agent skill](https://docs.typesafe.ai/agent-skill),
-[API](https://docs.typesafe.ai/api), [patterns](https://docs.typesafe.ai/patterns).
+[API](https://docs.typesafe.ai/api), [patterns](https://docs.typesafe.ai/patterns),
+[OpenRouter SDK compatibility](https://openrouter.ai/docs/guides/community/typesafe-sdk).
 Community design reading: [Drew Breunig's Jev skill](https://github.com/dbreunig/building-with-jev-skill).
 No community code or text is vendored here.
