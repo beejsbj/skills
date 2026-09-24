@@ -5,6 +5,10 @@ description: Use Jev for bounded semantic judgments, or build Jev into an applic
 
 # Jev
 
+Before either route, apply [when.md](references/when.md): the index-card test
+and the four conditions decide whether a judgment belongs to Jev, code, or a
+generative model.
+
 Route by the work requested:
 
 - **Use:** judge supplied evidence now, classify records, rank supplied candidates,
