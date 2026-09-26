@@ -33,6 +33,8 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`model-taste/`** — reusable model/provider judgment and dated roster, separate from dispatch mechanics and transport.
 
+**`t3-code/`** — automatically invoked T3 thread operations for Codex and Claude: create sessions, send prompts, and select the environment, project, model, effort, and checkout through a bundled command helper.
+
 **`consult/`** — independent model judgment: frame a neutral evidence packet, select a live frontier route and effort, and reconcile the consultant's verdict without surrendering the root decision.
 
 **`finish-pr/`** — carries an existing pull request through independent review, active babysitting, authorized merge, and exact cleanup.
