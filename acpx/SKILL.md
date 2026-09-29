@@ -25,7 +25,7 @@ opencode has **no acpx adapter** — reach opencode-go models with the native CL
 
 To run a `Ready for agent` issue on its executor class (the issue already carries the `/goal`-grade runbook; see the `linear` skill), pick the smallest sufficient model from the [model-taste roster](../model-taste/references/roster.md) and launch:
 
-- acpx (claude/gemini): `bunx --bun acpx --approve-all --cwd <project-root> -s bjs-<n> claude --model sonnet "<runbook>"`. For codex over acpx, prefix `CODEX_PATH=/opt/homebrew/bin/codex`.
+- acpx (claude/gemini): create the session once with `bunx --bun acpx --cwd <project-root> claude sessions new --name bjs-<n>`, then `bunx --bun acpx --approve-all --cwd <project-root> --model claude-sonnet-5-5 claude -s bjs-<n> "<runbook>"`. `--model` is global (before the agent); `-s` belongs to the agent (after it) — the reverse order just prints help. Pass full Claude model IDs: the claude adapter bundles its own runtime, so its aliases lag the installed `claude` CLI (on 2026-09-29 `--model sonnet` still resolved to `claude-sonnet-5` while `claude-sonnet-5-5` worked; verified acpx 0.19.3). For codex over acpx, prefix `CODEX_PATH=/opt/homebrew/bin/codex`.
 - codex, native (simplest, proven — choose Sol/Terra/Luna from the model-taste roster and write the runbook to a file first): `codex exec -C <project-root> -m gpt-5.6-terra -s workspace-write "$(cat runbook.md)" < /dev/null`. The `< /dev/null` matters; without it codex exec can hang silently at startup. Its stdout header prints the session id — bind that.
 - opencode, native: `opencode run --format json --dir <project-root> --model opencode-go/glm-5.2 "<runbook>"`.
 
