@@ -149,10 +149,10 @@ These are dated model judgments, preserved from the previous acpx roster. Provid
   - **checked:** 2026-07-20
   - **source:** https://docs.anthropic.com/en/docs/about-claude/pricing
 
-## claude — sonnet
+## claude — claude-sonnet-5-5
 
 - **provider:** claude
-- **model:** sonnet
+- **model:** claude-sonnet-5-5
 - **executor_class:** standard
 - **good_for:** General implementation, review, debugging, and balanced code work.
 - **avoid_for:** Tiny extraction tasks or problems needing the deepest available reasoning.
@@ -160,9 +160,9 @@ These are dated model judgments, preserved from the previous acpx roster. Provid
 - **cost:**
   - **relative:** mid
   - **access:** Claude plan quota or Anthropic API
-  - **note:** The unversioned Claude CLI alias can move between model versions; consult live Anthropic pricing before estimating token cost.
-  - **checked:** 2026-07-20
-  - **source:** https://docs.anthropic.com/en/docs/about-claude/pricing
+  - **note:** Released 2026-09-29; the capability judgment is carried over from Sonnet 5 and not yet re-earned. Pass the full ID: the `sonnet` alias resolves per runtime — Claude CLI 2.1.284 maps it to `claude-sonnet-5-5`, but the acpx claude adapter (acpx 0.19.3) and older CLI sessions still map it to `claude-sonnet-5`. Consult live Anthropic pricing before estimating token cost.
+  - **checked:** 2026-09-29
+  - **source:** hello-world runs through Claude CLI 2.1.284 and acpx 0.19.3 on bjslab; https://docs.anthropic.com/en/docs/about-claude/pricing
 
 ## claude — haiku
 
