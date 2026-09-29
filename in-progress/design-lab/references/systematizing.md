@@ -1,291 +1,134 @@
-# Systematizing (System Axis Reference)
+# Systematizing
 
-The System axis is fully autonomous. Use this to classify artifacts into the taxonomy, run the cohesion self-audit, and formalize a component with anatomy. Never turn any of this into a user question — resolve it and assert it done.
+Own the classification, reuse, and lineage decisions. Resolve engineering questions autonomously; report evidence and remaining gaps rather than asserting unverified completion.
 
-## Taxonomy layers
+## Categories and dependencies
 
-Source of truth, low → high. Classify every artifact into exactly one.
+The reusable hierarchy is `tokens -> primitives -> compounds -> compositions`. **Unique specimens are a separate category**, with dependencies determined by their anatomy rather than a fixed rung. Every artifact has one classification; imports form an acyclic graph.
 
-- **tokens** — values, semantic aliases, constraints, low-level recipes that do not render as standalone UI (color roles, type scale, spacing/radius/shadow/clip, motion durations/easings, data maps that drive presentation). Test: "Could this be replaced by reading a variable/constant?" → token.
-- **primitives** — smallest named renderable ideas with a single identity that stand alone without named child components. Families: control (button, tab, key, knob, toggle), visual (mark, sticker, badge, indicator), container (card/drawer/panel shell), field (pattern/texture/grid field, only if it has renderable identity beyond a token class). Primitive ≠ tiny: a drawer shell is primitive if its job is a structural shell with slots + behavior. Primitive ≠ "anything low-level": a primitive section must be named families, not a grab bag.
-- **unique specimens** — singular preserved artifacts that matter but should NOT become a reusable family (brand logo, loading splash, a one-of-a-kind code strip). May be complex; use local variation notes, not standard reusable variant axes. Test: "Would standard variants clarify a family or dilute a singular artifact?" → if dilute, unique specimen.
-- **compounds** — stable assemblies of primitives and/or unique specimens that travel together (pattern card, pattern reel, panel header with a fixed child set). Test: "Repeatable assembly of named lower-layer artifacts, where using half of it breaks the concept?" → compound.
-- **compositions** — real screens, regions, or app states that prove the grammar in context, with real content and orchestration.
+- **Tokens** — shared values, semantic aliases, constraints, and presentation recipes that do not render independently: color roles, type scales, spacing, geometry, shadows, motion, or presentation maps. A private implementation constant is not automatically a system token.
+- **Primitives** — renderable ideas with one identity or affordance: controls, marks, indicators, fields, or container shells. Size and file count do not determine the category. A drawer shell with arbitrary slots can be a primitive; private helpers can implement a single primitive's public contract.
+- **Compounds** — stable assemblies of named components that travel together under a reusable child contract. A card with a fixed status and action is a compound; its children retain ownership of their own grammar.
+- **Compositions** — real screens, regions, or app states that own content and orchestration. In an existing app these are production surfaces, not a further component layer preceding production. A greenfield composition can prove a realistic use case before an app exists.
+- **Unique specimens** — artifacts with a singular identity worth preserving, such as a brand mark or a product-specific notation editor. They may be complex, own behavior, compose reusable components, and have multiple consumers. Singularity concerns identity, not instance count. Preserve meaningful configuration; do not manufacture a reusable family merely to fill a variant grid.
+
+**Guide example** means a demonstration of any category. A Button demonstration is an example of a primitive, not a unique specimen. Guide scaffolding is neither component anatomy nor a new taxonomy category.
 
 ## Boundary rubric
 
-When classification is unclear, answer in order:
+Use these questions together; the first matching property is not a premature classification:
 
-1. **Does it render?** No → token / constant / data / doctrine. Yes → continue.
-2. **Does it own behavior?** Single affordance or shell behavior → primitive. Coordinates several child behaviors → compound or composition.
-3. **Does it own child orchestration?** No named children → primitive. Stable named children that always travel together → compound. Content/state varies by screen → composition.
-4. **Reusable across contexts?** Reusable with standard variant axes → primitive/compound. Singular but important, even if complex → unique specimen. Only meaningful as a final region → composition.
-5. **Would removing content leave it recognizably itself?** Yes → primitive/compound shell. No → composition or content-specific unique specimen.
+1. Does it render, or is it a value/recipe? Shared non-rendering grammar belongs to tokens; private mechanics stay with their owner.
+2. Is its identity deliberately singular? Preserve it as a unique specimen even if it composes other components or appears in several contexts.
+3. What public contract does it own? One affordance or structural shell suggests a primitive; a stable assembly suggests a compound; screen-specific content and orchestration suggest a composition.
+4. Would variants express actual supported use, or invent a family nobody needs? Extract a public abstraction only for a real contract; keep implementation helpers private.
 
-Shell rule: a drawer shell with arbitrary slot content is a primitive; a drawer with fixed header/tabs/data is a compound. Hard-to-extract is not the same as unique — uniqueness requires a singular role.
-
-## Cohesion self-audit
-
-Run this across the built system before the taste handoff. Every hit is resolved, not reported to the user.
-
-For each raw/new/unique decision: **promote** it downward if reusable/repeated/law-like; **prune** it if a close lower-level idea already exists; **keep local** if truly singular or style-guide-only.
-
-Residue scan (each must be 0 or justified):
-
-- raw hex colors outside tokens
-- raw px / lengths outside tokens
-- raw durations / easings / cubic-beziers outside tokens
-- repeated clip-paths, shadows, or transforms not promoted to tokens
-- duplicated primitive internals copied into compounds/compositions instead of imported
-- singular artifacts not marked as unique specimens
-- style-guide surfaces that define behavior instead of importing the real component
-
-If a built composition re-declares a primitive's markup instead of importing it, that is drift — fix it by importing.
+For example, an arbitrary-content drawer shell can be a primitive, a fixed settings assembly a compound, and a product's distinctive integrated drawer a unique. Classify from the actual identity and contract, not its name or extraction difficulty.
 
 ## Reuse decision
 
-When a surface needs something close to an existing component, decide whether the difference earns a variant or a separate identity. Apply the boundary rubric above to classify the result.
+When something is close to an existing component, decide whether the difference earns a variant or a separate identity. This decision is separate from classification.
 
-- **Snap** to an existing component when its identity, anatomy, behavior, and meaning are already covered; change only content or allowed configuration. Sprout's “Needs water” status fits `<Chip tone="clay">Needs water</Chip>`; making a second `CareTag` would duplicate the same contract.
-- **Promote as a variant** when it is the same concept and contract, but a recurring, named difference needs a stable axis with its own states or semantics. If Sprout needs a second muted status, add a `muted` `Chip` tone with explicit tokens and states; do not create a separate `DormantChip`.
-- **Promote as new** when sharing the existing component would obscure a distinct identity or force incompatible anatomy or behavior into its API. Sprout's `MoistureMeter` may be as compact as `Chip`, but its range, fill, and current-value semantics need their own contract; create a meter that shares foundation tokens instead of a `Chip mode="meter"` with irrelevant label states.
+- **Snap** when identity, anatomy, behavior, and meaning are already covered. In the invented plant-care system Sprout, use `<Chip tone="attention">Needs water</Chip>` instead of creating an equivalent `CareTag`.
+- **Promote as a variant** when the same contract needs a recurring, meaningful difference. Add a `muted` Chip tone when muted statuses need their own presentation, instead of creating `DormantChip`.
+- **Promote as new** when reuse would force incompatible anatomy or behavior into the API. A `MoistureMeter` needs range, fill, and value semantics; give it that contract instead of `Chip mode="meter"`.
 
-Preserve a singular artifact as a unique specimen when the taxonomy calls for it; a new identity does not automatically need a reusable family or standard variants.
+A new identity can remain a unique specimen. It does not automatically need standard family variants.
 
-## Anatomy
+## Token ownership and local rules
 
-Formalize each non-trivial component by capturing (inline beside it, or in its specimen):
+Promote values and recipes that express shared design grammar, named variation, or a system-wide constraint. A newly chosen foundation may earn a token before its second use when its role and intended consumer are concrete. Repeated literals are clues, not proof: unrelated values that happen to match need not share ownership.
 
-- **canonical instance** — the single representative rendering
-- **part tree + slot map** — named internal parts; slots with required/optional content and allowed child layers
-- **token dependencies by part** — every color/type/geometry/motion value, by part
-- **state matrix** — rest, hover, focus, active, selected, disabled, loading, reduced-motion where relevant
-- **variant axes** — standard reusable axes (size, tone, geometry, mode) for primitives/compounds; local variation notes for unique specimens
-- **child dependencies** — lower components imported/required
-- **forbidden mutations** — changes that would violate the direction
-- **promotion items** — raw recipes resolved via promote/prune/keep-local
+Reuse existing tokens for spacing, type, colors, geometry, and motion where their meaning fits. Keep structural CSS (`0`, `100%`, `inherit`, layout mechanics), private calculations, and genuinely singular optical or host adjustments local. Document a consequential exception beside its owner or in the tracker; trivial structural constants need no ledger entry.
 
-If an artifact can't fill this, don't force it — reclassify, split, or mark it a unique specimen.
+Promote a local rule when it acquires shared meaning or real reuse. Avoid tokens or public components created only to achieve a zero-literal count. Conversely, a unique specimen still consumes shared grammar; uniqueness does not excuse copying a primitive or inventing a rival palette.
 
-## Worked examples
+### Worked example: shared values, local structure
 
-These use one invented design system — **Sprout**, a calm plant-care app — so the examples interlock. There is one worked example per taxonomy layer, plus a cross-layer drift case. They are illustrative, not a dependency on any real repo. Foundation tokens assumed throughout:
+These excerpts illustrate ownership; they are not a complete application. Sprout's shared tokens include:
 
 ```css
---ink:#2b2a26; --paper:#f4f1ea; --sage:#7c9885; --clay:#c9785b; --sage-1:#e7ede8; --clay-1:#f1ddd3;
---radius-soft:14px; --shadow-soft:0 2px 8px rgba(43,42,38,.12);
---ease-gentle:cubic-bezier(.4,0,.2,1); --dur-calm:240ms; --font-display; --font-body;
+:root {
+  --ink: #2b2a26;
+  --paper: #f4f1ea;
+  --sage-1: #e7ede8;
+  --clay-1: #f1ddd3;
+  --space-xs: 4px;
+  --space-sm: 12px;
+  --radius-soft: 14px;
+  --font-body: "Source Sans 3", sans-serif;
+}
 ```
 
-### 1. Token promotion
-
-A raw value that shows up in more than one place is a token that hasn't been promoted yet.
-
-❌ Bad — `#c9785b` is typed 3× and the shadow literal 2× across two components:
-
-```astro
----
-// SaveButton.astro
----
-<button class="save">Save sprout</button>
-<style>
-  .save { background:#c9785b; border-radius:14px; box-shadow:0 2px 8px rgba(43,42,38,.12); }
-</style>
-
----
-// CareTag.astro
----
-<span class="tag">Needs water</span>
-<style>
-  .tag { color:#c9785b; border:1px solid #c9785b; box-shadow:0 2px 8px rgba(43,42,38,.12); }
-</style>
-```
-- `#c9785b` is a **raw hex that should resolve to `--clay`**; `0 2px 8px rgba(43,42,38,.12)` is **`--shadow-soft` re-typed**. A brand tweak now means hunting every literal by hand — miss one and the two drift apart.
-
-✅ Good — both resolve to the foundation:
-
-```astro
-.save { background: var(--clay); border-radius: var(--radius-soft); box-shadow: var(--shadow-soft); }
-.tag  { color: var(--clay); border: 1px solid var(--clay); box-shadow: var(--shadow-soft); }
-```
-- Tweaking `--clay` once re-skins every accent surface at the source; the two components can never drift.
-
-### 2. Formalizing a primitive (the quality bar)
-
-A primitive is one importable component, a token for every value, an explicit variant + state API, and a specimen that **imports** it. Anything copy-pasted with raw values is markup, not a primitive.
-
-❌ Bad — chip markup pasted in two files with raw values, no API, no states; the style-guide demo re-declares it:
-
-```astro
----
-// PlantCard.astro — chip markup pasted inline
----
-<span style="background:#e7ede8; color:#2b2a26; border-radius:14px; padding:4px 12px;">Thriving</span>
-
----
-// styleguide/status.astro — the "demo" RE-DECLARES the same markup
----
-<span style="background:#f1ddd3; color:#2b2a26; border-radius:14px; padding:4px 12px;">Needs water</span>
-```
-- No single source of truth; raw `#e7ede8 / #f1ddd3 / #2b2a26 / 14px / 4px 12px`; no `tone` API; no states; the specimen proves nothing because it copies rather than imports.
-
-✅ Good — one importable, fully tokenized `Chip.astro` with a variant + state API; the specimen imports it:
+Duplicating the Chip's background, padding, and shape in each consumer makes those consumers competing owners. One source fixes that:
 
 ```astro
 ---
 // primitives/Chip.astro
-interface Props { tone?: 'sage' | 'clay' | 'ink'; disabled?: boolean; }
-const { tone = 'sage', disabled = false } = Astro.props;
+interface Props { tone?: 'healthy' | 'attention' | 'neutral'; }
+const { tone = 'healthy' } = Astro.props;
 ---
-<span class:list={['chip', `chip--${tone}`]} aria-disabled={disabled || undefined}><slot /></span>
+<span class:list={['chip', `chip--${tone}`]}><slot /></span>
 <style>
-  .chip { display:inline-flex; padding:4px 12px; border-radius:var(--radius-soft);
-          box-shadow:var(--shadow-soft); font-family:var(--font-body); color:var(--ink);
-          transition:transform var(--dur-calm) var(--ease-gentle); }
-  .chip--sage { background:var(--sage-1); }
-  .chip--clay { background:var(--clay-1); }
-  .chip--ink  { background:var(--paper); }
-  .chip:hover { transform:translateY(-1px); }
-  .chip[aria-disabled] { opacity:.5; pointer-events:none; }
-</style>
-```
-```astro
----
-// styleguide/StatusSpecimen.astro — IMPORTS the primitive, never copies it
-import Chip from '../primitives/Chip.astro';
----
-<Chip tone="sage">Thriving</Chip>
-<Chip tone="clay">Needs water</Chip>
-<Chip tone="ink" disabled>Dormant</Chip>
-```
-
-Anatomy:
-- part tree: `Chip` (root `span`) → label slot. Single part.
-- tokens by part: background → `--sage-1 / --clay-1 / --paper` (per tone); text → `--ink`; shape → `--radius-soft`, `--shadow-soft`; type → `--font-body`; motion → `--dur-calm`, `--ease-gentle`.
-- states: rest, hover (`translateY(-1px)` over `--dur-calm`), disabled (`aria-disabled`, dimmed, non-interactive).
-- variant axes: `tone ∈ { sage, clay, ink }` mapped to semantic status, not raw color.
-- open decision (promotion item): is "Dormant" a muted `tone` or its own primitive? Recorded, not flattened — revisit when a second muted status appears.
-
-### 3. Cross-layer drift
-
-❌ Bad — a `PlantCard` compound re-declares the Chip's internals with raw colors instead of importing it:
-
-```astro
----
-// PlantCard.astro
-const { name, status } = Astro.props;
----
-<article class="plant-card"><h3>{name}</h3><span class="chip">{status}</span></article>
-<style>
-  .plant-card { border-radius:14px; box-shadow:0 2px 8px rgba(43,42,38,.12); }
-  .chip { background:#7c9885; color:#f4f1ea; border-radius:999px; padding:2px 10px; }
-</style>
-```
-- Residue rule broken: **duplicated primitive internals copied into a compound instead of imported** — the chip and its raw `#7c9885` are re-declared.
-
-✅ Good — the compound imports the primitive and keeps only card-specific decisions, in tokens:
-
-```astro
----
-// PlantCard.astro
-import Chip from '../primitives/Chip.astro';
-const { name, status } = Astro.props;
----
-<article class="plant-card"><h3>{name}</h3><Chip tone="sage">{status}</Chip></article>
-<style>
-  .plant-card { border-radius: var(--radius-soft); box-shadow: var(--shadow-soft); }
+  .chip {
+    display: inline-flex;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-soft);
+    font-family: var(--font-body);
+    color: var(--ink);
+  }
+  .chip--healthy { background: var(--sage-1); }
+  .chip--attention { background: var(--clay-1); }
+  .chip--neutral { background: var(--paper); }
 </style>
 ```
 
-### 4. Unique specimen
-
-A singular artifact earns its place by being one-of-a-kind — parameterizing it into a "family" destroys it.
-
-❌ Bad — the hand-drawn Sprout mascot over-generalized into a fake reusable family:
-
-```astro
----
-// Mascot.astro
-interface Props { size?: 'sm'|'md'|'lg'; tone?: 'sage'|'clay'|'ink'; outline?: boolean; }
-const { size='md', tone='sage', outline=false } = Astro.props;
----
-<svg class:list={['mascot',`mascot--${size}`,`mascot--${tone}`, outline && 'mascot--outline']}>…</svg>
-```
-- invents `size` / `tone` / `outline` axes for an artifact that appears **once** — dilutes a singular brand mark into a pseudo-family of dead variants nobody renders; `tone` even re-introduces colors the artwork already owns.
-
-✅ Good — one canonical mark, marked so nobody generalizes it:
-
-```astro
----
-// unique-specimens/SproutMascot.astro
-// unique specimen: singular brand mark — do NOT add variants or promote to a primitive
----
-<svg class="sprout-mascot" viewBox="0 0 64 64" role="img" aria-label="Sprout">…</svg>
-<style>.sprout-mascot { width: 40px; color: var(--sage); }</style>
-```
-- one rendering, used once; the comment stops a future agent from adding a `size` axis; if a smaller instance is ever needed that's a **local one-off**, not a reusable variant.
-
-**Test:** would standard variants clarify a reusable family, or dilute a singular artifact? Dilute → unique specimen.
-
-### 5. Compound
-
-A compound is a reusable assembly defined by its **child contract** — if it re-declares its children, it isn't a compound, it's drift.
-
-❌ Bad — a "compound" that flattens its children's internals with raw values:
-
-```astro
----
-// PlantCard.astro
-const { name } = Astro.props;
----
-<article class="plant-card">
-  <h3>{name}</h3>
-  <span class="chip" style="background:#e7ede8;color:#2b2a26;border-radius:14px;padding:4px 12px;">Thriving</span>
-  <button style="background:#c9785b;color:#f4f1ea;border-radius:14px;">Water</button>
-</article>
-```
-- not an assembly — it's a flat copy of the Chip and Button internals with raw values; no child contract; changing the Chip means editing every card.
-
-✅ Good — composes named primitives through an explicit contract (assume a `Button` primitive built like `Chip`):
+This Chip is a noninteractive status label. Hover, pressed, disabled, and loading states would misrepresent its contract. An interactive control needs its own appropriate semantics and state behavior.
 
 ```astro
 ---
 // compounds/PlantCard.astro
 import Chip from '../primitives/Chip.astro';
-import Button from '../primitives/Button.astro';
-interface Props { name: string; status: 'sage'|'clay'|'ink'; }
-const { name, status } = Astro.props;
+interface Props { name: string; status: string; tone?: 'healthy' | 'attention' | 'neutral'; }
+const { name, status, tone = 'healthy' } = Astro.props;
 ---
 <article class="plant-card">
-  <h3 class="plant-card__name">{name}</h3>
-  <Chip tone={status}><slot name="status" /></Chip>
-  <Button tone="clay"><slot name="action">Water</slot></Button>
+  <h3>{name}</h3>
+  <Chip tone={tone}>{status}</Chip>
 </article>
-<style>.plant-card { border-radius: var(--radius-soft); box-shadow: var(--shadow-soft); padding: 12px; }</style>
+<style>
+  .plant-card { padding: var(--space-sm); border-radius: var(--radius-soft); }
+  h3 { margin: 0; } /* Structural reset, not a missing token. */
+</style>
 ```
-- the child contract is explicit (a name + a status Chip + an action Button); composes by import; only card-specific layout/tokens live here; using half of it would break the concept → compound, not composition.
 
-**Test:** repeatable assembly of named lower-layer artifacts, where using half of it breaks the concept? → compound.
+The compound owns arrangement and its fixed child contract; Chip owns status presentation. A `GardenView` composition supplies plant data and imports PlantCard. A guide example also imports PlantCard and supplies realistic controlled values. Neither copies Chip's internals.
 
-### 6. Composition
+A `SproutMark` unique instead preserves the canonical brand artwork. It may consume shared colors and allow sizing for real hosts without becoming a fake family of interchangeable logos. An illustration's intrinsic coordinates stay with its artwork; reusable geometry shared with other components belongs to tokens.
 
-A composition is a real screen — it owns content and orchestration, composes compounds, and is the destination, not a reusable part.
+## Anatomy
 
-✅ Good — a real view that owns data and composes compounds:
+Capture the useful contract alongside each nontrivial source or its final guide example:
 
-```astro
----
-// compositions/GardenView.astro
-import PlantCard from '../compounds/PlantCard.astro';
-const plants = await getPlants(); // real content + orchestration
----
-<main class="garden">
-  <h1>Your garden</h1>
-  {plants.map((p) => <PlantCard name={p.name} status={p.status} />)}
-</main>
-```
-- owns real data/state and page layout; composes the `PlantCard` compound; **not** parameterized for reuse — it *is* the screen.
+- canonical instance, named parts, and required/optional slots;
+- token and child dependencies, with consequential local rules identified;
+- supported variants and relevant states, including keyboard focus and Reduced Motion for interactive/moving components;
+- consumer-controlled sizing, content, and state versus component-owned behavior;
+- constraints that preserve identity and accepted intent.
 
-❌ The drift version is example 3 one layer up: a `GardenView` that re-declares `PlantCard`/`Chip` markup inline instead of importing them. Fix by importing.
+Use actual states and consumers. Unique specimens get configuration notes where useful; private helpers do not need invented public variant grids.
 
-**Test:** remove the content — still recognizably itself? Yes → compound shell; No → composition.
+## Cohesion and lineage audit
+
+For each changed visual rule, identify its owner, any duplicate, and its real or intended consumer. Inspect source imports and rendered use, not just names in a tracker. Resolve findings through reuse, promotion, or justified locality.
+
+Scan for:
+
+- unexplained raw colors, lengths, durations, easing, shadows, clips, and transforms outside their owners;
+- shared recipes repeated beside or above their lowest appropriate owner;
+- component internals copied into compounds, uniques, compositions, or guide examples;
+- parallel production and guide implementations, or public callers bypassing a component's public seam;
+- guide scaffolding, demo states, or global gallery styles leaking into production;
+- unsupported taxonomy, unused abstractions, and hidden provisional adapters.
+
+Literal and import searches locate candidates; inspect each in context. A pass means the scoped ownership checks have evidence and findings are resolved or explicitly justified. It is not proof of visual quality or production adoption. The delivery checks in `workflow.md` establish those separately.
