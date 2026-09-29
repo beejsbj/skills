@@ -17,103 +17,30 @@ These are dated model judgments, preserved from the previous acpx roster. Provid
   - **checked:** 2026-09-09
   - **source:** cockpit handbook bjslab capabilities/t3-code.md
 
-## chatgpt — gpt-5.6-sol
+## chatgpt — gpt-6.1-sol
 
 - **provider:** chatgpt
-- **model:** gpt-5.6-sol
+- **model:** gpt-6.1-sol
 - **executor_class:** frontier
-- **good_for:** Frontier workhorse: hard implementation, architecture, difficult debugging, review, and long tool-heavy execution where both judgment and follow-through matter.
-- **avoid_for:** Thin or ambiguous briefs, weak stop conditions, and cheap bulk work. Sol can be overeager: give it explicit success criteria, boundaries, validation, and a stopping condition before granting broad autonomy.
-- **default_effort:** medium
-- **cost:**
-  - **relative:** premium
-  - **access:** Codex/ChatGPT plan limits or OpenAI API
-  - **api_usd_per_million_tokens:**
-    - **input:** `5.0`
-    - **cached_input:** `0.5`
-    - **cache_write:** `6.25`
-    - **output:** `30.0`
-  - **long_context_api_usd_per_million_tokens:**
-    - **input:** `10.0`
-    - **cached_input:** `1.0`
-    - **cache_write:** `12.5`
-    - **output:** `45.0`
-  - **note:** Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.
-  - **checked:** 2026-07-20
-  - **source:** https://developers.openai.com/api/docs/pricing
-
-## chatgpt — gpt-5.6-terra
-
-- **provider:** chatgpt
-- **model:** gpt-5.6-terra
-- **executor_class:** standard
-- **good_for:** Balanced everyday workhorse: implementation, debugging, review, synthesis, and agentic work that needs strong intelligence without Sol's full cost.
-- **avoid_for:** The hardest quality-first judgment where Sol earns its cost, or high-volume mechanical work where Luna is sufficient.
+- **good_for:** Default Codex workhorse for complex coding, computer use, professional work, architecture, difficult debugging, review, and long tool-heavy execution where judgment and follow-through both matter.
+- **avoid_for:** Mechanical bulk work that a smaller non-Codex route can handle, or the hardest quality-first judgment where Astra earns its higher cost. Give broad autonomous work explicit success criteria, boundaries, validation, and a stopping condition.
 - **default_effort:** medium
 - **cost:**
   - **relative:** mid
   - **access:** Codex/ChatGPT plan limits or OpenAI API
   - **api_usd_per_million_tokens:**
-    - **input:** `2.5`
-    - **cached_input:** `0.25`
-    - **cache_write:** `3.125`
-    - **output:** `15.0`
-  - **long_context_api_usd_per_million_tokens:**
-    - **input:** `5.0`
-    - **cached_input:** `0.5`
-    - **cache_write:** `6.25`
-    - **output:** `22.5`
-  - **note:** Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.
-  - **checked:** 2026-07-20
-  - **source:** https://developers.openai.com/api/docs/pricing
-
-## chatgpt — gpt-5.6-luna
-
-- **provider:** chatgpt
-- **model:** gpt-5.6-luna
-- **executor_class:** small
-- **good_for:** Fast, affordable high-volume work: extraction, classification, bounded edits, routine scouting, and well-specified mechanical execution.
-- **avoid_for:** Architecture, subtle debugging, ambiguous product judgment, or work whose context and dependencies exceed a tightly bounded brief.
-- **default_effort:** low
-- **cost:**
-  - **relative:** low
-  - **access:** Codex/ChatGPT plan limits or OpenAI API
-  - **api_usd_per_million_tokens:**
-    - **input:** `1.0`
-    - **cached_input:** `0.1`
-    - **cache_write:** `1.25`
-    - **output:** `6.0`
-  - **long_context_api_usd_per_million_tokens:**
     - **input:** `2.0`
-    - **cached_input:** `0.2`
+    - **cached_input:** `0.1`
     - **cache_write:** `2.5`
-    - **output:** `9.0`
-  - **note:** Standard API pricing; long-context eligibility/thresholds are model-specific. Codex subscription usage is plan-metered rather than billed at these API rates.
-  - **checked:** 2026-07-20
-  - **source:** https://developers.openai.com/api/docs/pricing
-
-## chatgpt — gpt-5.5
-
-- **provider:** chatgpt
-- **model:** gpt-5.5
-- **executor_class:** standard
-- **good_for:** Proven incumbent and compatibility fallback: familiar stewardship, implementation, debugging, synthesis, and tool-heavy coordination when its established behavior matters more than adopting 5.6.
-- **avoid_for:** Treating it as the cheap fallback: its standard short-context API price matches Sol. Prefer Terra or Luna when cost is the reason, and Sol when frontier capability is the reason.
-- **default_effort:** medium
-- **cost:**
-  - **relative:** premium
-  - **access:** Codex/ChatGPT plan limits or OpenAI API
-  - **api_usd_per_million_tokens:**
-    - **input:** `5.0`
-    - **cached_input:** `0.5`
-    - **output:** `30.0`
+    - **output:** `10.0`
   - **long_context_api_usd_per_million_tokens:**
-    - **input:** `10.0`
-    - **cached_input:** `1.0`
-    - **output:** `45.0`
-  - **note:** Standard API pricing; long-context eligibility/thresholds are model-specific. Keep for behavioral familiarity and compatibility, not a price advantage over Sol.
-  - **checked:** 2026-07-20
-  - **source:** https://developers.openai.com/api/docs/pricing
+    - **input:** `4.0`
+    - **cached_input:** `0.2`
+    - **cache_write:** `5.0`
+    - **output:** `15.0`
+  - **note:** Standard API pricing; prompts above 272K input tokens use 2x input/cache rates and 1.5x output. Codex subscription usage is plan-metered rather than billed at these API rates. Supported reasoning efforts are low, medium, high, xhigh, and max; none/minimal are unsupported.
+  - **checked:** 2026-09-29
+  - **source:** https://developers.openai.com/api/docs/models/gpt-6.1-sol
 
 ## claude — fable
 

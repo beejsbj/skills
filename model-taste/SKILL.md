@@ -15,4 +15,4 @@ Read the [model roster](references/roster.md) when the task needs a concrete pro
 
 The selection is complete when the chosen model, effort, route, fit rationale, and any availability or cost uncertainty are explicit, with the user’s choice preserved when present.
 
-<!-- Roster mechanically extracted from acpx/profiles.json at a61711341e40d9287c4c6e0c7dbaeb0415388a0e; source-dated facts are intentionally not recertified. -->
+<!-- Roster facts are source-dated snapshots and are intentionally not recertified on every use. -->
