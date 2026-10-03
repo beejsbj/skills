@@ -29,7 +29,9 @@ when useful, rather than duplicating entire notes. Donetick is retired.
 Burooj chose to try the existing tududi instance on 2026-10-03. New personal
 life-admin captures go into its Inbox; sort them into actions after the owner
 clarifies what is current. Historical issue suggestions remain candidates until
-confirmed. Areas organize practical administration; keep the broader ecology
+confirmed. Burooj prefers a guided back-and-forth when a complete dump is hard:
+ask one concrete question at a time and build from the obligations he names.
+Areas organize practical administration; keep the broader ecology
 and its seasonal states in the writing/thinking space.
 
 Otto is the default planning steward for this trial when planning is requested;
@@ -50,7 +52,11 @@ daily-plan HTTP API with the existing protected credential loader. Preserve the
 current plan's items rather than replacing it from an old snapshot. Planning
 suggestions currently select active-project tasks; loose actions can be selected
 explicitly, and genuinely due tasks remain visible. Phone reminder delivery is
-pending the owner's channel choice; a recorded date is not proof of delivery.
+through the owner's existing calendar for this trial (chosen 2026-10-03).
+Confirm uncertain event dates and times before creating calendar reminders, and
+use an explicitly stated travel timezone, such as India/Asia/Kolkata, for that
+event. The account timezone remains America/Toronto. A task's recorded date is
+not proof of reminder delivery.
 
 The MCP adapter reads the protected host credential file at startup. Use the
 configured server rather than displaying the token or placing it in command
