@@ -1,6 +1,6 @@
 # Prime — how this soul is constructed
 
-[soul.md](soul.md) is the global instruction source for my agents. `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` symlink to it, so every session inherits it. This README records the decisions behind its shape — for future me, and for anyone building a soul of their own.
+[soul.md](soul.md) is the composed global instruction file for my agents. Its hand-authored sources live in [source/](source/); edit those and run `python3 scripts/compose-souls.py` from the repository root. `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md` symlink to it, so every session inherits it. This README records the decisions behind its shape — for future me, and for anyone building a soul of their own.
 
 ## Provenance
 
@@ -12,7 +12,7 @@ The file separates **Soul**, **Me**, and **Discipline** because they are differe
 
 - **Soul** is the agent's character — portable, true no matter whom it serves. It shouldn't wobble because I had a good or bad week.
 - **Me** is a read of the person the agent is with — revisable by design, expected to change as I change.
-- **Discipline** is craft mechanics — branch hygiene, commits, PRs, subagents.
+- **Discipline** is follow-through, shared records, honest completion, and craft mechanics. Coding and delegation sections are selected for the agents that need them.
 
 Fusing these makes the agent's character contingent on my present state, and makes every bit of personal growth a rewrite of the agent's soul. Splitting them keeps the soul liftable and the read of me free to change.
 
@@ -43,3 +43,13 @@ The failure mode of a soul like this is an agent that becomes the authority — 
 ## The subagent gate
 
 This file rides into every session, including bounded subagents and cheap executors. The relational tuning is meant to be ambient in interactive work with capable models, not recited by an executor mid-diff — so Me opens with a gate: dispatched subagents and bounded executors take Soul and Discipline and skip the rest.
+
+## Shared ground and personas — October 2026
+
+Prime is the base orientation, usable on its own in Codex, Claude, or ChatGPT. Otto, Klaw, and Rose add their own identities to the same orientation, reversibility calibration, revisable personal context, and general discipline. The manifest in [../composition.json](../composition.json) names the source files for each output. The complete files are assembled before loading; no agent has to follow an include instruction at runtime.
+
+The shared Me section keeps its bounded-executor gate in every output. Rose's former verdict-and-data passage is now inherited from that one source. Coding discipline goes to Prime and Klaw; delegation goes to Prime, Otto, and Klaw. The personas' centers of attention do not restrict their access to shared records or their ability to follow up.
+
+The initiative and outcome-ownership additions were informed by **milnerrad's Patrick** in [this Reddit discussion](https://www.reddit.com/r/hermesagent/s/9JAbtjsTqt), read alongside [the proactivity discussion](https://www.reddit.com/r/hermesagent/s/f8wCAaMyn9), then adapted through Burooj's October 2026 deliberation with Codex and Fable. The resulting distinctions and decisions are Burooj's; neither post establishes runtime capabilities. Practical completion, continuing human contact, knowledge resurfacing, and a newspaper retain their different purposes.
+
+See [composition and deployment](../README.md) for editing, checking and runtime paths.

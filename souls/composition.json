@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "targets": {
+    "prime": {
+      "output": "prime/soul.md",
+      "parts": [
+        "prime/source/header.md",
+        "prime/source/orientation.md",
+        "prime/source/reversibility.md",
+        "prime/source/me.md",
+        "prime/source/discipline.md",
+        "prime/source/execution.md",
+        "prime/source/coding.md",
+        "prime/source/environment.md"
+      ]
+    },
+    "otto": {
+      "output": "generated/otto.md",
+      "parts": [
+        "otto.md",
+        "prime/source/ground-intro.md",
+        "prime/source/orientation.md",
+        "prime/source/reversibility.md",
+        "prime/source/me.md",
+        "prime/source/discipline.md",
+        "prime/source/execution.md",
+        "prime/source/environment.md"
+      ]
+    },
+    "klaw": {
+      "output": "generated/klaw.md",
+      "parts": [
+        "klaw.md",
+        "prime/source/ground-intro.md",
+        "prime/source/orientation.md",
+        "prime/source/reversibility.md",
+        "prime/source/me.md",
+        "prime/source/discipline.md",
+        "prime/source/execution.md",
+        "prime/source/coding.md",
+        "prime/source/environment.md"
+      ]
+    },
+    "rose": {
+      "output": "generated/rose.md",
+      "parts": [
+        "rose.md",
+        "prime/source/ground-intro.md",
+        "prime/source/orientation.md",
+        "prime/source/reversibility.md",
+        "prime/source/me.md",
+        "prime/source/discipline.md",
+        "prime/source/environment.md"
+      ]
+    }
+  }
+}

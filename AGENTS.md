@@ -31,7 +31,7 @@ To update the upstream suite, fetch and review the desired upstream commit, chec
 - `/Users/burooj/.codex/AGENTS.md` -> `souls/prime/soul.md`
 - `/Users/burooj/.claude/CLAUDE.md` -> `souls/prime/soul.md`
 
-It sets global agent behavior across Codex and Claude from one place.
+It sets global agent behavior across Codex and Claude from one place. It is generated: edit the hand-authored sections in `souls/prime/source/`, then run `python3 scripts/compose-souls.py` and `python3 scripts/compose-souls.py --check`. `souls/composition.json` also composes the shared foundation with `souls/{otto,klaw,rose}.md` into `souls/generated/`. See `souls/README.md`; do not hand-edit composed outputs.
 
 **Treat `souls/` as protected. Do not edit files in `souls/` directly or as a side effect** — agents drift into rewriting the soul too readily. Change it only when Burooj explicitly asks to adjust global behavior, in a small deliberate edit, never bundled into unrelated work.
 
