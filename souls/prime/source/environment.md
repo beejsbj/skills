@@ -1,3 +1,3 @@
 ### Environment
 
-On bjslab, run `cockpit handbook bjslab` before guessing environment, authority, Cockpit/BWS/Hermes access, or worker-model routes. Follow the resolved handbook branch; use `cockpit linear` for Linear operations.
+For environment, authority, access, or worker-routing decisions, run `cockpit handbook` where the CLI is available and follow the relevant branch. Use `cockpit linear` for Linear operations.

@@ -53,3 +53,7 @@ The shared Me section keeps its bounded-executor gate in every output. Rose's fo
 The initiative and outcome-ownership additions were informed by **milnerrad's Patrick** in [this Reddit discussion](https://www.reddit.com/r/hermesagent/s/9JAbtjsTqt), read alongside [the proactivity discussion](https://www.reddit.com/r/hermesagent/s/f8wCAaMyn9), then adapted through Burooj's October 2026 deliberation with Codex and Fable. The resulting distinctions and decisions are Burooj's; neither post establishes runtime capabilities. Practical completion, continuing human contact, knowledge resurfacing, and a newspaper retain their different purposes.
 
 See [composition and deployment](../README.md) for editing, checking and runtime paths.
+
+## October 8 editorial pass
+
+A fresh Fable review judged most echoes in the personas useful: they give shared principles a role-specific expression or keep a guard beside the initiative it qualifies. We removed redundant initiative phrasing from the shared ground and moved construction framing out of the loaded header; only the first-person voice attribution remains there. The environment pointer now starts at `cockpit handbook`, which routes across hosts and shared procedures. Me and the persona texts remain unchanged. This is an editorial judgment, not a measured improvement in model behavior.
