@@ -14,7 +14,7 @@ This skill is temporary. Retire it after the tracker records the visual pass and
 Resolve the repository root and verify that the work belongs to `emotitone-solfrege` on `implementing-design-system`. Read these files completely:
 
 1. `src/style-guide/DESIGN_SYSTEM_TRACKER.md` — current design truth, active unit, dependencies, and next gate.
-2. `src/style-guide/DESIGN_LOG.md` — only when the current unit needs its acceptance or implementation receipt.
+2. `src/style-guide/DESIGN_LOG.md` — frozen (2026-10-09): read it for receipts up to that date; later receipts live in PR bodies, so check the unit's open and merged PRs.
 
 Then inspect live Git state. Treat ahead counts, dirty files, worktrees, tests, and running sessions as current facts to recompute, never facts to copy from a document.
 
@@ -23,7 +23,7 @@ Use this truth order when sources disagree:
 1. Burooj's current explicit instruction.
 2. The tracker’s mission, checkpoint, unit row, and active frontier.
 3. Current production code and observed live behavior.
-4. The design log for chronological evidence.
+4. The frozen design log (to 2026-10-09) and then PR bodies for chronological evidence.
 5. Linear `BJS-35` for workflow state and receipts.
 6. Git history for archaeology.
 
@@ -43,7 +43,7 @@ Before acting, state a compact unit brief:
 - production authority and consumers;
 - reference surfaces worth comparing;
 - unresolved visual deltas that genuinely require taste;
-- behavior and unrelated-file preservation boundary;
+- behavior and unrelated-file preservation boundary, plus each defect the unit's lab recorded (found via the frozen log or the unit's open and merged PRs), to be fixed in this adoption;
 - observable completion condition.
 
 Adjacent unit sessions may run concurrently when their files and lineage do not overlap. A session that discovers a shared lower-layer dependency must announce it immediately. Serialize that promotion or coordinate ownership before either dependent unit closes.
@@ -96,9 +96,9 @@ Require an acceptance receipt. Characterize current production behavior before c
 
 The authoritative source component should also be the component production uses. The style guide imports and drives that same source through inert or controlled inputs. Do not create parallel `ProductionX` and design-system implementations. A thin provisional adapter is allowed only when an undefined downstream unit makes it necessary; name it in the tracker and preserve the downstream definition as unaccepted.
 
-Change only the accepted visual treatment and the ownership needed for lineage. Preserve interaction, audio, routing, state, persistence, APIs, accessibility behavior, haptics, and motion unless the accepted visual definition specifically governs state presentation or Burooj separately authorizes functionality work.
+Change only the accepted visual treatment and the ownership needed for lineage. Preserve interaction, audio, routing, state, persistence, APIs, accessibility behavior, haptics, and motion unless the accepted visual definition specifically governs state presentation or Burooj separately authorizes functionality work. A defect the unit's lab recorded is not behavior to preserve: an adoption fixes every accessibility or behavior defect its lab recorded.
 
-When functional defects or ideas appear:
+When any other functional defects or ideas appear:
 
 - reproduce or describe them accurately;
 - park them outside this visual slice with a durable pointer;
@@ -106,7 +106,7 @@ When functional defects or ideas appear:
 
 Specimens must use real source components, realistic values, and real states. Gallery markup cannot become production anatomy by accident.
 
-Commit coherent checkpoints: accepted definition, source/production implementation, specimen integration, and receipt may be separate commits when that keeps each claim reversible and reviewable.
+Commit coherent checkpoints: accepted definition, source/production implementation, specimen integration, and lab-defect fixes may be separate commits when that keeps each claim reversible and reviewable.
 
 ## Verify and hand off
 
@@ -120,10 +120,10 @@ Before closure, run a fresh read-only lineage audit—normally with a bounded su
 - higher layers compose lower sources instead of copying CSS or markup;
 - production and the style guide cross the same public component seam;
 - no specimen scaffold or demo state leaked into production;
-- no behavior changed without separate authorization and evidence;
+- no behavior changed without separate authorization and evidence, except fixes to defects the unit's lab recorded, which still need evidence; and every defect the unit's lab recorded is fixed;
 - no provisional adapter or duplicated recipe is hidden.
 
-Fix audit findings in a separate atomic slice, then update the tracker’s four claims independently: **defined**, **authoritative source**, **real specimen**, and **production adoption**. Append a concise design-log receipt. If Cockpit/Linear is active for the session, leave the corresponding `BJS-35` receipt without changing lifecycle state beyond the evidence.
+Fix audit findings in a separate atomic slice, then update the tracker’s four claims independently: **defined**, **authoritative source**, **real specimen**, and **production adoption**. Put the receipt in the PR body (with no PR yet, in the final handoff, then move it into the PR body when one opens); `DESIGN_LOG.md` is frozen (2026-10-09), so append nothing to it. If Cockpit/Linear is active for the session, leave the corresponding `BJS-35` receipt without changing lifecycle state beyond the evidence.
 
 End with exact branch, commits, pushed status, checks, visual evidence, residual risk, and next unit. Do not push unless Burooj explicitly authorizes it.
 
@@ -131,6 +131,6 @@ End with exact branch, commits, pushed status, checks, visual evidence, residual
 
 - Do not invoke `design-lab` for this pass; its old workflow is historical input, not current doctrine.
 - Do not reopen accepted units unless current evidence reveals a concrete contradiction or Burooj asks.
-- Do not mix visual migration with functionality, bug fixes, broad accessibility redesign, audio, routing, or state architecture.
+- Do not mix visual migration with functionality, bug fixes, broad accessibility redesign, audio, routing, or state architecture, except a defect the unit's lab recorded, which its adoption fixes.
 - Use at most one bounded scout before definition and one bounded lineage auditor after implementation. Orchestration must shorten the loop, not become the work.
 - Respect the dirty tree and adjacent sessions. Stage only owned files.
