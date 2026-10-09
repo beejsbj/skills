@@ -95,7 +95,6 @@ Labels encode metadata, never workflow position.
 | `type:*` | Work kind | `bug`, `feature`, `improvement`, `cleanup`, `research`, `chore`, `seed`, `grilling`, `context`, `one-off`, `polish` |
 | `executor:*` | Smallest model class the brief is written for | `frontier` (Sol/opus/fable judgment or hard execution), `standard` (Terra/gpt-5.5/sonnet/glm/minimax implementation), `small` (Luna/haiku/flash bulk work) |
 | `site:*` | Minimum execution site the work requires | `cloud`, `bjslab`, `macbook`, `multi` — see below |
-| `session:<provider>:<id>` | Active session binding | Live issues only; remove on `Done`/`Canceled` |
 | `<skill-namespace>:*` | Opaque metadata owned by an installed workflow | Cockpit transports but does not interpret it; for example `wayfinder:map` and `wayfinder:{research,prototype,grilling,task}` |
 
 `site:*` encodes *where the work can physically run*, as a capability ladder — label the **minimum** site required, not every site that would work. One `site:*` label per issue; absent means site-untriaged. Anything `site:cloud` is by definition phone-driveable, so there is no separate `site:phone` label.
@@ -136,7 +135,7 @@ Upstream skills compose these primitives. A frontier, claim, map, ticket, or res
 
 ## Comment Model
 
-**Cockpit Thread** (one per issue): a single top-level comment. All receipts, binding events, and audit trail live as replies under it. `bind`, `release`, `move`, and `comment` commands create or reuse this thread automatically.
+**Cockpit Thread** (one per issue): a single top-level comment. All receipts, work-log comments, and audit trail live as replies under it. `move` and `comment` create or reuse this thread automatically. Cockpit does not bind issues to sessions; each session event is an append-only work-log comment (format in Cockpit's `handbook/linear/session-discipline.md`).
 
 **Questions thread** (one per issue): a top-level comment titled `Questions`. Each question is a reply under it. Burooj replies per-question. Do not put questions in the issue body.
 
@@ -149,14 +148,13 @@ Upstream skills compose these primitives. A frontier, claim, map, ticket, or res
 Use cockpit commands for all writes so authorship stays on the Cockpit app actor (not Burooj's personal account):
 
 ```bash
-./cockpit.py bind BJS-123 codex <session-id>
-./cockpit.py release BJS-123
-./cockpit.py comment BJS-123 "Receipt or update."
-./cockpit.py comment BJS-123 --reply-to <comment-id> "Reply body."
-./cockpit.py comment BJS-123 --brief "Decision brief text (goes to the For Burooj thread)."
-./cockpit.py comment-resolve <comment-id>
-./cockpit.py comment-unresolve <comment-id>
-./cockpit.py move BJS-123 "In Review"
+cockpit linear comment BJS-123 "Receipt or update."
+cockpit linear comment BJS-123 "Work log · worker · <machine> · <harness> · model <from harness record> · session <id> — <outcome>"
+cockpit linear comment BJS-123 --reply-to <comment-id> "Reply body."
+cockpit linear comment BJS-123 --brief "Decision brief text (goes to the For Burooj thread)."
+cockpit linear comment-resolve <comment-id>
+cockpit linear comment-unresolve <comment-id>
+cockpit linear move BJS-123 "In Review"
 ```
 
 Resolution semantics: resolving a thread asserts the issue body no longer needs it — content graduated into the body, or the thread became moot. Unresolved threads are live context: `prepare` builds launch briefs from the body plus unresolved comments, so a cold worker sees exactly which threads still matter. The Cockpit Thread is auto-resolved by cockpit and is therefore never load-bearing for a cold start; Questions, For Burooj, and Grilling resolve only when a reply says what closed them — for Grilling, that means its conclusions have graduated into the body. Do not use raw Linear API/CLI writes for cockpit comments.
