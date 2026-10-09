@@ -96,9 +96,9 @@ Require an acceptance receipt. Characterize current production behavior before c
 
 The authoritative source component should also be the component production uses. The style guide imports and drives that same source through inert or controlled inputs. Do not create parallel `ProductionX` and design-system implementations. A thin provisional adapter is allowed only when an undefined downstream unit makes it necessary; name it in the tracker and preserve the downstream definition as unaccepted.
 
-Change only the accepted visual treatment and the ownership needed for lineage. Preserve interaction, audio, routing, state, persistence, APIs, accessibility behavior, haptics, and motion unless the accepted visual definition specifically governs state presentation or Burooj separately authorizes functionality work.
+Change only the accepted visual treatment and the ownership needed for lineage. Preserve interaction, audio, routing, state, persistence, APIs, accessibility behavior, haptics, and motion unless the accepted visual definition specifically governs state presentation or Burooj separately authorizes functionality work. A defect the unit's lab recorded is not behavior to preserve: an adoption fixes every accessibility or behavior defect its lab recorded in the unit it reopens.
 
-When functional defects or ideas appear:
+When any other functional defects or ideas appear:
 
 - reproduce or describe them accurately;
 - park them outside this visual slice with a durable pointer;
@@ -123,7 +123,7 @@ Before closure, run a fresh read-only lineage audit—normally with a bounded su
 - no behavior changed without separate authorization and evidence;
 - no provisional adapter or duplicated recipe is hidden.
 
-Fix audit findings in a separate atomic slice, then update the tracker’s four claims independently: **defined**, **authoritative source**, **real specimen**, and **production adoption**. Append a concise design-log receipt. If Cockpit/Linear is active for the session, leave the corresponding `BJS-35` receipt without changing lifecycle state beyond the evidence.
+Fix audit findings in a separate atomic slice, then update the tracker’s four claims independently: **defined**, **authoritative source**, **real specimen**, and **production adoption**. Put the receipt in the PR body; `DESIGN_LOG.md` is frozen (2026-10-09), so append nothing to it. If Cockpit/Linear is active for the session, leave the corresponding `BJS-35` receipt without changing lifecycle state beyond the evidence.
 
 End with exact branch, commits, pushed status, checks, visual evidence, residual risk, and next unit. Do not push unless Burooj explicitly authorizes it.
 
