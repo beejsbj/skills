@@ -14,7 +14,7 @@ This skill is temporary. Retire it after the tracker records the visual pass and
 Resolve the repository root and verify that the work belongs to `emotitone-solfrege` on `implementing-design-system`. Read these files completely:
 
 1. `src/style-guide/DESIGN_SYSTEM_TRACKER.md` — current design truth, active unit, dependencies, and next gate.
-2. `src/style-guide/DESIGN_LOG.md` — only when the current unit needs its acceptance or implementation receipt.
+2. `src/style-guide/DESIGN_LOG.md` — is frozen (2026-10-09): read it for receipts up to that date; later receipts live in PR bodies, so check the unit's merged PRs.
 
 Then inspect live Git state. Treat ahead counts, dirty files, worktrees, tests, and running sessions as current facts to recompute, never facts to copy from a document.
 
@@ -23,7 +23,7 @@ Use this truth order when sources disagree:
 1. Burooj's current explicit instruction.
 2. The tracker’s mission, checkpoint, unit row, and active frontier.
 3. Current production code and observed live behavior.
-4. The design log for chronological evidence.
+4. The frozen design log (to 2026-10-09) and then PR bodies for chronological evidence.
 5. Linear `BJS-35` for workflow state and receipts.
 6. Git history for archaeology.
 
@@ -120,10 +120,10 @@ Before closure, run a fresh read-only lineage audit—normally with a bounded su
 - higher layers compose lower sources instead of copying CSS or markup;
 - production and the style guide cross the same public component seam;
 - no specimen scaffold or demo state leaked into production;
-- no behavior changed without separate authorization and evidence;
+- no behavior changed without separate authorization and evidence, except fixes to defects the unit's lab recorded;
 - no provisional adapter or duplicated recipe is hidden.
 
-Fix audit findings in a separate atomic slice, then update the tracker’s four claims independently: **defined**, **authoritative source**, **real specimen**, and **production adoption**. Put the receipt in the PR body; `DESIGN_LOG.md` is frozen (2026-10-09), so append nothing to it. If Cockpit/Linear is active for the session, leave the corresponding `BJS-35` receipt without changing lifecycle state beyond the evidence.
+Fix audit findings in a separate atomic slice, then update the tracker’s four claims independently: **defined**, **authoritative source**, **real specimen**, and **production adoption**. Put the receipt in the PR body (with no PR yet, in the final handoff until one exists); `DESIGN_LOG.md` is frozen (2026-10-09), so append nothing to it. If Cockpit/Linear is active for the session, leave the corresponding `BJS-35` receipt without changing lifecycle state beyond the evidence.
 
 End with exact branch, commits, pushed status, checks, visual evidence, residual risk, and next unit. Do not push unless Burooj explicitly authorizes it.
 
@@ -131,6 +131,6 @@ End with exact branch, commits, pushed status, checks, visual evidence, residual
 
 - Do not invoke `design-lab` for this pass; its old workflow is historical input, not current doctrine.
 - Do not reopen accepted units unless current evidence reveals a concrete contradiction or Burooj asks.
-- Do not mix visual migration with functionality, bug fixes, broad accessibility redesign, audio, routing, or state architecture.
+- Do not mix visual migration with functionality, bug fixes, broad accessibility redesign (a defect the unit's lab recorded is fixed in its adoption, not parked), audio, routing, or state architecture.
 - Use at most one bounded scout before definition and one bounded lineage auditor after implementation. Orchestration must shorten the loop, not become the work.
 - Respect the dirty tree and adjacent sessions. Stage only owned files.
