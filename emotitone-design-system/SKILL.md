@@ -14,7 +14,7 @@ This skill is temporary. Retire it after the tracker records the visual pass and
 Resolve the repository root and verify that the work belongs to `emotitone-solfrege` on `implementing-design-system`. Read these files completely:
 
 1. `src/style-guide/DESIGN_SYSTEM_TRACKER.md` — current design truth, active unit, dependencies, and next gate.
-2. `src/style-guide/DESIGN_LOG.md` — frozen (2026-10-09): read it for receipts up to that date; later receipts live in PR bodies, so check the unit's merged PRs.
+2. `src/style-guide/DESIGN_LOG.md` — frozen (2026-10-09): read it for receipts up to that date; later receipts live in PR bodies, so check the unit's open and merged PRs.
 
 Then inspect live Git state. Treat ahead counts, dirty files, worktrees, tests, and running sessions as current facts to recompute, never facts to copy from a document.
 
@@ -43,7 +43,7 @@ Before acting, state a compact unit brief:
 - production authority and consumers;
 - reference surfaces worth comparing;
 - unresolved visual deltas that genuinely require taste;
-- behavior and unrelated-file preservation boundary, plus each defect the unit's lab recorded (found via the frozen log or the unit's merged PRs), to be fixed in this adoption;
+- behavior and unrelated-file preservation boundary, plus each defect the unit's lab recorded (found via the frozen log or the unit's open and merged PRs), to be fixed in this adoption;
 - observable completion condition.
 
 Adjacent unit sessions may run concurrently when their files and lineage do not overlap. A session that discovers a shared lower-layer dependency must announce it immediately. Serialize that promotion or coordinate ownership before either dependent unit closes.
