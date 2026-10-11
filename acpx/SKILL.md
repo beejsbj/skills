@@ -13,7 +13,7 @@ Use this skill when you need to run coding agents through `acpx`, manage persist
 
 When model or effort selection is needed and the user has not already chosen, use [`../model-taste/SKILL.md`](../model-taste/SKILL.md) and its [roster](../model-taste/references/roster.md). It owns model judgment; acpx owns ACP transport. Issues carry an `executor:*` label naming the class their brief is written for (see the `linear` skill).
 
-On bjslab, resolve `cockpit handbook bjslab capabilities/t3-code.md` before choosing a route. It documents the live harness and model boundaries. A model appearing in the Codex catalog does not mean the active native `spawn_agent` tool accepts it as an override; use that tool's advertised allowlist or launch a native CLI worker.
+Use `cockpit agents options --json` for live route availability and resolve `cockpit handbook agents` for harness boundaries. For sessions managed outside ACP, follow [cockpit-agents](../cockpit-agents/SKILL.md); ACP workflows below stay with acpx. A model appearing in the Codex catalog does not mean the active native `spawn_agent` tool accepts it as an override; use that tool's advertised allowlist or launch a native CLI worker.
 
 On the Mac, invoke as `bunx --bun acpx …`, with global flags **before** the agent subcommand.
 
