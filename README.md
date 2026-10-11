@@ -45,8 +45,6 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`pear/`** — local-first/P2P guidance for Pear/Holepunch: when to use peer replication, multi-device sync, Hypercore-style append-only stores, and pear:// app distribution instead of defaulting to servers, blockchain, or vague decentralization.
 
-**`in-progress/design-lab/`** — design-system composition skill. Develops raw material in a temporary workbench, tracks decisions and authoritative sources, and assembles a final style guide from tokens, primitives, compounds, unique specimens, and compositions.
-
 **`linear/`** — Burooj's Linear board discipline and write path: lanes, labels, issue bodies, comments, dependencies, receipts, and cockpit app-actor commands.
 
 **`remember/`** — personal recall with a source map for Brain, chat-scrobbler, Karakeep, Cockpit/Linear, GitHub and local repositories, Gmail, Calendar, and browser histories. Agents choose plausible sources and dispatch scouts from an ordinary recollection; source access notes live with the skill.

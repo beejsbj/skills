@@ -1,4 +1,0 @@
-interface:
-  display_name: "Design Lab"
-  short_description: "Orchestrate subagents from design options to a verified system."
-  default_prompt: "Use $design-lab as the orchestrator for this design-system pass. Own the brief, queue, human review, and integration; delegate scoped exploration, implementation, and verification to subagents. Preserve established direction. When direction is open, present 3–5 distinct rendered variations and wait for my choice before developing the selected system. Continue independent work while a choice is pending, verify integrated sources and consumers, and publish the final style guide with accurate acceptance and evidence claims."
