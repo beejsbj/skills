@@ -8,6 +8,10 @@ import subprocess
 import sys
 
 
+REQUIRED_COMMANDS = ('projects', 'models', 'threads', 'show', 'create', 'send',
+                     'sessions', 'resume', 'options', 'receipt')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
@@ -44,8 +48,7 @@ def main():
         result = subprocess.run(['cockpit', 'agents', '--help'], capture_output=True, text=True, timeout=15)
     except (OSError, subprocess.TimeoutExpired) as error:
         parser.error(f'cannot verify deployed cockpit agents: {type(error).__name__}')
-    required = ('projects', 'models', 'threads', 'show', 'create', 'send', 'sessions', 'resume', 'receipt')
-    missing = [name for name in required if name not in result.stdout.replace(',', ' ').replace('{', ' ').replace('}', ' ').split()]
+    missing = [name for name in REQUIRED_COMMANDS if name not in result.stdout.replace(',', ' ').replace('{', ' ').replace('}', ' ').split()]
     if result.returncode or missing:
         parser.error('CLI cutover is not ready; missing commands: ' + ', '.join(missing))
     if not changes:

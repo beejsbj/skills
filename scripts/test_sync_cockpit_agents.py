@@ -30,7 +30,7 @@ class CutoverTests(unittest.TestCase):
         self.bin = self.base / 'bin'
         self.bin.mkdir()
         self.cli = self.bin / 'cockpit'
-        self.cli.write_text('#!/bin/sh\necho "{projects,models,threads,show,create,send,sessions,resume,receipt}"\n')
+        self.cli.write_text('#!/bin/sh\necho "{projects,models,threads,show,create,send,sessions,resume,options,receipt}"\n')
         self.cli.chmod(0o755)
         self.backup = self.base / 'before.json'
 
@@ -87,6 +87,15 @@ class CutoverTests(unittest.TestCase):
         self.cli.write_text('#!/bin/sh\necho "{sessions,send,options,receipt}"\n')
         self.assertEqual(self.run_linker('--apply', '--backup', str(self.backup)).returncode, 2)
         self.assert_untouched()
+
+    def test_missing_options_blocks_check_and_apply(self):
+        self.cli.write_text('#!/bin/sh\necho "{projects,models,threads,show,create,send,sessions,resume,receipt}"\n')
+        for args in [('--check',), ('--apply', '--backup', str(self.backup))]:
+            with self.subTest(mode=args[0]):
+                result = self.run_linker(*args)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn('missing commands: options', result.stderr)
+                self.assert_untouched()
 
     def test_apply_requires_new_backup(self):
         self.assertEqual(self.run_linker('--apply').returncode, 2)
