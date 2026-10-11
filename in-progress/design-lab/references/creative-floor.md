@@ -6,16 +6,16 @@ Ownership and token tracing belong to `systematizing.md`. Here, examine the actu
 
 ## Explore before committing
 
-Specify variety deliberately rather than expecting repeated attempts to produce range.
+Specify variety deliberately rather than expecting repeated attempts to produce range. The orchestrator sets one shared brief and gives workers distinct exploration assignments, then reconciles overlap and gaps into a coherent comparison.
 
-- **Established direction:** preserve accepted palette, type, doctrine, and liked details. Explore treatments within the unresolved space. A conflicting source export does not automatically supersede accepted intent.
-- **Open direction:** develop 3–4 genuinely distinct candidates, each tied to the brief. Specify ground/accent values, named display/body type, density, geometry/elevation, and interaction character. Make at least one a plausible departure from your reflexive choice. Different shades of one palette are not distinct directions.
+- **Established direction:** preserve accepted palette, type, doctrine, and liked details. Delegate scoped treatments within the unresolved space; an ordinary treatment in an accepted system does not need 3–5 new directions. A conflicting source export does not automatically supersede accepted intent.
+- **Open direction:** develop 3–5 genuinely distinct candidates tied to the same brief. Vary the design point of view, not just recolours; specify the consequential choices, such as ground/accent values, named display/body type, density, geometry/elevation, and interaction character. Include a plausible departure from the reflexive choice.
 
-Use a small temporary workbench to render consequential comparisons or a representative composition. Written specs guide the work; they are not visual evidence. When an unresolved intent decision would materially change the system, show the concrete alternatives and ask before dependent construction. Otherwise choose, state the rationale, and proceed.
+Render open-direction candidates as comparable compositions using the same content, states, and host sizes. Give each a stable ID and name, a brief-specific rationale, concrete benefits and tradeoffs, and a preview or capture the user can compare. Written specs guide the work; they are not visual evidence. Preserve deep behavior through the existing seam when trying a new face, and identify units worth leaving alone. A visually attractive candidate that drops a difficult state has not won the comparison.
 
-For an existing product, mount its real baseline beside candidates under the same content, states, and host constraints. Preserve deep behavior through the existing seam when trying a new face. Give each treatment a concrete benefit and cost, and identify units worth leaving alone. A visually attractive replacement that drops a difficult state has not won the comparison.
+For an existing product, mount its real baseline beside treatments under the same content, states, and host constraints. Within an established direction, surface consequential unresolved taste or intent choices before dependent construction; otherwise proceed within the accepted brief.
 
-Freeze one direction in the tracker, keeping alternatives as short notes. Record accepted intent separately from the agent's proposal. Preserve distinctive details through systematization; a reuse decision should not flatten a meaningful creative difference. Reopen the direction for new evidence or user steering, not restless mid-build restyling.
+For an open direction, present the comparison and wait for the user's selection or requested revisions before promoting a direction, building its full system, or adopting it. A recommendation is not a selection. The user may explicitly delegate selection for this pass; general permission to explore or do autonomous structural work does not. Independent work can continue while selection is pending. Freeze the selected direction in the tracker, keeping alternatives as short notes. Record accepted intent separately from the agent's proposal. Preserve distinctive details through systematization; a reuse decision should not flatten a meaningful creative difference. Reopen the direction for new evidence or user steering, not restless mid-build restyling.
 
 ## Review the rendered result
 

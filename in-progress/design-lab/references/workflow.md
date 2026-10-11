@@ -14,7 +14,7 @@ Production adoption is a separate scope decision: perform it when requested or i
 
 | Starting point | First useful work |
 | --- | --- |
-| Brief, screenshots, moodboard, or disconnected design files | Identify source provenance, intended use, liked details, and missing states. Propose contracts where evidence is incomplete; build a representative direction for review. |
+| Brief, screenshots, moodboard, or disconnected design files | Identify source provenance, intended use, liked details, and missing states. Propose contracts where evidence is incomplete; when direction is open, commission the 3–5 variations and user selection defined in `SKILL.md`. |
 | Finished site or application | Compare production, any guide, and accepted references. Map actual owners and behavior before extracting or consolidating. Existing implementation is a baseline, not automatic taste acceptance. |
 | Established system with new work or drift | Start from the affected units and consumers. Reuse settled definitions and reopen only claims touched by the change. |
 | Requested reimagining | Keep the accepted baseline available beside experiments. Explore the named scope; promote selected treatments through the real source and adoption gates. |
@@ -34,11 +34,24 @@ Choose work in this order: the user's named priority, a failed required check or
 For each iteration:
 
 1. **Read current claims.** Reconcile the tracker with live sources and existing evidence. A new session resumes the earliest unresolved claim; it does not replay completed exploration.
-2. **Perform the next useful action.** Inspect missing evidence, expose a visual choice, formalize a source, adopt it, or verify it. Match the action to the gap instead of rebuilding every unit through every phase.
-3. **Record the result.** Update changed claims, decisions, evidence, and newly discovered dependent gaps. A rejected experiment is useful progress when it settles a question. Keep required failures open; deferral needs a reason consistent with the brief and authority.
-4. **Continue or yield precisely.** Take the next unblocked action without asking whether to continue. If a required taste/intent answer is pending, keep working on independent units. If nothing useful can proceed, hand off the concrete choice or access blocker and the exact resume action. Repeated attempts with no new evidence need a revised diagnosis, narrower experiment, or that handoff.
+2. **Dispatch the next useful action.** Assign bounded work to inspect missing evidence, expose a visual choice, formalize a source, adopt it, or verify it. Match the action to the gap instead of rebuilding every unit through every phase. Use the dispatch contract below.
+3. **Inspect and integrate the result.** Check the actual artifacts, diff, and evidence before updating claims, decisions, and dependent gaps. A worker's completion message alone does not close a claim. A rejected experiment is useful progress when it settles a question. Keep required failures open; deferral needs a reason consistent with the brief and authority.
+4. **Continue or yield precisely.** Dispatch the next unblocked action without asking whether to continue. If a required taste/intent answer is pending, progress independent units. If nothing useful can proceed, hand off the concrete choice or access blocker and the exact resume action. Repeated attempts with no new evidence need a revised diagnosis, narrower experiment, or that handoff.
 
 Ready for final-guide assembly means the scoped inventory is accounted for and required source, workbench/composition, and in-scope adoption checks are resolved. Guide assembly and its delivered-surface checks remain open until performed. Before declaring the pass complete, verify the delivered guide and any changed production surfaces; required acceptance gates must also be satisfied. Open taste approval may instead be reported as **ready for review**. Explicit retentions and accepted limitations can remain visible without forcing needless redesign. A later finding reopens its affected claim even if an earlier pass closed.
+
+### Dispatch contract
+
+Discover available worker routes using the environment's guidance; where available, `cockpit handbook` routes worker/access decisions. Choose a capable economical model and effort for the assignment, without hardcoding a provider into the project workflow. Give each worker a self-contained brief:
+
+- **Purpose and finish:** the gap, why it matters, the required artifact, and the observable completion condition.
+- **Current truth:** relevant source revision, accepted direction or proposed candidate, tracker excerpt, dependencies, and reference/evidence paths. Specify whether selection is still pending.
+- **Ownership:** checkout, exact writable paths, shared sources to leave to their owner, preserved behavior, and permitted side effects. Exploration stays in candidate/workbench paths until selection; production scope is explicit.
+- **Verification and return:** relevant checks, required rendered evidence, changed files or commits, unresolved findings, and next dependency. Follow the consuming repository's check commands and resource limits.
+
+Keep assignments and evidence pointers in the existing tracker. Assign each shared source to one writer at a time; other workers propose needed changes to that owner. Use isolated candidate directories or worktrees where competing treatments would otherwise overwrite each other. A worker finishes its bounded assignment and returns; the orchestrator integrates shared registrations and updates the queue.
+
+Inspect returned artifacts against the brief, including renders when visual claims matter. Resolve competing ownership before integrating, then verify the affected combined surface: individually passing workers can still conflict. A fresh review worker gets the brief, relevant sources, diff, and evidence; route concrete findings back to the responsible worker and recheck the correction. On worker failure, inspect partial changes before retrying or reassigning so the next worker does not duplicate or overwrite them.
 
 ### Turn review into the next action
 
@@ -95,7 +108,7 @@ Keep these claims independent:
 
 For example, a Button can have a proposed definition, a working source, and a real workbench while its guide entry is pending and production adoption is out of scope. That is a valid intermediate state, not an accepted or fully delivered unit. Conversely, existing production use does not settle a disputed definition.
 
-When the user delegates creative choices (for example, “make the creative calls”), record **chosen under delegated authority** and the instruction that grants it. Continue within that scope without inventing an acceptance gate. Reserve **user-accepted** for an actual acceptance of the result; delegated choice and personal taste approval are different claims.
+When the user explicitly delegates selection for this pass (for example, “show the options, then choose for me”), record **chosen under delegated authority** and the instruction that grants it. Permission to explore, build candidates, or act autonomously on system coherence does not waive the open-direction choice gate. Reserve **user-accepted** for an actual acceptance of the result; delegated selection and personal taste approval are different claims.
 
 Update current truth after settled decisions, promotions, meaningful verification, and handoff. Replace resolved frontier questions rather than appending the conversation. A short acceptance receipt records what was accepted and its source; silence or an agent recommendation is not that receipt. Maintain named design constraints at the level needed to prevent their loss; keep implementation detail and historical receipts in sources, Git, or the project's receipt mechanism. Add a separate log only when chronology outgrows the tracker and no existing mechanism fits.
 

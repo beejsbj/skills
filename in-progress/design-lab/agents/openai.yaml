@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Lab"
-  short_description: "Iterate from raw material to a verified design system."
-  default_prompt: "Use $design-lab to turn the provided material or existing product into a cohesive design system. Map the scoped gaps, choose and resolve the next one autonomously, compare visual choices in temporary workbenches, and verify authoritative sources and real consumers. Preserve established direction; propose and build one for review when it is open. Repeat until the pass is ready, then publish its final style guide and record any remaining acceptance or evidence gaps."
+  short_description: "Orchestrate subagents from design options to a verified system."
+  default_prompt: "Use $design-lab as the orchestrator for this design-system pass. Own the brief, queue, human review, and integration; delegate scoped exploration, implementation, and verification to subagents. Preserve established direction. When direction is open, present 3–5 distinct rendered variations and wait for my choice before developing the selected system. Continue independent work while a choice is pending, verify integrated sources and consumers, and publish the final style guide with accurate acceptance and evidence claims."
