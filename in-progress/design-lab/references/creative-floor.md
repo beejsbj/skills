@@ -13,6 +13,8 @@ Specify variety deliberately rather than expecting repeated attempts to produce 
 
 Use a small temporary workbench to render consequential comparisons or a representative composition. Written specs guide the work; they are not visual evidence. When an unresolved intent decision would materially change the system, show the concrete alternatives and ask before dependent construction. Otherwise choose, state the rationale, and proceed.
 
+For an existing product, mount its real baseline beside candidates under the same content, states, and host constraints. Preserve deep behavior through the existing seam when trying a new face. Give each treatment a concrete benefit and cost, and identify units worth leaving alone. A visually attractive replacement that drops a difficult state has not won the comparison.
+
 Freeze one direction in the tracker, keeping alternatives as short notes. Record accepted intent separately from the agent's proposal. Preserve distinctive details through systematization; a reuse decision should not flatten a meaningful creative difference. Reopen the direction for new evidence or user steering, not restless mid-build restyling.
 
 ## Review the rendered result
@@ -25,7 +27,7 @@ Inspect the real composition and later the final guide at representative sizes a
 - **Unclear feedback.** Interactive states are difficult to perceive, focus is lost, or transitions obscure cause and effect. Use motion only where it helps; immediate updates and Reduced Motion stillness are valid. Decorative movement on a noninteractive status does not make it a better control.
 - **No point of view.** Nothing in color, type, layout, imagery, or interaction connects the result to this brief. Distinctiveness can be quiet and functional; it need not force spectacle into a dense tool.
 
-Treat a failed review as a concrete design problem, not a score to assert away. If the direction itself is the problem, revise it and record the reason. If implementation drifted from a sound direction, correct the affected source. Keep existing behavior intact unless a change is in scope.
+Treat a failed review as a concrete design problem, not a score to assert away. Revise a proposal within the creative authority established in `SKILL.md`; if a protected accepted direction conflicts with the goal, show the conflict and proposed correction for a decision. If implementation drifted from a sound direction, correct the affected source. Keep existing behavior intact unless a change is in scope.
 
 ## Worked example: chosen hierarchy
 

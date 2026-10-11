@@ -132,3 +132,13 @@ Scan for:
 - unsupported taxonomy, unused abstractions, and hidden provisional adapters.
 
 Literal and import searches locate candidates; inspect each in context. A pass means the scoped ownership checks have evidence and findings are resolved or explicitly justified. It is not proof of visual quality or production adoption. The delivery checks in `workflow.md` establish those separately.
+
+Finish with a disposition for scoped sources that have no consumer: connect an intended consumer, merge equivalent ownership, remove an owned unused source, or retain it with a reason. A directly demonstrated foundation or a terminal composition can be intentional; neither needs an invented higher layer. Verify runtime mounting before calling a composition adopted.
+
+## Keep settled rules executable
+
+When recurring drift has an objective rule, encode it in the project's existing checks if that earns its maintenance cost. Examples include import boundaries, production isolation from guide fixtures, or a palette policy limited to named surfaces. Derive the rule and exceptions from accepted contracts; keep taste judgments in rendered review.
+
+Scope rules explicitly and test representative violations, bypasses, and legitimate exceptions. In a mature product, existing debt can have a reviewed baseline that prevents growth while fixes reduce it. Report remaining debt separately from check success. Counts alone can miss a new violation replacing an old one, so inspect the changed code as well. A changed design decision revises the rule deliberately; an inconvenient failure does not justify silently broadening exceptions.
+
+This pattern comes from EmotiTone's design-law lint (`f97b59ea`, inspected at `f1526054`). Its specific colour zones and service boundaries belong to that instrument, not every Design Lab system.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Design Lab"
-  short_description: "Build a cohesive system and publish its style guide."
-  default_prompt: "Use $design-lab to develop the provided material into one cohesive design system: explore in a temporary workbench, track decisions and source ownership, verify real components and compositions, and assemble the final style guide for taste review."
+  short_description: "Iterate from raw material to a verified design system."
+  default_prompt: "Use $design-lab to turn the provided material or existing product into a cohesive design system. Map the scoped gaps, choose and resolve the next one autonomously, compare visual choices in temporary workbenches, and verify authoritative sources and real consumers. Preserve established direction; propose and build one for review when it is open. Repeat until the pass is ready, then publish its final style guide and record any remaining acceptance or evidence gaps."
