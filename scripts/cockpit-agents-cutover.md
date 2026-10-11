@@ -21,6 +21,30 @@ Default roots are `~/.codex/skills`, `~/.agents/skills`, and `~/.claude/skills`;
 
 The compatibility scripts under `t3-code/scripts/` remain byte-for-byte unchanged so already-running coordinators and older Cockpit installations can finish using them. Removing the discovered skill does not delete that helper. Cockpit's deployed transport owns future calls; retire the compatibility files only after all callers have migrated. Their protocol reference is retained for legacy debugging, not as a session route.
 
+## Hermes profile links
+
+Read-only inspection on 2026-10-11 found:
+
+| Profile | Skill source | Required cutover |
+| --- | --- | --- |
+| Otto | `skills.external_dirs` includes the canonical skills repo; no local `t3-code` copy or link | Advance the canonical repo, then refresh discovery. The old trigger disappears with `t3-code/SKILL.md`; `cockpit-agents` appears from the same external source. |
+| Rose | Profile-local skills only; no `t3-code` entry and no external skill roots | Add `cockpit-agents` to `/home/admin/.hermes/profiles/rose/skills`. |
+| Klaw/default | Root-local skills only; no `t3-code` entry and no external skill roots | Add `cockpit-agents` to `/home/admin/.hermes/skills`. |
+
+Neither skill name is disabled globally or per platform in these profiles. After CLI readiness and canonical repo integration, run this **in addition to** the native-root invocation above:
+
+```sh
+python3 scripts/sync-cockpit-agents.py --apply \
+  --root /home/admin/.hermes/skills \
+  --root /home/admin/.hermes/profiles/rose/skills \
+  --backup /absolute/session/path/hermes-skills-links-before.json
+python3 scripts/sync-cockpit-agents.py --check \
+  --root /home/admin/.hermes/skills \
+  --root /home/admin/.hermes/profiles/rose/skills
+```
+
+Explicit `--root` arguments replace the three default roots, so retain both deployment invocations. Otto needs no extra local link. Verify fresh discovery per profile after cutover: existing sessions may retain a previously loaded trigger. Do not change `agent.environment_hint`, souls, or profile configuration as part of this link deployment.
+
 ## Mac handoff
 
 Read-only inspection on 2026-10-11 found the clean skills checkout at `/Users/burooj/BJsWorkspace/Projects/skills`, and no `t3-code` entry in any of the three native skill roots. The older `/Users/burooj/Projects/skills` path does not exist. The Mac's Codex `cockpit` link already targets `/Users/burooj/BJsWorkspace/cockpit`.
