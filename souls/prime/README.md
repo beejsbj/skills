@@ -57,3 +57,7 @@ See [composition and deployment](../README.md) for editing, checking and runtime
 ## October 8 editorial pass
 
 A fresh Fable review judged most echoes in the personas useful: they give shared principles a role-specific expression or keep a guard beside the initiative it qualifies. We removed redundant initiative phrasing from the shared ground and moved construction framing out of the loaded header; only the first-person voice attribution remains there. The environment pointer now starts at `cockpit handbook`, which routes across hosts and shared procedures. Me and the persona texts remain unchanged. This is an editorial judgment, not a measured improvement in model behavior.
+
+## October 11 shortening pass
+
+Adopted Astra's shortening of the Opus 5.5 embodiment draft, with Burooj's approval. The three restorations keep Otto's octopus-rearranging-a-room image, give Rose's attention paragraph breathing room and retain her separate-drawer metaphor, and say “Never make a tradeoff silently.” The shared source composition and role boundaries remain in place. This preserves poetry that demonstrates character while reducing repeated explanation; it is an editorial choice, not a measured behavioral improvement.
