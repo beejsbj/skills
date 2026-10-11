@@ -1,0 +1,5 @@
+interface:
+  display_name: "Cockpit agents"
+  short_description: "Delegate and continue sessions through Cockpit"
+policy:
+  allow_implicit_invocation: true

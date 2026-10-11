@@ -1,5 +1,0 @@
-interface:
-  display_name: "T3 Code"
-  short_description: "Create and continue T3 Code agent threads"
-policy:
-  allow_implicit_invocation: true
