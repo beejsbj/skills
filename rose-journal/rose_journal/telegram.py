@@ -5,8 +5,10 @@ The token comes from the same secrets helper the Rose profile uses
 """
 from __future__ import annotations
 
+import html
 import json
 import os
+import re
 import subprocess
 import urllib.error
 import urllib.request
@@ -46,10 +48,16 @@ def _call(method: str, payload: dict) -> dict:
 
 
 def send_html(chat_id: str, text: str) -> str:
-    result = _call("sendMessage", {
-        "chat_id": chat_id, "text": text, "parse_mode": "HTML",
-        "link_preview_options": {"is_disabled": True},
-    })
+    payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML",
+               "link_preview_options": {"is_disabled": True}}
+    try:
+        result = _call("sendMessage", payload)
+    except TelegramError as e:
+        if "parse entities" not in str(e):
+            raise
+        payload.pop("parse_mode")  # never lose a prompt to a markup error
+        payload["text"] = html.unescape(re.sub(r"<[^>]+>", "", text))
+        result = _call("sendMessage", payload)
     return str(result["message_id"])
 
 

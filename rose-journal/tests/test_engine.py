@@ -195,3 +195,47 @@ class PluginTranscriptTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TickSendTest(unittest.TestCase):
+    def test_failed_sends_retry_then_alert(self):
+        from rose_journal import telegram, tick
+        with tempfile.TemporaryDirectory() as t:
+            cfg = make_cfg(Path(t))
+            orig_send, orig_opener = telegram.send_html, tick._opener
+
+            def boom(*a, **k):
+                raise telegram.TelegramError("Bad Gateway")
+            telegram.send_html = boom
+            tick._opener = lambda *a: ("Morning 🌹", "plain:test", [])
+            try:
+                now = datetime(2026, 10, 14, 6, 5, tzinfo=IST)
+                for attempt in (1, 2):
+                    log = []
+                    tick.send_due(cfg, now, log)
+                    self.assertIn(f"attempt {attempt}/3", log[-1])
+                with self.assertRaises(tick.SendFailed):
+                    tick.send_due(cfg, now, [])
+                log = []
+                tick.send_due(cfg, now, log)  # exhausted: no more attempts
+                self.assertEqual(log, [])
+            finally:
+                telegram.send_html, tick._opener = orig_send, orig_opener
+
+    def test_successful_send_recorded_once(self):
+        from rose_journal import telegram, tick
+        with tempfile.TemporaryDirectory() as t:
+            cfg = make_cfg(Path(t))
+            orig_send, orig_opener = telegram.send_html, tick._opener
+            sent = []
+            telegram.send_html = lambda chat, html: sent.append(html) or "555"
+            tick._opener = lambda *a: ("Morning 🌹", "rose", [])
+            try:
+                now = datetime(2026, 10, 14, 6, 5, tzinfo=IST)
+                tick.send_due(cfg, now, [])
+                tick.send_due(cfg, now + timedelta(minutes=5), [])
+                self.assertEqual(len(sent), 1)
+                p = ledger.find(ledger.snapshot(cfg.ledger_path), "2026-10-14-morning")
+                self.assertEqual(p["message_id"], "555")
+            finally:
+                telegram.send_html, tick._opener = orig_send, orig_opener

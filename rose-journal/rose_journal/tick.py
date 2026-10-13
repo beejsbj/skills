@@ -36,12 +36,18 @@ def _opener(cfg: Config, kind: str, now_local: datetime, pid: str) -> tuple[str,
     return data["opener"].strip(), "rose", data.get("citations") or []
 
 
+SEND_ATTEMPTS = 3
+
+
+class SendFailed(RuntimeError):
+    """A prompt could not be delivered after SEND_ATTEMPTS ticks."""
+
+
 def send_due(cfg: Config, now_local: datetime, log: list[str], only: str | None = None, dry_run: bool = False) -> None:
-    sent_ids = {p["id"] for p in ledger.snapshot(cfg.ledger_path)["prompts"]}
-    if only:
-        due = [(only, now_local)]
-    else:
-        due = schedule.due(cfg, now_local, sent_ids)
+    snap = ledger.snapshot(cfg.ledger_path)["prompts"]
+    done = {p["id"] for p in snap if p.get("message_id") or p.get("send_attempts", 0) >= SEND_ATTEMPTS
+            or p.get("backfilled")}
+    due = [(only, now_local)] if only else schedule.due(cfg, now_local, done)
     for kind, at in due:
         local_date = at.date().isoformat()
         pid = ledger.prompt_id(kind, local_date)
@@ -56,17 +62,35 @@ def send_due(cfg: Config, now_local: datetime, log: list[str], only: str | None 
             log.append(f"[dry-run] {pid} opener_source={source}\n{html}")
             continue
         try:
-            record["message_id"] = telegram.send_html(cfg.chat_id, html)
-        except telegram.TelegramError as e:
-            log.append(f"{pid}: send failed ({e}); retrying plain")
-            plain = compose.telegram_html(kind, now_local, compose.PLAIN_OPENERS[kind])
-            record.update(opener=compose.PLAIN_OPENERS[kind], opener_source="plain:send-retry", html=plain,
-                          plain_text=compose.plain_text(kind, now_local, compose.PLAIN_OPENERS[kind]))
-            record["message_id"] = telegram.send_html(cfg.chat_id, plain)
+            try:
+                record["message_id"] = telegram.send_html(cfg.chat_id, html)
+            except telegram.TelegramError as e:
+                log.append(f"{pid}: send failed ({e}); retrying with the plain opener")
+                op = compose.PLAIN_OPENERS[kind]
+                record.update(opener=op, opener_source="plain:send-retry",
+                              html=compose.telegram_html(kind, now_local, op),
+                              plain_text=compose.plain_text(kind, now_local, op))
+                record["message_id"] = telegram.send_html(cfg.chat_id, record["html"])
+        except Exception as e:
+            with ledger.locked(cfg.ledger_path) as data:
+                q = ledger.find(data, pid)
+                if q is None:
+                    q = {"id": pid, "kind": kind, "local_date": local_date, "chat_id": cfg.chat_id}
+                    data["prompts"].append(q)
+                q["send_attempts"] = q.get("send_attempts", 0) + 1
+                q["send_error"] = str(e)[:300]
+                attempts = q["send_attempts"]
+            log.append(f"{pid}: send attempt {attempts}/{SEND_ATTEMPTS} failed ({e})")
+            if attempts >= SEND_ATTEMPTS:
+                raise SendFailed(f"{pid} was not delivered after {attempts} attempts: {e}")
+            continue
         record["sent_at"] = datetime.now(timezone.utc).isoformat()
         with ledger.locked(cfg.ledger_path) as data:
-            if not ledger.find(data, pid):
+            q = ledger.find(data, pid)
+            if q is None:
                 data["prompts"].append(record)
+            elif not q.get("message_id"):
+                q.update(record)
         log.append(f"sent {pid} (opener: {source})")
 
 
@@ -170,8 +194,10 @@ def main(argv: list[str] | None = None) -> int:
         for step in steps:
             try:
                 step()
-            except Exception as e:  # one failing step must not stop the others
+            except SendFailed as e:
                 errors += 1
+                log.append(f"ALERT: {e}")
+            except Exception as e:  # one failing step must not stop the others
                 log.append(f"error: {type(e).__name__}: {e}")
         if log:
             print("\n".join(log))
