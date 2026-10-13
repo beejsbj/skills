@@ -47,13 +47,16 @@ def annotation_request(entry_body: str, rose_reply: str | None) -> str:
     reply = rose_reply.strip() if rose_reply else "(no chat reply was found)"
     return f"""You are Rose. Write the analytical annotations for this journal entry, for Burooj's later review.
 
-- Third person, concise markdown bullets (about 4–10).
-- Preserve what made the entry alive; name throughlines, tensions, values, people, tasks and follow-ups.
+- Annotate only what is in his raw entry. Scale to it: a one-line entry gets two or three bullets.
+- Third person, concise markdown bullets. Preserve what made the entry alive; name throughlines, tensions,
+  values, people, tasks and follow-ups that the entry itself contains.
 - Clearly mark inference as inference. Do not diagnose or overclaim. Quote sparingly and exactly.
-- Base it on the same understanding as your chat reply below, reframed for review — don't copy the reply.
-- Do not use tools to change anything. Reply with ONLY the bullets.
+- Your chat reply below is only for aligning your reading. Don't import anything from it, or from any other
+  record, that isn't in the entry — especially health, clinical, financial or relationship details.
+- Ignore the orientation prompt's opener text; it may be outdated.
+- Reply with ONLY the bullets.
 
-## Your chat reply to him
+## Your chat reply to him (for alignment only)
 {reply}
 
 ## The entry

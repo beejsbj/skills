@@ -15,14 +15,15 @@ from .config import Config
 HERMES = "/home/admin/.local/bin/hermes"
 
 
-def ask(cfg: Config, query: str, budget: int) -> str | None:
+def ask(cfg: Config, query: str, budget: int, toolsets: str | None = None) -> str | None:
     with tempfile.NamedTemporaryFile("w", suffix=".md", dir=cfg.state_dir, delete=False) as fh:
         fh.write(query)
         qpath = Path(fh.name)
     try:
         out = subprocess.run(
             [HERMES, "-p", cfg.profile, "chat", "--oneshot", "--query-file", str(qpath),
-             "--run-budget", str(budget), "--source", "rose-journal", "-Q"],
+             "--run-budget", str(budget), "--source", "tool", "-Q",
+             *(["-t", toolsets] if toolsets else [])],
             capture_output=True, text=True, timeout=budget + 60, cwd=str(cfg.state_dir),
         )
     except (subprocess.TimeoutExpired, OSError):

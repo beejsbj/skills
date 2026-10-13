@@ -134,6 +134,7 @@ def _rose_reply_after(ts: datetime, db: Path = context.ROSE_STATE_DB) -> str | N
             """select m.content from messages m join sessions s on s.id = m.session_id
                where s.source = 'telegram' and m.role = 'assistant' and m.timestamp > ? and m.timestamp < ?
                  and coalesce(m.content, '') != '' and coalesce(m.tool_calls, '') in ('', '[]')
+                 and m.content not like '[PRIOR CONTEXT%' and m.content not like '[CONTEXT COMPACTION%'
                order by m.timestamp limit 1""",
             (ts.timestamp(), ts.timestamp() + 3600),
         ).fetchone()
@@ -154,7 +155,7 @@ def annotate(cfg: Config, now: datetime, log: list[str]) -> None:
         body = path.read_text(encoding="utf-8")
         if not entries.annotations_pending(body):
             continue
-        text = agent.ask(cfg, prompts.annotation_request(body, _rose_reply_after(first)), 180)
+        text = agent.ask(cfg, prompts.annotation_request(body, _rose_reply_after(first)), 180, toolsets="none")
         ok = bool(text) and len(text) < 5000 and not text.lstrip().startswith("{")
         if ok:
             entries.write_annotations(path, text)
