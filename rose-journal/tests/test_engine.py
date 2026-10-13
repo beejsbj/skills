@@ -64,13 +64,15 @@ class ComposeTest(unittest.TestCase):
     def test_bank_folded_and_escaped(self):
         html = compose.telegram_html("morning", datetime(2026, 10, 14, 6, 0, tzinfo=IST), "Tea & <toast>?")
         self.assertIn("<blockquote expandable>1. How did you sleep?", html)
+        ev = compose.telegram_html("evening", datetime(2026, 10, 14, 23, 0, tzinfo=IST), "x")
+        self.assertIn("<b>1. Brain Dump &amp; Letting Go</b>\n- What's spinning in your mind?", ev)
         self.assertIn("Tea &amp; &lt;toast&gt;?", html)
         self.assertIn("11. What would make today deeply satisfying?", html)
 
     def test_folded_state_has_no_opener(self):
         html = compose.telegram_html("evening", datetime(2026, 10, 14, 23, 0, tzinfo=IST), None, "missed — reply anytime")
         self.assertIn("missed — reply anytime", html)
-        self.assertIn("<blockquote expandable>", html)
+        self.assertNotIn("<blockquote", html)  # folded = header only
 
 
 class ValidateTest(unittest.TestCase):
@@ -115,8 +117,8 @@ class CaptureTest(unittest.TestCase):
         self.assertEqual(info["rule"], "next-message")
         body = Path(info["path"]).read_text()
         self.assertIn("Slept badly.\nStill in Kashmir.", body)
-        self.assertIn("status: captured", body)
-        self.assertTrue(info["path"].endswith("2026/10/2026-10-14-morning.md"))
+        self.assertIn("## Morning journal", body)
+        self.assertTrue(info["path"].endswith("2026/10/2026-10-14.md"))
         self.assertIsNone(capture.capture(self.cfg, self.cfg.chat_id, None, "ok thanks", now + timedelta(minutes=2)))
 
     def test_after_window_only_direct_reply(self):
@@ -130,7 +132,7 @@ class CaptureTest(unittest.TestCase):
         info = capture.capture(self.cfg, self.cfg.chat_id, "100", "second", self.sent + timedelta(hours=20))
         body = Path(info["path"]).read_text()
         self.assertLess(body.index("first"), body.index("second"))
-        self.assertLess(body.index("second"), body.index("## Rose's Annotations"))
+        self.assertLess(body.index("second"), body.index("### Rose's annotations"))
 
     def test_other_chat_and_commands_ignored(self):
         now = self.sent + timedelta(hours=1)
@@ -146,12 +148,12 @@ class CaptureTest(unittest.TestCase):
     def test_annotations_written_without_touching_raw(self):
         info = capture.capture(self.cfg, self.cfg.chat_id, None, "raw words", self.sent + timedelta(hours=1))
         path = Path(info["path"])
-        self.assertTrue(entries.annotations_pending(path.read_text()))
-        entries.write_annotations(path, "- Pattern: sleep")
+        self.assertTrue(entries.annotations_pending(path.read_text(), "morning"))
+        entries.write_annotations(path, "morning", "- Pattern: sleep")
         body = path.read_text()
-        self.assertIn("raw words", entries.raw_entry(body))
-        self.assertIn("status: complete", body)
-        self.assertFalse(entries.annotations_pending(body))
+        self.assertIn("raw words", entries.raw_entry(body, "morning"))
+        self.assertIn("- Pattern: sleep", body)
+        self.assertFalse(entries.annotations_pending(body, "morning"))
 
 
 class GuardTest(unittest.TestCase):
@@ -261,38 +263,38 @@ class NotesTest(unittest.TestCase):
         a = capture.capture_note(self.cfg, "first thought", self.now)
         b = capture.capture_note(self.cfg, "second thought", self.now + timedelta(hours=1))
         self.assertEqual(a["path"], b["path"])
-        self.assertTrue(a["path"].endswith("2026-10-14-note.md"))
+        self.assertTrue(a["path"].endswith("2026-10-14.md"))
         body = Path(a["path"]).read_text()
         self.assertLess(body.index("first thought"), body.index("second thought"))
-        self.assertIn("/j", body)
+        self.assertIn("## Notes (/j)", body)
 
     def test_rose_note_never_touches_raw_or_annotations(self):
         add_prompt(self.cfg, sent=datetime(2026, 10, 14, 0, 30, tzinfo=timezone.utc))
         info = capture.capture(self.cfg, self.cfg.chat_id, "100", "my words", self.now)
         path = Path(info["path"])
         capture.add_rose_note(self.cfg, "A connection to the August entry (inference).", self.now, "2026-10-14", "morning")
-        entries.write_annotations(path, "- annotated")
+        entries.write_annotations(path, "morning", "- annotated")
         body = path.read_text()
-        self.assertIn("my words", entries.raw_entry(body))
+        self.assertIn("my words", entries.raw_entry(body, "morning"))
         self.assertIn("- annotated", body)
-        self.assertIn("## Rose's Notes", body)
+        self.assertIn("### Rose's notes", body)
         self.assertIn("A connection to the August entry", body)
-        self.assertLess(body.index("## Rose's Annotations"), body.index("## Rose's Notes"))
+        self.assertLess(body.index("### Rose's annotations"), body.index("### Rose's notes"))
         # a later direct reply still lands in the raw entry, above the notes
         capture.capture(self.cfg, self.cfg.chat_id, "100", "more words", self.now + timedelta(hours=3))
         body = path.read_text()
-        self.assertLess(body.index("more words"), body.index("## Rose's Annotations"))
+        self.assertLess(body.index("more words"), body.index("### Rose's annotations"))
         self.assertIn("- annotated", body)
 
     def test_rose_note_on_empty_day_then_his_reply(self):
         p = capture.add_rose_note(self.cfg, "Worth keeping.", self.now)
-        self.assertTrue(p.endswith("2026-10-14-note.md"))
+        self.assertTrue(p.endswith("2026-10-14.md"))
         info = capture.capture_note(self.cfg, "my own words", self.now + timedelta(hours=1))
         body = Path(info["path"]).read_text()
-        self.assertIn("my own words", entries.raw_entry(body))
-        self.assertNotIn("_None._", body)
-        self.assertLess(body.index("## Rose's Annotations"), body.index("## Rose's Notes"))
-        self.assertTrue(entries.annotations_pending(body))
+        self.assertIn("my own words", entries.raw_entry(body, "note"))
+        self.assertNotIn(entries.NO_WORDS, body)
+        self.assertLess(body.index("### Burooj"), body.index("### Rose's notes"))
+        self.assertTrue(entries.annotations_pending(body, "note"))
 
     def test_bad_note_inputs(self):
         with self.assertRaises(ValueError):
@@ -352,7 +354,7 @@ class PluginDispatchTest(unittest.TestCase):
         self.assertEqual(out["action"], "rewrite")
         self.assertTrue(out["text"].startswith("[Journal note"))
         self.assertFalse(out["text"].split("]\n\n", 1)[1].startswith("/"))
-        notes = list(self.cfg.root.rglob("*-note.md"))
+        notes = list(self.cfg.root.rglob("2026-*.md"))
         self.assertEqual(len(notes), 1)
         self.assertIn("can't sleep, thinking about Rishikesh", notes[0].read_text())
 
@@ -364,17 +366,57 @@ class PluginDispatchTest(unittest.TestCase):
         add_prompt(self.cfg, sent=datetime.now(timezone.utc) - timedelta(hours=30), message_id="77")
         out = self.mod.on_dispatch(event=self.event("late answer", reply_to="77"))
         self.assertTrue(out["text"].startswith("[Journal reply"))
-        self.assertIn("late answer", next(self.cfg.root.rglob("*-morning.md")).read_text())
+        self.assertIn("late answer", next(self.cfg.root.rglob("2026-10-14.md")).read_text())
 
     def test_voice_j_saved_after_transcription(self):
         out = self.mod.on_dispatch(event=self.event("/j", kind="VOICE"))
         note = out["text"]
         self.mod.on_llm_call(user_message='"walked by the lake, felt light"\n\n' + note, platform="telegram")
-        body = next(self.cfg.root.rglob("*-note.md")).read_text()
+        body = next(self.cfg.root.rglob("20*.md")).read_text()
         self.assertIn("walked by the lake, felt light", body)
         self.assertIn("voice transcript", body)
 
     def test_add_note_tool(self):
         res = json.loads(self.mod.journal_add_note({"note": "Pattern worth keeping (inference)."}))
         self.assertTrue(res["success"])
-        self.assertIn("## Rose's Notes", Path(res["path"]).read_text())
+        self.assertIn("### Rose's notes", Path(res["path"]).read_text())
+
+
+class DailyFileTest(unittest.TestCase):
+    def test_rituals_share_one_day_file_in_order(self):
+        with tempfile.TemporaryDirectory() as t:
+            cfg = make_cfg(Path(t))
+            base = datetime(2026, 10, 14, 0, 30, tzinfo=timezone.utc)
+            add_prompt(cfg, "morning", sent=base, message_id="1")
+            add_prompt(cfg, "evening", sent=base + timedelta(hours=17), message_id="2")
+            capture.capture(cfg, cfg.chat_id, "1", "morning words", base + timedelta(hours=1))
+            capture.capture_note(cfg, "a /j thought", base + timedelta(hours=8))
+            capture.capture(cfg, cfg.chat_id, "2", "evening words", base + timedelta(hours=18))
+            files = list(cfg.root.rglob("*.md"))
+            self.assertEqual(len(files), 1)
+            body = files[0].read_text()
+            self.assertEqual(entries.kinds_in(body), ["morning", "note", "evening"])
+            self.assertIn("kinds: [morning, note, evening]", body)
+            self.assertEqual(entries.raw_entry(body, "evening").splitlines()[-1], "evening words")
+            self.assertIn("> [!question]- Questions", body)
+
+
+class LocationTest(unittest.TestCase):
+    def test_set_location_updates_config_and_history(self):
+        from rose_journal import location
+        with tempfile.TemporaryDirectory() as t:
+            conf = Path(t) / "journal.json"
+            conf.write_text(json.dumps({"root": t, "state_dir": str(Path(t) / "state"),
+                                        "timezone": "Asia/Kolkata", "location": "Srinagar"}))
+            orig = location.geocode
+            location.geocode = lambda q: {"name": "Toronto", "admin1": "Ontario", "country": "Canada",
+                                          "latitude": 43.7, "longitude": -79.4, "timezone": "America/Toronto"}
+            try:
+                r = location.set_location("Toronto", path=conf)
+            finally:
+                location.geocode = orig
+            d = json.loads(conf.read_text())
+            self.assertEqual(d["timezone"], "America/Toronto")
+            self.assertEqual(d["coordinates"]["lat"], 43.7)
+            self.assertEqual(r["previous"]["timezone"], "Asia/Kolkata")
+            self.assertTrue((Path(t) / "state" / "location-history.jsonl").exists())

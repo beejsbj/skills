@@ -141,7 +141,37 @@ def reading(cfg: Config, now_local: datetime) -> list[str]:
     return out + ([f"_{'; '.join(errors)}_"] if errors else [])
 
 
+WMO = {0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "fog", 48: "freezing fog",
+       51: "light drizzle", 53: "drizzle", 55: "heavy drizzle", 61: "light rain", 63: "rain", 65: "heavy rain",
+       66: "freezing rain", 67: "heavy freezing rain", 71: "light snow", 73: "snow", 75: "heavy snow",
+       77: "snow grains", 80: "light showers", 81: "showers", 82: "violent showers", 85: "snow showers",
+       86: "heavy snow showers", 95: "thunderstorm", 96: "thunderstorm with hail", 99: "thunderstorm with hail"}
+
+
+def weather(cfg: Config, now_local: datetime) -> list[str]:
+    """Open-Meteo (no key): now, today and tomorrow at the configured coordinates."""
+    if not cfg.coordinates:
+        return ["_no coordinates in journal.json_"]
+    lat, lon = cfg.coordinates
+    url = (f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
+           "&current=temperature_2m,apparent_temperature,weather_code"
+           "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code,sunrise,sunset"
+           f"&timezone={cfg.timezone.replace('/', '%2F')}&forecast_days=2")
+    out = subprocess.run(["curl", "-4", "-s", "--max-time", "15", url], capture_output=True, text=True, timeout=20)
+    d = json.loads(out.stdout)
+    cur, day = d["current"], d["daily"]
+    lines = [f"- weather:now ({cur['time']}) — {WMO.get(cur['weather_code'], 'code ' + str(cur['weather_code']))}, "
+             f"{cur['temperature_2m']}°C (feels {cur['apparent_temperature']}°C)"]
+    for i, label in enumerate(("today", "tomorrow")):
+        lines.append(f"- weather:{label} ({day['time'][i]}) — {WMO.get(day['weather_code'][i], '?')}, "
+                     f"{day['temperature_2m_min'][i]}–{day['temperature_2m_max'][i]}°C, "
+                     f"rain chance {day['precipitation_probability_max'][i]}%, "
+                     f"sunrise {day['sunrise'][i][-5:]}, sunset {day['sunset'][i][-5:]}")
+    return lines
+
+
 ALL = [
+    ("Weather where he is (Open-Meteo)", weather),
     ("tududi — open tasks, habits, done this week", tududi),
     ("AI chats in the last 3 days (chat-scrobbler: ChatGPT/Claude/Gemini browser chats)", scrobbler),
     ("Music in the last 2 days (ListenBrainz)", listenbrainz),

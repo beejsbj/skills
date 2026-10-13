@@ -15,7 +15,7 @@ import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from . import sources
+from . import entries, sources
 from .config import Config
 
 ROSE_STATE_DB = Path("/home/admin/.hermes/profiles/rose/state.db")
@@ -29,20 +29,30 @@ def clean_user_text(text: str) -> str:
     return text.strip()
 
 
-def journal_entries(cfg: Config, limit: int = 5) -> list[str]:
-    files = []
+def journal_entries(cfg: Config, limit: int = 6) -> list[str]:
+    """Newest journal sections, from daily files and the older one-file-per-ritual layout."""
+    found = []
     for p in cfg.root.rglob("*.md"):
-        m = re.match(r"(\d{4}-\d{2}-\d{2})-(morning|evening|midweek|weekly|note)\.md$", p.name)
-        if m:
-            files.append((m.group(1), m.group(2), p))
-    out = []
-    for date, kind, p in sorted(files, reverse=True)[:limit]:
+        m = re.match(r"(\d{4}-\d{2}-\d{2})(?:-(morning|evening|midweek|weekly|note))?\.md$", p.name)
+        if not m or p.parent == cfg.root:  # top-level files are his older hand-written journal
+            continue
         body = p.read_text(encoding="utf-8", errors="replace")
-        raw = re.search(r"## Raw Entry\n(.*?)(?=\n## |\Z)", body, re.S)
-        ann = re.search(r"## Rose's Annotations\n(.*)\Z", body, re.S)
-        text = (raw.group(1).strip() if raw else "")[:1500]
-        notes = (ann.group(1).strip() if ann else "")[:600]
-        out.append(f"### journal:{date}-{kind}\n{text}\n\n_Rose's annotations:_ {notes}")
+        if m.group(2):  # legacy layout
+            raw = re.search(r"## Raw Entry\n(.*?)(?=\n## |\Z)", body, re.S)
+            ann = re.search(r"## Rose's Annotations\n(.*?)(?=\n## |\Z)", body, re.S)
+            found.append((m.group(1), m.group(2), raw.group(1).strip() if raw else "",
+                          ann.group(1).strip() if ann else ""))
+            continue
+        for kind in entries.kinds_in(body):
+            sec = entries.section(body, kind)
+            ann = re.search(r"### Rose's annotations\n(.*?)(?=\n### |\Z)", sec, re.S)
+            found.append((m.group(1), kind, entries.raw_entry(body, kind), ann.group(1).strip() if ann else ""))
+    out = []
+    for date, kind, text, notes in sorted(found, key=lambda f: (f[0], f[1]), reverse=True):
+        if text:
+            out.append(f"### journal:{date}-{kind}\n{text[:1500]}\n\n_Rose's annotations:_ {notes[:600]}")
+        if len(out) >= limit:
+            break
     return out
 
 

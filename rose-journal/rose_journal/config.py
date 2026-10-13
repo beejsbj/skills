@@ -30,6 +30,7 @@ class Config:
     root: Path
     timezone: str = "Asia/Kolkata"
     location: str = ""
+    coordinates: tuple[float, float] | None = None  # (lat, lon) for weather; update when travelling
     chat_id: str = "579876880"
     profile: str = "rose"
     schedule: dict = field(default_factory=lambda: dict(DEFAULT_SCHEDULE))
@@ -60,6 +61,8 @@ def load(path: Path | None = None) -> Config:
         root=Path(root).expanduser(),
         timezone=data.get("timezone", "Asia/Kolkata"),
         location=data.get("location", ""),
+        coordinates=(float(data["coordinates"]["lat"]), float(data["coordinates"]["lon"]))
+        if isinstance(data.get("coordinates"), dict) else None,
         chat_id=str(data.get("telegram_chat_id", "579876880")),
         profile=data.get("profile", "rose"),
         schedule=schedule,

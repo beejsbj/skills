@@ -5,6 +5,7 @@ pre_gateway_dispatch  typed journal replies are written to Brain verbatim on
                       here and written once transcribed (pre_llm_call).
 pre_tool_call         the guard: Rose can't change Hermes settings.
 journal_add_note      tool: Rose appends her own notes to an entry (never his words).
+journal_set_location  tool: Rose moves location/timezone/weather when he travels.
 /j or /journal        a message starting with it is saved as that day's freeform entry.
 
 Every callback fails open for capture (a bug must never drop a message) and
@@ -25,7 +26,7 @@ _REPO = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 if _REPO not in sys.path:
     sys.path.insert(0, _REPO)
 
-from rose_journal import capture, config as jconfig, guard, ledger  # noqa: E402
+from rose_journal import capture, config as jconfig, guard, ledger, location  # noqa: E402
 
 log = logging.getLogger("rose_journal.plugin")
 _VOICE_TTL = 900
@@ -170,7 +171,42 @@ def journal_add_note(params, **_kw):
         return json.dumps({"success": False, "error": f"{type(e).__name__}: {e}"})
 
 
+LOCATION_SCHEMA = {
+    "name": "journal_set_location",
+    "description": (
+        "Update where Burooj is, when he tells you he has moved or is travelling. Looks the place up, then "
+        "sets the journal's location, timezone and weather coordinates; prompts follow his new local time "
+        "automatically. Confirm the place with him first if it's ambiguous. Returns the new local schedule."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "place": {"type": "string", "description": "City or town, e.g. 'Srinagar' or 'Toronto, Canada'."},
+            "timezone": {"type": "string", "description": "Optional IANA timezone override, e.g. 'Asia/Kolkata'."},
+        },
+        "required": ["place"],
+    },
+}
+
+
+def journal_set_location(params, **_kw):
+    import json
+    try:
+        result = location.set_location(str(params.get("place", "")).strip(), params.get("timezone") or None)
+        return json.dumps({"success": True, **result})
+    except Exception as e:
+        return json.dumps({"success": False, "error": f"{type(e).__name__}: {e}"})
+
+
 def register(ctx):
+    ctx.register_tool(
+        name="journal_set_location",
+        toolset="rose_journal",
+        schema=LOCATION_SCHEMA,
+        handler=journal_set_location,
+        description="Move the journal to where Burooj is now (location, timezone, weather).",
+        emoji="🧭",
+    )
     ctx.register_tool(
         name="journal_add_note",
         toolset="rose_journal",

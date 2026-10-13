@@ -5,7 +5,7 @@ import html
 import re
 from datetime import datetime
 
-from .questions import TITLES, bank_text
+from .questions import EVENING, MIDWEEK, MORNING, TITLES, WEEKLY, bank_text
 
 PLAIN_OPENERS = {
     "morning": "Morning, Burooj 🌹 Start wherever something feels alive — one line or a voice note is plenty.",
@@ -14,7 +14,7 @@ PLAIN_OPENERS = {
     "weekly": "End of the week. Let's look back — take whichever thread matters.",
 }
 
-HINT = "Reply to this message anytime — it goes in the journal."
+HINT = "Tap to open the questions · reply to this message anytime"
 
 
 def header(kind: str, local_dt: datetime, status: str = "") -> str:
@@ -31,13 +31,26 @@ def _md_to_html(text: str) -> str:
     return out
 
 
+def bank_html(kind: str) -> str:
+    """The question set with its original formatting: bold numbered sections, dashed questions."""
+    esc = lambda t: html.escape(t, quote=False)  # noqa: E731
+    if kind == "morning":
+        return "\n".join(esc(f"{i}. {q}") for i, q in enumerate(MORNING, 1))
+    sections = {"evening": EVENING, "midweek": MIDWEEK, "weekly": WEEKLY}[kind]
+    return "\n\n".join(f"<b>{esc(f'{i}. {title}')}</b>\n" + "\n".join(esc(f"- {q}") for q in qs)
+                       for i, (title, qs) in enumerate(sections, 1))
+
+
 def telegram_html(kind: str, local_dt: datetime, opener: str | None, status: str = "") -> str:
-    parts = [f"<b>{html.escape(header(kind, local_dt, status), quote=False)}</b>"]
+    """Live prompt: header, opener, folded question set. Folded (status set): header only."""
+    head = f"<b>{html.escape(header(kind, local_dt, status), quote=False)}</b>"
+    if status:
+        return head
+    parts = [head]
     if opener:
         parts.append(_md_to_html(opener.strip()))
-    parts.append(f"<blockquote expandable>{html.escape(bank_text(kind), quote=False)}</blockquote>")
-    if not status:
-        parts.append(f"<i>{HINT}</i>")
+    parts.append(f"<blockquote expandable>{bank_html(kind)}</blockquote>")
+    parts.append(f"<i>{HINT}</i>")
     return "\n\n".join(parts)
 
 

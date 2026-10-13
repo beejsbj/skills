@@ -124,7 +124,7 @@ def note_context(info: dict) -> str:
 
 def add_rose_note(cfg: Config, text: str, now: datetime, local_date: str | None = None,
                   kind: str | None = None) -> str:
-    """Rose's own addition to the journal: appended under "Rose's Notes", never touching his words."""
+    """Rose's own addition: appended under "Rose's notes" in that day's file, never touching his words."""
     if not text or not text.strip():
         raise ValueError("note text is empty")
     local_now = now.astimezone(cfg.tz)
@@ -132,23 +132,15 @@ def add_rose_note(cfg: Config, text: str, now: datetime, local_date: str | None 
     datetime.strptime(local_date, "%Y-%m-%d")  # validate
     if kind and kind not in ("morning", "evening", "midweek", "weekly", "note"):
         raise ValueError(f"unknown kind {kind!r}")
-    path = None
-    if kind:
-        candidate = entries.entry_path(cfg.root, local_date, kind)
-        path = candidate if candidate.exists() else None
-    if path is None and not kind:
-        existing = [entries.entry_path(cfg.root, local_date, k)
-                    for k in ("evening", "morning", "weekly", "midweek", "note")]
-        path = next((x for x in existing if x.exists()), None)
-    if path is None:
-        path = entries.create_shell(cfg.root, local_date, "note", NOTE_ORIENTATION.replace(
-            "Burooj sent this with /j", "started by Rose's note"))
-    entries.add_rose_note(path, text, local_now)
-    return str(path)
+    if not kind:
+        path = entries.entry_path(cfg.root, local_date)
+        existing = entries.kinds_in(path.read_text(encoding="utf-8")) if path.exists() else []
+        kind = existing[-1] if existing else "note"
+    return str(entries.add_rose_note(cfg.root, local_date, kind, text, local_now))
 
 
 def planned_info(cfg: Config, prompt: dict) -> dict:
-    return {"prompt": prompt, "path": str(entries.entry_path(cfg.root, prompt["local_date"], prompt["kind"]))}
+    return {"prompt": prompt, "path": str(entries.entry_path(cfg.root, prompt["local_date"]))}
 
 
 def context_note(info: dict) -> str:

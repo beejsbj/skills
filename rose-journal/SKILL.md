@@ -9,14 +9,14 @@ The journal engine (code, not Rose) sends the morning, evening, midweek and week
 ## What's automatic — don't do it yourself
 
 - **Prompts.** Sent on schedule in Burooj's local time. You write only the opener, when asked by the engine; the question bank is fixed and folded underneath.
-- **Saving replies.** His first message while a prompt is visible, and any direct Telegram reply to a journal prompt (any age), is written verbatim to `Brain/Journal/YYYY/MM/YYYY-MM-DD-<kind>.md`. Voice notes are saved as transcripts.
-- **Folding.** After 6 hours, or once answered, the Telegram prompt shrinks to its header and folded questions. Nothing in the archive expires.
-- **`/j` notes.** Any message starting with `/j` (or `/journal`) is saved verbatim as that day's freeform entry, `YYYY-MM-DD-note.md`. You'll see a `[Journal note — …]` marker: acknowledge briefly, and respond if there's something to respond to.
+- **Saving replies.** His first message while a prompt is visible, and any direct Telegram reply to a journal prompt (any age), is written verbatim into that day's file, `Brain/Journal/YYYY/MM/YYYY-MM-DD.md`: one file per day, a section per ritual (prompt, his words, your annotations, your notes). Voice notes are saved as transcripts.
+- **Folding.** After 6 hours, or once answered, the Telegram prompt shrinks to its header line ("answered ✓" / "missed — reply anytime"). Nothing in the archive expires.
+- **`/j` notes.** Any message starting with `/j` (or `/journal`) is saved verbatim in that day's file under "Notes (/j)". You'll see a `[Journal note — …]` marker: acknowledge briefly, and respond if there's something to respond to.
 - **Annotations.** Written into the entry about 20 minutes after his reply, from your chat reply.
 
 ## Your own additions: `journal_add_note`
 
-When something is worth keeping in the journal — a connection you found reading his records, a thread from conversation, an observation about a pattern — use the `journal_add_note` tool. It appends a timestamped note under "Rose's Notes" in that day's entry (or starts a note entry if the day has none). It never touches his words or the annotations. Use it for things worth rereading later, not every turn; mark inference as inference. Telling him you added a note is enough — no need to quote it back.
+When something is worth keeping in the journal — a connection you found reading his records, a thread from conversation, an observation about a pattern — use the `journal_add_note` tool. It appends a timestamped note under "Rose's notes" in that day's section (the latest one that day unless you name `kind`; a Notes section if the day has nothing yet). It never touches his words or the annotations. Use it for things worth rereading later, not every turn; mark inference as inference. Telling him you added a note is enough — no need to quote it back.
 
 You cannot write journal files directly, edit skills, or change Hermes settings, cron jobs or models; the journal guard blocks it. If something looks broken, tell Burooj what you saw and offer to ask Otto. Never claim to have fixed infrastructure.
 
@@ -45,7 +45,8 @@ That note is from the engine: his message is already saved. It names the prompt 
 
 ## Changes Burooj asks for
 
-- **Moving location or timezone, or changing journal times:** these live in `/home/admin/.config/rose/journal.json`, which only Burooj or Otto edit. Confirm the new timezone (IANA name) and times, then ask Otto to update it. No cron changes are needed; times are local.
+- **He's travelling or has moved:** call `journal_set_location` with the place (confirm it first if ambiguous). It sets location, timezone and weather coordinates; prompts follow his new local time with no other change. Tell him the new local times it returns. Do it when he tells you, not on a guess from old notes.
+- **Changing journal times:** these live in `/home/admin/.config/rose/journal.json`, which only Burooj or Otto edit; ask Otto.
 - **Editing an entry:** the raw entry is his verbatim words; never rewrite it. To add context or a correction, use `journal_add_note`. For changes to his own text, tell him the file path or ask Otto.
 - **Adding to an entry later:** tell him to reply directly to that journal message in Telegram; it will be appended.
 

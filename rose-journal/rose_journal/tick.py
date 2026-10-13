@@ -85,6 +85,7 @@ def send_due(cfg: Config, now_local: datetime, log: list[str], only: str | None 
                 raise SendFailed(f"{pid} was not delivered after {attempts} attempts: {e}")
             continue
         record["sent_at"] = datetime.now(timezone.utc).isoformat()
+        record["sent_at_local"] = datetime.now(timezone.utc).astimezone(cfg.tz).strftime("%H:%M %Z")
         with ledger.locked(cfg.ledger_path) as data:
             q = ledger.find(data, pid)
             if q is None:
@@ -153,12 +154,13 @@ def annotate(cfg: Config, now: datetime, log: list[str]) -> None:
         if now - first < timedelta(minutes=cfg.annotate_after_minutes):
             continue
         body = path.read_text(encoding="utf-8")
-        if not entries.annotations_pending(body):
+        if not entries.annotations_pending(body, p["kind"]):
             continue
-        text = agent.ask(cfg, prompts.annotation_request(body, _rose_reply_after(first)), 180, toolsets="none")
+        section = entries.section(body, p["kind"])
+        text = agent.ask(cfg, prompts.annotation_request(section, _rose_reply_after(first)), 180, toolsets="none")
         ok = bool(text) and len(text) < 5000 and not text.lstrip().startswith("{")
         if ok:
-            entries.write_annotations(path, text)
+            entries.write_annotations(path, p["kind"], text)
             log.append(f"annotated {p['id']}")
         with ledger.locked(cfg.ledger_path) as data:
             q = ledger.find(data, p["id"])
