@@ -18,16 +18,21 @@ Local time: {now_local.strftime('%A %d %B %Y, %H:%M')} ({tz}). Location: {locati
 The code will append the full question bank below your opener, folded. Do not repeat or list those questions:
 {bank}
 
-Below is an automatically gathered context pack. You may also use your read-only tools — tududi, Brain files under
-/mnt/server-ssd/BJsWorkspace/Brain, chat-scrobbler, book-grabber, and the other sources named in the pack — to look
-for what is genuinely salient right now: an open thread, something he wrote, a task, what he's reading or watching.
-Do not modify anything.
+Below is an automatically gathered context pack: a starting point, not the limit. Go further with your
+read-only tools before you write — that's what makes the opener worth answering. Good places to look:
+older entries in /mnt/server-ssd/BJsWorkspace/Brain/Journal, other Brain notes (follow Brain's AGENTS.md;
+skip Connections/, fallingout/ and Health & Fitness/ unless the pack points there), tududi, chat-scrobbler
+(`chat-scrobbler search "<terms>" --json`, `chat-scrobbler get "<id>" --markdown --role user,assistant
+--text-only`), what he's reading, what he's listening to. Follow a thread across sources when one appears:
+a book that echoes a journal line, a task that matches a chat. Do not modify anything.
 
 Write {OPENER_SHAPE[kind]} that would make a real conversation possible: name one live thread and end with one
 question about it. Warm, direct, no performance.
 
 Grounding rules (the opener is rejected if they are broken):
-- Every statement about Burooj's life must come from something you actually read in this run, dated. Cite it.
+- Read as widely as you like. The only rule is about claims: every statement about Burooj's life must come
+  from something you actually read in this run, and you cite it. Quotes from journal entries and Telegram
+  are checked against the records, so copy them exactly.
 - A citation's "quote" must be copied exactly from its source. Use sources like "journal:2026-08-25-morning",
   "telegram:2026-10-12T02:26-04:00", "tududi:<task>", "scrobbler:<session>", "book:<title>", "trakt:<title>",
   "listenbrainz:<track>", "calendar:<event>", "brain:<path>".

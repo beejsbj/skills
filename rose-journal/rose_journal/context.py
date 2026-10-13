@@ -32,7 +32,7 @@ def clean_user_text(text: str) -> str:
 def journal_entries(cfg: Config, limit: int = 5) -> list[str]:
     files = []
     for p in cfg.root.rglob("*.md"):
-        m = re.match(r"(\d{4}-\d{2}-\d{2})-(morning|evening|midweek|weekly)\.md$", p.name)
+        m = re.match(r"(\d{4}-\d{2}-\d{2})-(morning|evening|midweek|weekly|note)\.md$", p.name)
         if m:
             files.append((m.group(1), m.group(2), p))
     out = []
@@ -66,6 +66,33 @@ def telegram_messages(tz=None, days: int = 7, limit: int = 25, db: Path = ROSE_S
             stamp = datetime.fromtimestamp(ts).astimezone(tz).isoformat(timespec="minutes")
             out.append(f"- telegram:{stamp} — {text[:700]}")
     return out
+
+
+def make_verifier(cfg: Config, db: Path = ROSE_STATE_DB):
+    """Check a quoted journal/Telegram passage against the full records, not just the pack."""
+    from .validate import norm
+    cache: dict[str, str] = {}
+
+    def corpus(kind: str) -> str:
+        if kind not in cache:
+            if kind == "journal":
+                texts = [p.read_text(encoding="utf-8", errors="replace") for p in cfg.root.rglob("*.md")]
+            else:
+                con = sqlite3.connect(f"file:{db}?mode=ro", uri=True, timeout=10)
+                try:
+                    texts = [r[0] or "" for r in con.execute(
+                        """select m.content from messages m join sessions s on s.id = m.session_id
+                           where s.source = 'telegram' and m.role = 'user'""")]
+                finally:
+                    con.close()
+            cache[kind] = norm("\n".join(texts))
+        return cache[kind]
+
+    def verify(source: str, quote_norm: str) -> bool:
+        kind = "journal" if source.startswith("journal:") else "telegram"
+        return bool(quote_norm) and quote_norm in corpus(kind)
+
+    return verify
 
 
 def _run(cmd: list[str], timeout: int = 20, env: dict | None = None) -> str:

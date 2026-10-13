@@ -7,6 +7,7 @@ re-authorisation by Burooj before they can be added.
 from __future__ import annotations
 
 import json
+import sqlite3
 import subprocess
 from datetime import datetime, timedelta, timezone
 
@@ -83,19 +84,67 @@ def listenbrainz(cfg: Config, now_local: datetime) -> list[str]:
     return lines
 
 
-def books(cfg: Config, now_local: datetime) -> list[str]:
-    out = subprocess.run(["/home/admin/.local/bin/book-grabber", "history", "--json"],
-                         capture_output=True, text=True, timeout=20)
-    since = (now_local - timedelta(days=45)).date().isoformat()
-    rows = json.loads(out.stdout or "{}").get("data", [])
-    return [f"- book:{r.get('title')} — {r.get('author')} (grabbed {str(r.get('date'))[:10]})"
-            for r in rows if str(r.get("date", "")) >= since][:8]
+STORYTELLER_DB = "/mnt/server-ssd/library/data/storyteller/storyteller.db"
+ABS_DB = "/mnt/server-ssd/library/configs/audiobookshelf/absdatabase.sqlite"
+GRIMMORY_DB_CONTAINER = "mariadb-e4k444cc08s00cscs4o80wc0"
+
+
+def _sqlite(path: str, sql: str, args: tuple = ()) -> list:
+    con = sqlite3.connect(f"file:{path}?mode=ro", uri=True, timeout=10)
+    try:
+        return con.execute(sql, args).fetchall()
+    finally:
+        con.close()
+
+
+def reading(cfg: Config, now_local: datetime) -> list[str]:
+    """What he has actually been reading or listening to, across his three readers."""
+    since = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
+    lines: list[tuple[str, str]] = []
+    errors = []
+    try:  # Storyteller (read-along ebooks); positions are UTC
+        for updated, title, locator in _sqlite(STORYTELLER_DB,
+                """select p.updated_at, b.title, p.locator from position p join book b on b.uuid = p.book_uuid
+                   where p.updated_at >= ? order by p.updated_at desc limit 8""", (since,)):
+            pct = json.loads(locator).get("locations", {}).get("totalProgression")
+            pct_s = f"{round(pct * 100)}%" if isinstance(pct, (int, float)) else "?"
+            local = datetime.fromisoformat(updated).replace(tzinfo=timezone.utc).astimezone(cfg.tz)
+            lines.append((local.isoformat(), f"- book:{title} — Storyteller, {pct_s} through, last read "
+                                              f"{local.isoformat(timespec='minutes')}"))
+    except Exception as e:
+        errors.append(f"Storyteller unavailable ({type(e).__name__})")
+    try:  # Grimmory (ebook library, MariaDB); credentials stay inside the container
+        sql = ("select p.last_read_time, m.title, coalesce(p.epub_progress_percent, p.pdf_progress_percent, "
+               "p.koreader_progress_percent, p.kobo_progress_percent), p.read_status from user_book_progress p "
+               f"left join book_metadata m on m.book_id = p.book_id where p.last_read_time >= '{since}' "
+               "order by p.last_read_time desc limit 8")
+        out = subprocess.run(["docker", "exec", GRIMMORY_DB_CONTAINER, "sh", "-c",
+                              f'mariadb -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" booklore -N -B -e "{sql}"'],
+                             capture_output=True, text=True, timeout=20)
+        for row in out.stdout.splitlines():
+            when, title, pct, status = (row.split("\t") + ["", "", "", ""])[:4]
+            pct_s = f"{float(pct):.0f}%" if pct not in ("", "NULL") else "?"
+            lines.append((when, f"- book:{title} — Grimmory, {pct_s} ({status.lower()}), last read {when[:16]}"))
+    except Exception as e:
+        errors.append(f"Grimmory unavailable ({type(e).__name__})")
+    try:  # Audiobookshelf; never touch its users table
+        for updated, title, audio, ebook, finished in _sqlite(ABS_DB,
+                """select mp.updatedAt, b.title, round(mp.currentTime / nullif(mp.duration, 0), 3), mp.ebookProgress,
+                          mp.isFinished from mediaProgresses mp left join books b on b.id = mp.mediaItemId
+                   where mp.updatedAt >= ? order by mp.updatedAt desc limit 5""", (since,)):
+            pct = audio if audio is not None else ebook
+            pct_s = "finished" if finished else (f"{round(float(pct) * 100)}%" if pct is not None else "?")
+            lines.append((str(updated), f"- book:{title} — Audiobookshelf, {pct_s}, last {str(updated)[:16]}"))
+    except Exception as e:
+        errors.append(f"Audiobookshelf unavailable ({type(e).__name__})")
+    out = [l for _, l in sorted(lines, reverse=True)]
+    return out + ([f"_{'; '.join(errors)}_"] if errors else [])
 
 
 ALL = [
     ("tududi — open tasks, habits, done this week", tududi),
     ("AI chats in the last 3 days (chat-scrobbler: ChatGPT/Claude/Gemini browser chats)", scrobbler),
     ("Music in the last 2 days (ListenBrainz)", listenbrainz),
-    ("Books grabbed in the last 45 days (book-grabber; not reading progress)", books),
+    ("Reading in the last 30 days (Storyteller, Grimmory, Audiobookshelf)", reading),
 ]
 GAPS = "Calendar (Google auth expired) and Trakt watch history (API key rejected) are not connected."

@@ -76,6 +76,7 @@ TITLES = {
     "evening": "Evening journal",
     "midweek": "Midweek check-in",
     "weekly": "Weekly pattern scan",
+    "note": "Journal note",
 }
 
 

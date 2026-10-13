@@ -9,6 +9,7 @@ Rules:
 """
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta
 
 from . import entries, ledger
@@ -73,6 +74,77 @@ def capture_to(cfg: Config, pid: str, rule: str, text: str, now: datetime,
         if not prompt:
             return None
         return record(cfg, prompt, rule, text, now, source, platform_message_id)
+
+
+JOURNAL_COMMAND = re.compile(r"^\s*/(?:j|journal)(?:@\w+)?(?:\s+|$)", re.I)
+NOTE_ORIENTATION = "_Freeform entry — Burooj sent this with /j._"
+
+
+def strip_command(text: str) -> str | None:
+    """Return the text after a /j or /journal command, or None if it isn't one."""
+    m = JOURNAL_COMMAND.match(text or "")
+    return text[m.end():] if m else None
+
+
+def note_prompt(data: dict, cfg: Config, now: datetime) -> dict:
+    """The day's freeform-note record (one per local date), created on first use."""
+    local_date = now.astimezone(cfg.tz).date().isoformat()
+    pid = ledger.prompt_id("note", local_date)
+    p = ledger.find(data, pid)
+    if p is None:
+        p = {"id": pid, "kind": "note", "local_date": local_date, "chat_id": cfg.chat_id,
+             "message_id": None, "sent_at": now.isoformat(), "opener": "", "opener_source": "/j",
+             "plain_text": NOTE_ORIENTATION}
+        data["prompts"].append(p)
+    return p
+
+
+def capture_note(cfg: Config, text: str, now: datetime, source: str = "text",
+                 platform_message_id: str | None = None) -> dict:
+    with ledger.locked(cfg.ledger_path) as data:
+        p = note_prompt(data, cfg, now)
+        info = record(cfg, p, "/j", text, now, source, platform_message_id)
+        p["needs_edit"] = False  # nothing to fold in Telegram
+        return info
+
+
+def reserve_note(cfg: Config, now: datetime) -> dict:
+    """For a /j voice note: make sure the day's note record exists before transcription."""
+    with ledger.locked(cfg.ledger_path) as data:
+        return dict(note_prompt(data, cfg, now))
+
+
+def note_context(info: dict) -> str:
+    return (
+        f"[Journal note — Burooj used /j; the journal system saved this verbatim to {info['path']}. "
+        f"Acknowledge briefly and respond naturally if there's something to respond to. "
+        f"Don't edit the file.]\n\n"
+    )
+
+
+def add_rose_note(cfg: Config, text: str, now: datetime, local_date: str | None = None,
+                  kind: str | None = None) -> str:
+    """Rose's own addition to the journal: appended under "Rose's Notes", never touching his words."""
+    if not text or not text.strip():
+        raise ValueError("note text is empty")
+    local_now = now.astimezone(cfg.tz)
+    local_date = local_date or local_now.date().isoformat()
+    datetime.strptime(local_date, "%Y-%m-%d")  # validate
+    if kind and kind not in ("morning", "evening", "midweek", "weekly", "note"):
+        raise ValueError(f"unknown kind {kind!r}")
+    path = None
+    if kind:
+        candidate = entries.entry_path(cfg.root, local_date, kind)
+        path = candidate if candidate.exists() else None
+    if path is None and not kind:
+        existing = [entries.entry_path(cfg.root, local_date, k)
+                    for k in ("evening", "morning", "weekly", "midweek", "note")]
+        path = next((x for x in existing if x.exists()), None)
+    if path is None:
+        path = entries.create_shell(cfg.root, local_date, "note", NOTE_ORIENTATION.replace(
+            "Burooj sent this with /j", "started by Rose's note"))
+    entries.add_rose_note(path, text, local_now)
+    return str(path)
 
 
 def planned_info(cfg: Config, prompt: dict) -> dict:

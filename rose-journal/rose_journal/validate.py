@@ -21,6 +21,10 @@ VERIFIABLE = ("journal:", "telegram:")
 LIMITS = {"morning": 700, "evening": 700, "midweek": 500, "weekly": 1600}
 
 
+def norm(s: str) -> str:
+    return _norm(s)
+
+
 def _norm(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip().lower()
 
@@ -37,8 +41,12 @@ def parse(raw: str) -> dict | None:
     return data if isinstance(data, dict) else None
 
 
-def check(kind: str, data: dict | None, pack_text: str) -> tuple[bool, str]:
-    """Return (ok, reason)."""
+def check(kind: str, data: dict | None, pack_text: str, verify=None) -> tuple[bool, str]:
+    """Return (ok, reason).
+
+    `verify(source, quote) -> bool` checks journal/Telegram quotes against the real records, so Rose
+    can cite things she read with her own tools beyond the pack. Default: the pack only.
+    """
     if not data:
         return False, "unparseable"
     opener = data.get("opener")
@@ -56,8 +64,10 @@ def check(kind: str, data: dict | None, pack_text: str) -> tuple[bool, str]:
         if not isinstance(c, dict) or not str(c.get("quote", "")).strip():
             return False, "citation without quote"
         src = str(c.get("source", ""))
-        if src.startswith(VERIFIABLE) and _norm(str(c["quote"])) not in pack:
-            return False, f"unverified quote from {src}"
+        if src.startswith(VERIFIABLE):
+            q = _norm(str(c["quote"]))
+            if q not in pack and not (verify and verify(src, q)):
+                return False, f"unverified quote from {src}"
     if not cites and CLAIM_MARKERS.search(opener):
         return False, "claim without citation"
     return True, "ok"

@@ -4,6 +4,8 @@ pre_gateway_dispatch  typed journal replies are written to Brain verbatim on
                       arrival, before any model runs; voice notes are matched
                       here and written once transcribed (pre_llm_call).
 pre_tool_call         the guard: Rose can't change Hermes settings.
+journal_add_note      tool: Rose appends her own notes to an entry (never his words).
+/j or /journal        a message starting with it is saved as that day's freeform entry.
 
 Every callback fails open for capture (a bug must never drop a message) and
 the guard fails open too (a bug must never block all of Rose's tools); errors
@@ -51,18 +53,35 @@ def on_dispatch(event=None, **_kw):
         text = getattr(event, "text", "") or ""
         kind = str(getattr(getattr(event, "message_type", ""), "name", getattr(event, "message_type", ""))).upper()
 
+        after_j = capture.strip_command(text)
+
         if kind in ("VOICE", "AUDIO"):
-            prompt, rule = capture.match(ledger.snapshot(cfg.ledger_path), cfg, chat_id, reply_to, now)
-            if not prompt:
-                return None
-            info = capture.planned_info(cfg, prompt)
-            note = capture.context_note(info)
+            if after_j is not None:
+                if str(chat_id) != str(cfg.chat_id):
+                    return None
+                prompt, rule = capture.reserve_note(cfg, now), "/j"
+                text = after_j
+                info = capture.planned_info(cfg, prompt)
+                note = capture.note_context(info)
+            else:
+                prompt, rule = capture.match(ledger.snapshot(cfg.ledger_path), cfg, chat_id, reply_to, now)
+                if not prompt:
+                    return None
+                info = capture.planned_info(cfg, prompt)
+                note = capture.context_note(info)
             with _lock:
                 _pending_voice["slot"] = {
                     "pid": prompt["id"], "rule": rule, "msg_id": msg_id, "note": note,
                     "caption": text, "deadline": time.time() + _VOICE_TTL,
                 }
             return {"action": "rewrite", "text": note + text}
+
+        if after_j is not None:
+            if str(chat_id) != str(cfg.chat_id) or not after_j.strip():
+                return None
+            info = capture.capture_note(cfg, after_j, now, "text", msg_id)
+            log.info("journal note captured: %s", info["path"])
+            return {"action": "rewrite", "text": capture.note_context(info) + after_j}
 
         info = capture.capture(cfg, chat_id, reply_to, text, now, "text", msg_id)
         if not info:
@@ -119,7 +138,47 @@ def on_tool_call(tool_name=None, args=None, **_kw):
     return None
 
 
+NOTE_SCHEMA = {
+    "name": "journal_add_note",
+    "description": (
+        "Add your own note to Burooj's journal in Brain: an observation, a connection you found while "
+        "reading his records, or something from conversation worth keeping. It is appended, timestamped, "
+        "under \"Rose's Notes\" in that day's entry and never changes his words or the annotations. "
+        "Use it when something is genuinely worth keeping, not for every turn."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "note": {"type": "string", "description": "The note, in your voice. Mark inference as inference."},
+            "date": {"type": "string", "description": "Local date YYYY-MM-DD of the entry; defaults to today."},
+            "kind": {"type": "string", "enum": ["morning", "evening", "midweek", "weekly", "note"],
+                     "description": "Which entry of that day; defaults to the most recent existing one."},
+        },
+        "required": ["note"],
+    },
+}
+
+
+def journal_add_note(params, **_kw):
+    import json
+    try:
+        cfg = jconfig.load()
+        path = capture.add_rose_note(cfg, str(params.get("note", "")), datetime.now(timezone.utc),
+                                     params.get("date") or None, params.get("kind") or None)
+        return json.dumps({"success": True, "path": path})
+    except Exception as e:
+        return json.dumps({"success": False, "error": f"{type(e).__name__}: {e}"})
+
+
 def register(ctx):
+    ctx.register_tool(
+        name="journal_add_note",
+        toolset="rose_journal",
+        schema=NOTE_SCHEMA,
+        handler=journal_add_note,
+        description="Append Rose's own note to a journal entry in Brain.",
+        emoji="🌹",
+    )
     ctx.register_hook("pre_gateway_dispatch", on_dispatch)
     ctx.register_hook("pre_llm_call", on_llm_call)
     ctx.register_hook("pre_tool_call", on_tool_call)

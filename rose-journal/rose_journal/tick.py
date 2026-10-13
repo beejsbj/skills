@@ -30,7 +30,7 @@ def _opener(cfg: Config, kind: str, now_local: datetime, pid: str) -> tuple[str,
     if raw is None:
         return compose.PLAIN_OPENERS[kind], "plain:agent-failed", []
     data = validate.parse(raw)
-    ok, reason = validate.check(kind, data, pack)
+    ok, reason = validate.check(kind, data, pack, context.make_verifier(cfg))
     if not ok:
         return compose.PLAIN_OPENERS[kind], f"plain:{reason}", []
     return data["opener"].strip(), "rose", data.get("citations") or []
