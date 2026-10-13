@@ -37,6 +37,7 @@ def _opener(cfg: Config, kind: str, now_local: datetime, pid: str) -> tuple[str,
 
 
 SEND_ATTEMPTS = 3
+FOLD_ATTEMPTS = 6
 
 
 class SendFailed(RuntimeError):
@@ -120,12 +121,16 @@ def fold(cfg: Config, now: datetime, log: list[str]) -> None:
             q = ledger.find(data, p["id"])
             if q is None:
                 continue
+            if error:  # retry on later ticks; give up after FOLD_ATTEMPTS so a deleted message can't loop
+                q["fold_error"] = error
+                q["fold_attempts"] = q.get("fold_attempts", 0) + 1
+                if q["fold_attempts"] < FOLD_ATTEMPTS:
+                    continue
             q["collapsed_at"] = q.get("collapsed_at") or now.isoformat()
             if len(q.get("captures", [])) == len(p.get("captures", [])):
                 q["needs_edit"] = False  # a reply that landed mid-edit keeps its flag
-            if error:
-                q["fold_error"] = error
-        log.append(f"folded {p['id']} ({status})")
+        if not error:
+            log.append(f"folded {p['id']} ({status})")
 
 
 def _rose_reply_after(ts: datetime, db: Path = context.ROSE_STATE_DB) -> str | None:

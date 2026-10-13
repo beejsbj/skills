@@ -20,15 +20,29 @@ class TelegramError(RuntimeError):
     pass
 
 
+_TOKEN: str | None = None
+
+
 def _token() -> str:
+    """Rose's bot token, fetched once per process; the helper occasionally stalls, so retry once."""
+    global _TOKEN
+    if _TOKEN:
+        return _TOKEN
     tok = os.environ.get("ROSE_TELEGRAM_BOT_TOKEN")
-    if tok:
-        return tok
-    out = subprocess.run(SECRETS_HELPER, capture_output=True, text=True, timeout=30)
-    for line in out.stdout.splitlines():
-        if line.startswith("TELEGRAM_BOT_TOKEN="):
-            return line.split("=", 1)[1].strip().strip('"').strip("'")
-    raise TelegramError("TELEGRAM_BOT_TOKEN unavailable from secrets helper")
+    for timeout in (30, 60):
+        if tok:
+            break
+        try:
+            out = subprocess.run(SECRETS_HELPER, capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            continue
+        for line in out.stdout.splitlines():
+            if line.startswith("TELEGRAM_BOT_TOKEN="):
+                tok = line.split("=", 1)[1].strip().strip('"').strip("'")
+    if not tok:
+        raise TelegramError("TELEGRAM_BOT_TOKEN unavailable from secrets helper")
+    _TOKEN = tok
+    return tok
 
 
 def _call(method: str, payload: dict) -> dict:

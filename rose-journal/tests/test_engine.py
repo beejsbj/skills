@@ -420,3 +420,24 @@ class LocationTest(unittest.TestCase):
             self.assertEqual(d["coordinates"]["lat"], 43.7)
             self.assertEqual(r["previous"]["timezone"], "Asia/Kolkata")
             self.assertTrue((Path(t) / "state" / "location-history.jsonl").exists())
+
+
+class FoldRetryTest(unittest.TestCase):
+    def test_failed_fold_retries_then_gives_up(self):
+        from rose_journal import telegram, tick
+        with tempfile.TemporaryDirectory() as t:
+            cfg = make_cfg(Path(t))
+            sent = datetime.now(timezone.utc) - timedelta(hours=7)
+            add_prompt(cfg, sent=sent, message_id="5")
+            orig = telegram.edit_html
+            telegram.edit_html = lambda *a: (_ for _ in ()).throw(telegram.TelegramError("timeout"))
+            try:
+                for _ in range(tick.FOLD_ATTEMPTS - 1):
+                    tick.fold(cfg, datetime.now(timezone.utc), [])
+                    p = ledger.find(ledger.snapshot(cfg.ledger_path), "2026-10-14-morning")
+                    self.assertIsNone(p.get("collapsed_at"))
+                tick.fold(cfg, datetime.now(timezone.utc), [])
+                p = ledger.find(ledger.snapshot(cfg.ledger_path), "2026-10-14-morning")
+                self.assertIsNotNone(p.get("collapsed_at"))
+            finally:
+                telegram.edit_html = orig
