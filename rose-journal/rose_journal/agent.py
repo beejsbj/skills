@@ -33,5 +33,6 @@ def ask(cfg: Config, query: str, budget: int, toolsets: str | None = None) -> st
     if out.returncode != 0:
         return None
     text = re.sub(r"\n*session_id:\s*\S+\s*$", "", out.stdout.strip())
-    text = "\n".join(l for l in text.splitlines() if not l.startswith("  Command helper:"))
+    text = "\n".join(l for l in text.splitlines()
+                     if not l.startswith(("  Command helper:", "Warning: Unknown toolsets")))
     return text.strip() or None
