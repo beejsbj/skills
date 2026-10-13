@@ -1,0 +1,4 @@
+name: rose-journal
+version: "1.0.0"
+description: Saves Burooj's journal replies to Brain deterministically and stops Rose from changing Hermes settings.
+kind: standalone
