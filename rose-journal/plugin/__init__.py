@@ -216,7 +216,13 @@ def _trigger(kind: str):
     return handler
 
 
+def _j_usage(raw_args: str = "", **_kw):
+    # Text after /j is captured before command routing; this only runs for a bare /j.
+    return "Write it right after the command: /j <anything worth keeping>. A voice note captioned /j works too."
+
+
 def register(ctx):
+    ctx.register_command("j", _j_usage, description="Save a note to today's journal: /j <text>")
     for kind in ("morning", "evening", "midweek", "weekly"):
         ctx.register_command(kind, _trigger(kind), description=f"Send the {kind} journal now")
     for alias, kind in (("morning-journal", "morning"), ("evening-journal", "evening")):

@@ -510,7 +510,7 @@ class PluginCommandTest(unittest.TestCase):
             def register_tool(self, name, **kw):
                 tools.append(name)
         mod.register(Ctx())
-        self.assertEqual(names, ["morning", "evening", "midweek", "weekly", "morning-journal", "evening-journal"])
+        self.assertEqual(names, ["j", "morning", "evening", "midweek", "weekly", "morning-journal", "evening-journal"])
         self.assertIn("journal_set_location", tools)
         calls = []
         orig = subprocess.Popen
