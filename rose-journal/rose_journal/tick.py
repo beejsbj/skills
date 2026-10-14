@@ -16,24 +16,24 @@ from pathlib import Path
 
 from . import agent, compose, context, entries, ledger, prompts, schedule, telegram, validate
 from .config import Config, load
-from .questions import bank_text
+from .questions import bank_with_ids
 
 ANNOTATE_ATTEMPTS = 3
 KEEP_DAYS = 120
 
 
-def _opener(cfg: Config, kind: str, now_local: datetime, pid: str) -> tuple[str, str, list]:
+def _opener(cfg: Config, kind: str, now_local: datetime, pid: str) -> tuple[str, str, list, list]:
     pack = context.build(cfg, now_local)
     context.save(cfg, pid, pack)
-    query = prompts.opener_request(kind, now_local, cfg.timezone, cfg.location, pack, bank_text(kind))
+    query = prompts.opener_request(kind, now_local, cfg.timezone, cfg.location, pack, bank_with_ids(kind))
     raw = agent.ask(cfg, query, cfg.opener_budget_seconds)
     if raw is None:
-        return compose.PLAIN_OPENERS[kind], "plain:agent-failed", []
+        return compose.PLAIN_OPENERS[kind], "plain:agent-failed", [], []
     data = validate.parse(raw)
     ok, reason = validate.check(kind, data, pack, context.make_verifier(cfg))
     if not ok:
-        return compose.PLAIN_OPENERS[kind], f"plain:{reason}", []
-    return data["opener"].strip(), "rose", data.get("citations") or []
+        return compose.PLAIN_OPENERS[kind], f"plain:{reason}", [], []
+    return data["opener"].strip(), "rose", data.get("citations") or [], validate.asked(kind, data)
 
 
 SEND_ATTEMPTS = 3
@@ -52,11 +52,11 @@ def send_due(cfg: Config, now_local: datetime, log: list[str], only: str | None 
     for kind, at in due:
         local_date = at.date().isoformat()
         pid = ledger.prompt_id(kind, local_date)
-        opener, source, cites = _opener(cfg, kind, now_local, pid)
+        opener, source, cites, asked = _opener(cfg, kind, now_local, pid)
         html = compose.telegram_html(kind, now_local, opener)
         record = {
             "id": pid, "kind": kind, "local_date": local_date, "scheduled": at.isoformat(),
-            "chat_id": cfg.chat_id, "opener": opener, "opener_source": source, "citations": cites,
+            "chat_id": cfg.chat_id, "opener": opener, "opener_source": source, "citations": cites, "asked": asked,
             "plain_text": compose.plain_text(kind, now_local, opener), "html": html,
         }
         if dry_run:
@@ -87,13 +87,25 @@ def send_due(cfg: Config, now_local: datetime, log: list[str], only: str | None 
             continue
         record["sent_at"] = datetime.now(timezone.utc).isoformat()
         record["sent_at_local"] = datetime.now(timezone.utc).astimezone(cfg.tz).strftime("%H:%M %Z")
+        replaced = None
         with ledger.locked(cfg.ledger_path) as data:
             q = ledger.find(data, pid)
             if q is None:
                 data["prompts"].append(record)
             elif not q.get("message_id"):
                 q.update(record)
-        log.append(f"sent {pid} (opener: {source})")
+            else:  # manual re-trigger: the new message becomes current; the old one still accepts replies
+                replaced = q["message_id"]
+                q.setdefault("previous_message_ids", []).append(replaced)
+                q.update({k: v for k, v in record.items() if k != "id"})
+                q.pop("collapsed_at", None)
+                q["needs_edit"] = False
+        if replaced:
+            try:
+                telegram.edit_html(cfg.chat_id, replaced, compose.telegram_html(kind, now_local, None, "sent again below"))
+            except telegram.TelegramError:
+                pass
+        log.append(f"sent {pid} (opener: {source}, wove {len(asked)} questions)")
 
 
 def fold(cfg: Config, now: datetime, log: list[str]) -> None:
@@ -186,15 +198,16 @@ def main(argv: list[str] | None = None) -> int:
     cfg = load()
     cfg.state_dir.mkdir(parents=True, exist_ok=True)
     with open(cfg.state_dir / "tick.lock", "a+") as lock:
+        only = argv[argv.index("--send") + 1] if "--send" in argv else None
         try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            # a manual /morning waits for a running tick; a scheduled tick just skips this round
+            fcntl.flock(lock, fcntl.LOCK_EX if only else fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            return 0  # previous tick still running (e.g. writing an opener)
+            return 0
         now = datetime.now(timezone.utc)
         now_local = now.astimezone(cfg.tz)
         log: list[str] = []
         errors = 0
-        only = argv[argv.index("--send") + 1] if "--send" in argv else None
         dry = "--dry-run" in argv
         steps = [lambda: send_due(cfg, now_local, log, only, dry)]
         if not dry and not only:

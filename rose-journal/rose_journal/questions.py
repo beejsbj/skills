@@ -92,5 +92,24 @@ def bank_lines(kind: str) -> list[str]:
     return lines
 
 
+def bank_items(kind: str) -> dict[str, str]:
+    """Stable ids for each question: "3" for morning, "9.2" (section.question) otherwise."""
+    if kind == "morning":
+        return {str(i): q for i, q in enumerate(MORNING, 1)}
+    sections = {"evening": EVENING, "midweek": MIDWEEK, "weekly": WEEKLY}[kind]
+    return {f"{i}.{j}": q for i, (_, qs) in enumerate(sections, 1) for j, q in enumerate(qs, 1)}
+
+
+def bank_with_ids(kind: str) -> str:
+    if kind == "morning":
+        return "\n".join(f"[{k}] {q}" for k, q in bank_items(kind).items())
+    sections = {"evening": EVENING, "midweek": MIDWEEK, "weekly": WEEKLY}[kind]
+    out = []
+    for i, (title, qs) in enumerate(sections, 1):
+        out.append(f"{i}. {title}")
+        out.extend(f"   [{i}.{j}] {q}" for j, q in enumerate(qs, 1))
+    return "\n".join(out)
+
+
 def bank_text(kind: str) -> str:
     return "\n".join(bank_lines(kind))

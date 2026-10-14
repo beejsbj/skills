@@ -73,6 +73,8 @@ def _prompt_md(prompt: dict) -> str:
     opener = (prompt.get("opener") or "").strip()
     sent = prompt.get("sent_at_local") or ""
     meta = f"_Sent {sent} · opener: {prompt.get('opener_source', '')}_\n\n" if sent else ""
+    if prompt.get("asked"):
+        meta += "_Woven in: " + "; ".join(f"[{a['id']}] {a['question']}" for a in prompt["asked"]) + "_\n\n"
     def fmt(line: str) -> str:
         if line.startswith("   "):
             return f"> - {line.strip(' •')}"

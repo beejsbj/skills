@@ -62,6 +62,8 @@ def find(data: dict, pid: str) -> dict | None:
 def by_message_id(data: dict, chat_id: str, message_id: str) -> dict | None:
     return next(
         (p for p in data["prompts"]
-         if str(p.get("chat_id")) == str(chat_id) and str(p.get("message_id")) == str(message_id)),
+         if str(p.get("chat_id")) == str(chat_id)
+         and (str(p.get("message_id")) == str(message_id)
+              or str(message_id) in [str(x) for x in p.get("previous_message_ids", [])])),
         None,
     )

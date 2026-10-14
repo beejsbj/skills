@@ -18,7 +18,7 @@ CLAIM_MARKERS = re.compile(
     re.I,
 )
 VERIFIABLE = ("journal:", "telegram:")
-LIMITS = {"morning": 700, "evening": 700, "midweek": 500, "weekly": 1600}
+LIMITS = {"morning": 1400, "evening": 1400, "midweek": 900, "weekly": 2200}
 
 
 def norm(s: str) -> str:
@@ -55,8 +55,8 @@ def check(kind: str, data: dict | None, pack_text: str, verify=None) -> tuple[bo
         return False, "empty opener"
     if len(opener) > LIMITS[kind]:
         return False, f"too long ({len(opener)})"
-    if len(re.findall(r"(?m)^\s*\d+[.)]\s", opener)) >= 3:
-        return False, "repeats question bank"
+    if len(re.findall(r"(?m)^\s*\d+[.)]\s", opener)) >= 6:
+        return False, "pastes the question set"
     if not isinstance(cites, list):
         return False, "citations not a list"
     pack = _norm(pack_text)
@@ -71,3 +71,14 @@ def check(kind: str, data: dict | None, pack_text: str, verify=None) -> tuple[bo
     if not cites and CLAIM_MARKERS.search(opener):
         return False, "claim without citation"
     return True, "ok"
+
+
+def asked(kind: str, data: dict) -> list[dict]:
+    """The bank questions Rose wove in, keeping only ids that exist (bad ids are dropped, not fatal)."""
+    from .questions import bank_items
+    items = bank_items(kind)
+    out = []
+    for a in data.get("asked") or []:
+        if isinstance(a, dict) and str(a.get("id")) in items:
+            out.append({"id": str(a["id"]), "question": items[str(a["id"])], "as": str(a.get("as", "")).strip()})
+    return out

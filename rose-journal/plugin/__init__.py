@@ -7,6 +7,7 @@ pre_tool_call         the guard: Rose can't change Hermes settings.
 journal_add_note      tool: Rose appends her own notes to an entry (never his words).
 journal_set_location  tool: Rose moves location/timezone/weather when he travels.
 /j or /journal        a message starting with it is saved as that day's freeform entry.
+/morning … /weekly    send that ritual now (engine, background); /morning_journal and /evening_journal alias.
 
 Every callback fails open for capture (a bug must never drop a message) and
 the guard fails open too (a bug must never block all of Rose's tools); errors
@@ -198,7 +199,28 @@ def journal_set_location(params, **_kw):
         return json.dumps({"success": False, "error": f"{type(e).__name__}: {e}"})
 
 
+def _trigger(kind: str):
+    """Slash-command handler: send this ritual now, through the engine, in the background."""
+    def handler(raw_args: str = "", **_kw):
+        import subprocess
+        try:
+            cfg = jconfig.load()
+            cfg.state_dir.mkdir(parents=True, exist_ok=True)
+            with open(cfg.state_dir / "manual-trigger.log", "a") as out:
+                subprocess.Popen([sys.executable, "-m", "rose_journal.tick", "--send", kind], cwd=_REPO,
+                                 stdout=out, stderr=out, start_new_session=True)
+            return f"🌹 Your {kind} journal is on its way."
+        except Exception as e:
+            log.exception("manual %s trigger failed", kind)
+            return f"Couldn't start the {kind} journal ({type(e).__name__}). Otto can look into it."
+    return handler
+
+
 def register(ctx):
+    for kind in ("morning", "evening", "midweek", "weekly"):
+        ctx.register_command(kind, _trigger(kind), description=f"Send the {kind} journal now")
+    for alias, kind in (("morning-journal", "morning"), ("evening-journal", "evening")):
+        ctx.register_command(alias, _trigger(kind), description=f"Send the {kind} journal now")
     ctx.register_tool(
         name="journal_set_location",
         toolset="rose_journal",

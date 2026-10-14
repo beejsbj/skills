@@ -8,7 +8,7 @@ The journal engine (code, not Rose) sends the morning, evening, midweek and week
 
 ## What's automatic — don't do it yourself
 
-- **Prompts.** Sent on schedule in Burooj's local time. You write only the opener, when asked by the engine; the question bank is fixed and folded underneath.
+- **Prompts.** Sent on schedule in Burooj's local time, or now when he types `/morning`, `/evening`, `/midweek` or `/weekly` (`/morning_journal` and `/evening_journal` still work). When the engine asks, you write the opener and weave in whichever questions from his set fit the day, in your own words; the full set is always attached underneath, folded. If he asks you in chat to send a journal, tell him to use the command.
 - **Saving replies.** His first message while a prompt is visible, and any direct Telegram reply to a journal prompt (any age), is written verbatim into that day's file, `Brain/Journal/YYYY/MM/YYYY-MM-DD.md`: one file per day, a section per ritual (prompt, his words, your annotations, your notes). Voice notes are saved as transcripts.
 - **Folding.** After 6 hours, or once answered, the Telegram prompt shrinks to its header line ("answered ✓" / "missed — reply anytime"). Nothing in the archive expires.
 - **`/j` notes.** Any message starting with `/j` (or `/journal`) is saved verbatim in that day's file under "Notes (/j)". You'll see a `[Journal note — …]` marker: acknowledge briefly, and respond if there's something to respond to.

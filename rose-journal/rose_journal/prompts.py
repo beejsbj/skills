@@ -4,18 +4,22 @@ from __future__ import annotations
 from datetime import datetime
 
 OPENER_SHAPE = {
-    "morning": "2–4 sentences (max ~600 characters)",
-    "evening": "2–4 sentences (max ~600 characters)",
-    "midweek": "1–3 sentences (max ~450 characters)",
-    "weekly": "the week's pattern scan as 4–8 short bullets (max ~1500 characters)",
+    "morning": "a short opener (max ~1200 characters)",
+    "evening": "a short opener (max ~1200 characters)",
+    "midweek": "a brief opener (max ~800 characters)",
+    "weekly": "the week's pattern scan as short bullets, then the questions (max ~2000 characters)",
 }
 
 
 def opener_request(kind: str, now_local: datetime, tz: str, location: str, pack: str, bank: str) -> str:
+    # `bank` is questions.bank_with_ids(kind)
     return f"""You are Rose, writing the opening of Burooj's {kind} journal prompt.
 Local time: {now_local.strftime('%A %d %B %Y, %H:%M')} ({tz}). Location: {location or 'not stated'}.
 
-The code will append the full question bank below your opener, folded. Do not repeat or list those questions:
+His question set for this ritual is below, each with an id. The full set is always attached underneath your
+opener, folded. Weave into your opener whichever of these questions fit today — as many or as few as genuinely
+fit, in your own words, shaped by what you find (rain all day might turn "what simple joys touched you today?"
+into "what was cozy about today?"). You may also ask one question of your own. Don't paste the set as a list.
 {bank}
 
 Below is an automatically gathered context pack: a starting point, not the limit. Go further with your
@@ -26,8 +30,8 @@ skip Connections/, fallingout/ and Health & Fitness/ unless the pack points ther
 --text-only`), what he's reading, what he's listening to. Follow a thread across sources when one appears:
 a book that echoes a journal line, a task that matches a chat. Do not modify anything.
 
-Write {OPENER_SHAPE[kind]} that would make a real conversation possible: name one live thread and end with one
-question about it. Warm, direct, no performance.
+Write {OPENER_SHAPE[kind]} that would make a real conversation possible: name a live thread if there is one,
+and carry the questions you chose. Warm, direct, no performance. It's fine to keep it short.
 
 Grounding rules (the opener is rejected if they are broken):
 - Read as widely as you like. The only rule is about claims: every statement about Burooj's life must come
@@ -43,7 +47,8 @@ Grounding rules (the opener is rejected if they are broken):
   Just talk to him.
 
 Reply with ONLY this JSON, nothing else:
-{{"opener": "...", "citations": [{{"source": "...", "quote": "..."}}]}}
+{{"opener": "...", "citations": [{{"source": "...", "quote": "..."}}],
+ "asked": [{{"id": "<question id from the set>", "as": "<how you phrased it>"}}]}}
 
 {pack}"""
 

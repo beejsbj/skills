@@ -209,7 +209,7 @@ class TickSendTest(unittest.TestCase):
             def boom(*a, **k):
                 raise telegram.TelegramError("Bad Gateway")
             telegram.send_html = boom
-            tick._opener = lambda *a: ("Morning 🌹", "plain:test", [])
+            tick._opener = lambda *a: ("Morning 🌹", "plain:test", [], [])
             try:
                 now = datetime(2026, 10, 14, 6, 5, tzinfo=IST)
                 for attempt in (1, 2):
@@ -231,7 +231,7 @@ class TickSendTest(unittest.TestCase):
             orig_send, orig_opener = telegram.send_html, tick._opener
             sent = []
             telegram.send_html = lambda chat, html: sent.append(html) or "555"
-            tick._opener = lambda *a: ("Morning 🌹", "rose", [])
+            tick._opener = lambda *a: ("Morning 🌹", "rose", [], [{"id": "1", "question": "How did you sleep?", "as": "Sleep okay?"}])
             try:
                 now = datetime(2026, 10, 14, 6, 5, tzinfo=IST)
                 tick.send_due(cfg, now, [])
@@ -441,3 +441,91 @@ class FoldRetryTest(unittest.TestCase):
                 self.assertIsNotNone(p.get("collapsed_at"))
             finally:
                 telegram.edit_html = orig
+
+
+class WovenQuestionsTest(unittest.TestCase):
+    def test_ids_and_asked_filtering(self):
+        from rose_journal.questions import bank_items
+        self.assertEqual(bank_items("evening")["9.2"], "What simple joys touched you today?")
+        self.assertEqual(bank_items("morning")["11"], "What would make today deeply satisfying?")
+        d = {"opener": "x", "asked": [{"id": "9.2", "as": "What was cozy today?"}, {"id": "99", "as": "bogus"}]}
+        got = validate.asked("evening", d)
+        self.assertEqual([a["id"] for a in got], ["9.2"])
+        self.assertEqual(got[0]["as"], "What was cozy today?")
+
+    def test_longer_woven_opener_allowed_but_not_a_pasted_list(self):
+        woven = "Evening, Burooj. " + "What was cozy about the rain? " * 20
+        self.assertTrue(validate.check("evening", {"opener": woven, "citations": []}, "")[0])
+        pasted = "\n".join(f"{i}. q" for i in range(1, 8))
+        self.assertFalse(validate.check("evening", {"opener": pasted, "citations": []}, "")[0])
+
+    def test_manual_resend_keeps_old_message_replyable(self):
+        from rose_journal import telegram, tick
+        with tempfile.TemporaryDirectory() as t:
+            cfg = make_cfg(Path(t))
+            ids = iter(["500", "501"])
+            edits = []
+            orig_send, orig_edit, orig_opener = telegram.send_html, telegram.edit_html, tick._opener
+            telegram.send_html = lambda chat, html: next(ids)
+            telegram.edit_html = lambda chat, mid, html: edits.append(mid)
+            tick._opener = lambda *a: ("Morning 🌹", "rose", [], [])
+            try:
+                now = datetime(2026, 10, 14, 9, 0, tzinfo=IST)
+                tick.send_due(cfg, now, [], only="morning")
+                tick.send_due(cfg, now + timedelta(minutes=10), [], only="morning")
+                data = ledger.snapshot(cfg.ledger_path)
+                p = ledger.find(data, "2026-10-14-morning")
+                self.assertEqual(p["message_id"], "501")
+                self.assertEqual(edits, ["500"])  # old one marked "sent again below"
+                self.assertIs(ledger.by_message_id(data, cfg.chat_id, "500"), p)
+            finally:
+                telegram.send_html, telegram.edit_html, tick._opener = orig_send, orig_edit, orig_opener
+
+    def test_entry_records_woven_questions(self):
+        with tempfile.TemporaryDirectory() as t:
+            cfg = make_cfg(Path(t))
+            p = add_prompt(cfg, sent=datetime(2026, 10, 14, 0, 30, tzinfo=timezone.utc))
+            with ledger.locked(cfg.ledger_path) as data:
+                q = ledger.find(data, p["id"])
+                q["sent_at_local"] = "06:00 IST"
+                q["asked"] = [{"id": "1", "question": "How did you sleep?", "as": "Sleep okay?"}]
+            info = capture.capture(cfg, cfg.chat_id, "100", "fine", datetime(2026, 10, 14, 1, 0, tzinfo=timezone.utc))
+            self.assertIn("_Woven in: [1] How did you sleep?_", Path(info["path"]).read_text())
+
+
+class PluginCommandTest(unittest.TestCase):
+    def test_commands_registered_and_spawn_engine(self):
+        import importlib.util, subprocess
+        spec = importlib.util.spec_from_file_location(
+            "rj_plugin3", Path(__file__).resolve().parents[1] / "plugin" / "__init__.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        names, hooks, tools = [], [], []
+
+        class Ctx:
+            def register_command(self, name, handler, description=""):
+                names.append(name)
+            def register_hook(self, name, cb):
+                hooks.append(name)
+            def register_tool(self, name, **kw):
+                tools.append(name)
+        mod.register(Ctx())
+        self.assertEqual(names, ["morning", "evening", "midweek", "weekly", "morning-journal", "evening-journal"])
+        self.assertIn("journal_set_location", tools)
+        calls = []
+        orig = subprocess.Popen
+        subprocess.Popen = lambda args, **kw: calls.append(args)
+        try:
+            with tempfile.TemporaryDirectory() as t:
+                from rose_journal import config as jconfig
+                conf = Path(t) / "j.json"
+                conf.write_text(json.dumps({"root": t, "state_dir": t}))
+                o, jconfig.CONFIG_PATH = jconfig.CONFIG_PATH, conf
+                try:
+                    msg = mod._trigger("evening")("")
+                finally:
+                    jconfig.CONFIG_PATH = o
+        finally:
+            subprocess.Popen = orig
+        self.assertIn("on its way", msg)
+        self.assertEqual(calls[0][-3:], ["rose_journal.tick", "--send", "evening"])
