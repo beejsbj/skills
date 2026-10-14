@@ -13,7 +13,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 CONFIG_PATH = Path(os.environ.get("ROSE_JOURNAL_CONFIG", "/home/admin/.config/rose/journal.json"))
-STATE_DIR = Path(os.environ.get("ROSE_JOURNAL_STATE", "/home/admin/.local/state/rose-journal"))
+STATE_DIR = Path(os.environ.get("ROSE_JOURNAL_STATE", "/home/admin/.hermes/profiles/rose/plugin-data/rose-journal"))
 
 KINDS = ("morning", "evening", "midweek", "weekly")
 

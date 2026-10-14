@@ -15,7 +15,7 @@ PROTECTED = [
     "/home/admin/.hermes",
     "/mnt/server-ssd/agent-data/admin/.hermes",
     "/home/admin/.config/rose",
-    "/home/admin/.local/state/rose-journal",
+    "/home/admin/.local/state/rose-journal",  # pre-2026-10-14 state location
     "/mnt/server-ssd/BJsWorkspace/Projects/skills",
     "/home/admin/.config/systemd",
 ]

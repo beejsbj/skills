@@ -98,15 +98,16 @@ def on_dispatch(event=None, **_kw):
 
 
 def _keep_audio(cfg, media: str, entry_path: str, now) -> str | None:
-    """Copy the voice note's audio into Journal/audio/, named after its entry. Returns the file name."""
+    """Copy the voice note's audio next to its entry, same name: 2026-10-13-evening.ogg (then -2, -3 …)."""
     import shutil
     try:
         stem = os.path.splitext(os.path.basename(entry_path))[0]
         ext = os.path.splitext(media)[1] or ".ogg"
-        name = f"{stem}-{now.astimezone(cfg.tz).strftime('%H%M%S')}{ext}"
-        dest = os.path.join(str(cfg.root), "audio", name)
-        os.makedirs(os.path.dirname(dest), exist_ok=True)
-        shutil.copy2(media, dest)
+        name, n = f"{stem}{ext}", 1
+        while os.path.exists(os.path.join(str(cfg.root), name)):
+            n += 1
+            name = f"{stem}-{n}{ext}"
+        shutil.copy2(media, os.path.join(str(cfg.root), name))
         return name
     except Exception:
         log.exception("rose-journal could not keep voice audio")
