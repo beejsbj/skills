@@ -20,11 +20,15 @@ Built 2026-10-13 after an audit found two weeks of failed prompts, invented cont
 2. **Opener** — `context.build` gathers a dated pack (recent journal entries, Rose Telegram messages, tududi, chat-scrobbler, ListenBrainz, reading progress from Storyteller/Grimmory/Audiobookshelf). `agent.ask` runs `hermes -p rose chat --oneshot` with Rose's chain and tools; she is told to read further. `validate.check` rejects claims about Burooj with no citation, and journal/Telegram quotes that don't exist in the real records (`context.make_verifier`). Any failure → plain opener.
 2b. **Woven questions** — Rose gets the set with ids (`3`, `9.2`) and weaves in as many as fit, reworded; she returns `asked` ids, which are validated against the set and recorded in the entry (`_Woven in: …_`). The full set is always attached, folded.
 3. **Send** — Bot API `sendMessage` (HTML): header, opener, full question bank in `<blockquote expandable>`. The message id goes into the ledger. Brain gets nothing yet.
-4. **Capture** — direct reply to a journal message (any age) → that prompt; else the first message while a prompt is visible (< `collapse_hours`) → most recent visible prompt. Written verbatim into the day's file `<root>/YYYY/MM/YYYY-MM-DD.md` (a section per ritual, in order: prompt with the question set in a folded Obsidian callout, his words, annotations, Rose's notes); later direct replies append. The agent sees a `[Journal reply — …]` note before the text.
+4. **Capture** — direct reply to a journal message (any age) → that prompt; else the first message while a prompt is visible (< `collapse_hours`) → most recent visible prompt. Written verbatim to its own entry at the Journal root, `<root>/YYYY-MM-DD-<kind>.md` (flat, one file per entry, like Burooj's own library): prompt with the question set in a folded Obsidian callout, his words, annotations, Rose's notes; later direct replies append. Voice audio is copied to `<root>/audio/` and embedded. The agent sees a `[Journal reply — …]` note before the text.
 5. **Fold** — answered or after `collapse_hours`: the Telegram message is edited down to its header line (`answered ✓` / `missed — reply anytime`); replying to it still works. The archive never expires.
-6. **`/j`** — a message starting with `/j` or `/journal` (text, or a voice note captioned `/j`) is saved verbatim under the day's `Notes (/j)` section.
+6. **`/j`** — a message starting with `/j` or `/journal` (text, or a voice note captioned `/j`) is saved verbatim as its own entry, `YYYY-MM-DD-j.md`, `-j-2.md`, ….
 7. **Rose's notes** — the `journal_add_note` tool appends a timestamped note under `### Rose's notes` in a day's section; it never edits his words or annotations.
 8. **Annotate** — `annotate_after_minutes` after the first capture, Rose drafts annotations from the entry and her chat reply; code writes them. Up to 3 attempts. Annotation runs with no tools and may use only the entry's content.
+
+## Rose's notebook
+
+Private to Rose: `notebook.json` in the state dir, written only by the `rose_notebook` tool and by `FOLLOW-UP:` lines in annotation drafts. Open items are injected into every Rose turn (`pre_llm_call` context) and into the opener pack. Resolved items move to `notebook-archive.jsonl`; open items untouched for 21 days are archived as stale; at most 40 stay open.
 
 ## Manual triggers
 

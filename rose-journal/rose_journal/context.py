@@ -15,7 +15,7 @@ import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from . import entries, sources
+from . import entries, notebook, sources
 from .config import Config
 
 ROSE_STATE_DB = Path("/home/admin/.hermes/profiles/rose/state.db")
@@ -30,29 +30,23 @@ def clean_user_text(text: str) -> str:
 
 
 def journal_entries(cfg: Config, limit: int = 6) -> list[str]:
-    """Newest journal sections, from daily files and the older one-file-per-ritual layout."""
+    """Newest engine entries (his words + Rose's annotations), newest first."""
     found = []
-    for p in cfg.root.rglob("*.md"):
-        m = re.match(r"(\d{4}-\d{2}-\d{2})(?:-(morning|evening|midweek|weekly|note))?\.md$", p.name)
-        if not m or p.parent == cfg.root:  # top-level files are his older hand-written journal
+    for p in cfg.root.glob("*.md"):
+        kind = entries.kind_of(p)
+        if not kind or kind == "note":
             continue
         body = p.read_text(encoding="utf-8", errors="replace")
-        if m.group(2):  # legacy layout
-            raw = re.search(r"## Raw Entry\n(.*?)(?=\n## |\Z)", body, re.S)
-            ann = re.search(r"## Rose's Annotations\n(.*?)(?=\n## |\Z)", body, re.S)
-            found.append((m.group(1), m.group(2), raw.group(1).strip() if raw else "",
-                          ann.group(1).strip() if ann else ""))
-            continue
-        for kind in entries.kinds_in(body):
-            sec = entries.section(body, kind)
-            ann = re.search(r"### Rose's annotations\n(.*?)(?=\n### |\Z)", sec, re.S)
-            found.append((m.group(1), kind, entries.raw_entry(body, kind), ann.group(1).strip() if ann else ""))
-    out = []
-    for date, kind, text, notes in sorted(found, key=lambda f: (f[0], f[1]), reverse=True):
+        text = entries.raw_entry(body)
+        if not text:  # older Rose-format files
+            m = re.search(r"## Raw Entry\n(.*?)(?=\n## |\Z)", body, re.S)
+            text = m.group(1).strip() if m else ""
+        ann = re.search(r"## Rose's [Aa]nnotations\n(.*?)(?=\n## |\Z)", body, re.S)
         if text:
-            out.append(f"### journal:{date}-{kind}\n{text[:1500]}\n\n_Rose's annotations:_ {notes[:600]}")
-        if len(out) >= limit:
-            break
+            found.append((p.stem, text, ann.group(1).strip() if ann else ""))
+    out = []
+    for stem, text, notes in sorted(found, reverse=True)[:limit]:
+        out.append(f"### journal:{stem}\n{text[:1500]}\n\n_Rose's annotations:_ {notes[:600]}")
     return out
 
 
@@ -134,6 +128,7 @@ def build(cfg: Config, now_local: datetime) -> str:
 
     add("Recent journal entries (newest first)", lambda: journal_entries(cfg))
     add("Burooj's recent Telegram messages to Rose (last 7 days)", lambda: telegram_messages(cfg.tz))
+    add("Your private notebook (open threads)", lambda: notebook.render(cfg, now_local.date().isoformat()) or "_empty_")
     for title, fn in sources.ALL:
         add(title, lambda fn=fn: fn(cfg, now_local))
     sections.append(f"## Not connected\n{sources.GAPS}")

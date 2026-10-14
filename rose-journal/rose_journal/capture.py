@@ -39,10 +39,11 @@ def match(data: dict, cfg: Config, chat_id: str, reply_to: str | None, now: date
 
 
 def record(cfg: Config, prompt: dict, rule: str, text: str, now: datetime,
-           source: str = "text", platform_message_id: str | None = None) -> dict:
+           source: str = "text", platform_message_id: str | None = None, audio: str | None = None) -> dict:
     """Write the reply into Brain and note it on the ledger prompt (caller holds the lock)."""
     local_now = now.astimezone(cfg.tz)
-    path = entries.record_reply(cfg.root, prompt, text, local_now, source)
+    prompt.setdefault("stem", entries.stem_for(prompt["local_date"], prompt["kind"]))
+    path = entries.record_reply(cfg.root, prompt, text, local_now, source, audio)
     prompt.setdefault("captures", []).append({
         "at": now.isoformat(),
         "rule": rule,
@@ -67,51 +68,49 @@ def capture(cfg: Config, chat_id: str, reply_to: str | None, text: str, now: dat
 
 
 def capture_to(cfg: Config, pid: str, rule: str, text: str, now: datetime,
-               source: str, platform_message_id: str | None = None) -> dict | None:
+               source: str, platform_message_id: str | None = None, audio: str | None = None) -> dict | None:
     """Save into a known prompt (voice notes: matched at arrival, written after transcription)."""
     with ledger.locked(cfg.ledger_path) as data:
         prompt = ledger.find(data, pid)
         if not prompt:
             return None
-        return record(cfg, prompt, rule, text, now, source, platform_message_id)
+        return record(cfg, prompt, rule, text, now, source, platform_message_id, audio)
 
 
 JOURNAL_COMMAND = re.compile(r"^\s*/(?:j|journal)(?:@\w+)?(?:\s+|$)", re.I)
-NOTE_ORIENTATION = "_Freeform entry — Burooj sent this with /j._"
-
-
 def strip_command(text: str) -> str | None:
     """Return the text after a /j or /journal command, or None if it isn't one."""
     m = JOURNAL_COMMAND.match(text or "")
     return text[m.end():] if m else None
 
 
-def note_prompt(data: dict, cfg: Config, now: datetime) -> dict:
-    """The day's freeform-note record (one per local date), created on first use."""
+def new_note_prompt(data: dict, cfg: Config, now: datetime) -> dict:
+    """A fresh record for one /j note: each note is its own entry file (…-j.md, …-j-2.md)."""
     local_date = now.astimezone(cfg.tz).date().isoformat()
-    pid = ledger.prompt_id("note", local_date)
-    p = ledger.find(data, pid)
-    if p is None:
-        p = {"id": pid, "kind": "note", "local_date": local_date, "chat_id": cfg.chat_id,
-             "message_id": None, "sent_at": now.isoformat(), "opener": "", "opener_source": "/j",
-             "plain_text": NOTE_ORIENTATION}
-        data["prompts"].append(p)
+    taken = {p.get("stem") for p in data["prompts"]}
+    n, stem = 1, entries.stem_for(local_date, "j")
+    while stem in taken or entries.entry_path(cfg.root, stem).exists():
+        n += 1
+        stem = entries.stem_for(local_date, "j", n)
+    p = {"id": stem, "stem": stem, "kind": "j", "local_date": local_date, "chat_id": cfg.chat_id,
+         "message_id": None, "sent_at": now.isoformat(), "opener": "", "opener_source": "/j"}
+    data["prompts"].append(p)
     return p
 
 
 def capture_note(cfg: Config, text: str, now: datetime, source: str = "text",
-                 platform_message_id: str | None = None) -> dict:
+                 platform_message_id: str | None = None, audio: str | None = None) -> dict:
     with ledger.locked(cfg.ledger_path) as data:
-        p = note_prompt(data, cfg, now)
-        info = record(cfg, p, "/j", text, now, source, platform_message_id)
+        p = new_note_prompt(data, cfg, now)
+        info = record(cfg, p, "/j", text, now, source, platform_message_id, audio)
         p["needs_edit"] = False  # nothing to fold in Telegram
         return info
 
 
 def reserve_note(cfg: Config, now: datetime) -> dict:
-    """For a /j voice note: make sure the day's note record exists before transcription."""
+    """For a /j voice note: create its record now; the transcript is written after STT."""
     with ledger.locked(cfg.ledger_path) as data:
-        return dict(note_prompt(data, cfg, now))
+        return dict(new_note_prompt(data, cfg, now))
 
 
 def note_context(info: dict) -> str:
@@ -124,23 +123,29 @@ def note_context(info: dict) -> str:
 
 def add_rose_note(cfg: Config, text: str, now: datetime, local_date: str | None = None,
                   kind: str | None = None) -> str:
-    """Rose's own addition: appended under "Rose's notes" in that day's file, never touching his words."""
+    """Rose's own addition, appended under "Rose's notes" in an entry; never touches his words."""
     if not text or not text.strip():
         raise ValueError("note text is empty")
     local_now = now.astimezone(cfg.tz)
     local_date = local_date or local_now.date().isoformat()
     datetime.strptime(local_date, "%Y-%m-%d")  # validate
-    if kind and kind not in ("morning", "evening", "midweek", "weekly", "note"):
+    if kind and kind not in ("morning", "evening", "midweek", "weekly", "j"):
         raise ValueError(f"unknown kind {kind!r}")
-    if not kind:
-        path = entries.entry_path(cfg.root, local_date)
-        existing = entries.kinds_in(path.read_text(encoding="utf-8")) if path.exists() else []
-        kind = existing[-1] if existing else "note"
-    return str(entries.add_rose_note(cfg.root, local_date, kind, text, local_now))
+    day = entries.entries_on(cfg.root, local_date)
+    if kind:
+        day = [p for p in day if entries.kind_of(p) == kind]
+    if day:
+        path = day[-1]
+    else:  # nothing that day: a Rose-started note entry
+        stem = entries.next_stem(cfg.root, local_date, "note")
+        path = entries.entry_path(cfg.root, stem)
+    entries.add_rose_note(path, text, local_now, {"kind": "note", "local_date": local_date})
+    return str(path)
 
 
 def planned_info(cfg: Config, prompt: dict) -> dict:
-    return {"prompt": prompt, "path": str(entries.entry_path(cfg.root, prompt["local_date"]))}
+    stem = prompt.get("stem") or entries.stem_for(prompt["local_date"], prompt["kind"])
+    return {"prompt": prompt, "path": str(entries.entry_path(cfg.root, stem))}
 
 
 def context_note(info: dict) -> str:

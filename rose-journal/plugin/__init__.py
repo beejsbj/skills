@@ -27,7 +27,7 @@ _REPO = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 if _REPO not in sys.path:
     sys.path.insert(0, _REPO)
 
-from rose_journal import capture, config as jconfig, guard, ledger, location  # noqa: E402
+from rose_journal import capture, config as jconfig, guard, ledger, location, notebook  # noqa: E402
 
 log = logging.getLogger("rose_journal.plugin")
 _VOICE_TTL = 900
@@ -58,6 +58,7 @@ def on_dispatch(event=None, **_kw):
         after_j = capture.strip_command(text)
 
         if kind in ("VOICE", "AUDIO"):
+            media = next((m for m in (getattr(event, "media_urls", None) or []) if os.path.isfile(str(m))), None)
             if after_j is not None:
                 if str(chat_id) != str(cfg.chat_id):
                     return None
@@ -71,10 +72,11 @@ def on_dispatch(event=None, **_kw):
                     return None
                 info = capture.planned_info(cfg, prompt)
                 note = capture.context_note(info)
+            audio = _keep_audio(cfg, media, info["path"], now) if media else None
             with _lock:
                 _pending_voice["slot"] = {
                     "pid": prompt["id"], "rule": rule, "msg_id": msg_id, "note": note,
-                    "caption": text, "deadline": time.time() + _VOICE_TTL,
+                    "caption": text, "deadline": time.time() + _VOICE_TTL, "audio": audio,
                 }
             return {"action": "rewrite", "text": note + text}
 
@@ -95,6 +97,22 @@ def on_dispatch(event=None, **_kw):
         return None
 
 
+def _keep_audio(cfg, media: str, entry_path: str, now) -> str | None:
+    """Copy the voice note's audio into Journal/audio/, named after its entry. Returns the file name."""
+    import shutil
+    try:
+        stem = os.path.splitext(os.path.basename(entry_path))[0]
+        ext = os.path.splitext(media)[1] or ".ogg"
+        name = f"{stem}-{now.astimezone(cfg.tz).strftime('%H%M%S')}{ext}"
+        dest = os.path.join(str(cfg.root), "audio", name)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        shutil.copy2(media, dest)
+        return name
+    except Exception:
+        log.exception("rose-journal could not keep voice audio")
+        return None
+
+
 def _transcript(user_message: str, pend: dict) -> str:
     text = user_message.replace(pend["note"], "")
     text = _REPLY_PREFIX.sub("", text.strip())
@@ -107,6 +125,17 @@ def _transcript(user_message: str, pend: dict) -> str:
 
 
 def on_llm_call(user_message=None, platform=None, **_kw):
+    _capture_voice(user_message, platform)
+    try:
+        cfg = jconfig.load()
+        block = notebook.render(cfg, datetime.now(cfg.tz).date().isoformat())
+        return {"context": block} if block else None
+    except Exception:
+        log.exception("rose-journal notebook injection failed")
+        return None
+
+
+def _capture_voice(user_message, platform):
     try:
         if "telegram" not in str(platform or "").lower():
             return None
@@ -120,12 +149,11 @@ def on_llm_call(user_message=None, platform=None, **_kw):
         if pend.get("caption"):
             text = f"{text}\n\n{pend['caption']}"
         info = capture.capture_to(cfg, pend["pid"], pend["rule"], text,
-                                  datetime.now(timezone.utc), "voice", pend["msg_id"])
+                                  datetime.now(timezone.utc), "voice", pend["msg_id"], pend.get("audio"))
         if info:
             log.info("journal voice reply captured: %s", info["path"])
     except Exception:
         log.exception("rose-journal voice capture failed")
-    return None
 
 
 def on_tool_call(tool_name=None, args=None, **_kw):
@@ -221,7 +249,54 @@ def _j_usage(raw_args: str = "", **_kw):
     return "Write it right after the command: /j <anything worth keeping>. A voice note captioned /j works too."
 
 
+NOTEBOOK_SCHEMA = {
+    "name": "rose_notebook",
+    "description": (
+        "Your private notebook (only you see it; it is not in Burooj's journal). Use it for threads you mean to "
+        "pick up with him later: 'ask how the Amir conversation went', 'he wanted to try X'. Open items are shown "
+        "to you each turn. action=add with text (optional bring_up_after YYYY-MM-DD, optional source); "
+        "action=resolve with id once it has come up or stopped mattering; action=list to see everything open."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "action": {"type": "string", "enum": ["add", "resolve", "list"]},
+            "text": {"type": "string"},
+            "id": {"type": "string"},
+            "outcome": {"type": "string", "description": "For resolve: what happened, briefly."},
+            "bring_up_after": {"type": "string"},
+            "source": {"type": "string", "description": "Where it came from, e.g. an entry name."},
+        },
+        "required": ["action"],
+    },
+}
+
+
+def rose_notebook(params, **_kw):
+    import json
+    try:
+        cfg = jconfig.load()
+        action = str(params.get("action", "list"))
+        if action == "add":
+            return json.dumps({"success": True, "item": notebook.add(cfg, str(params.get("text", "")),
+                               str(params.get("source", "")), params.get("bring_up_after") or None)})
+        if action == "resolve":
+            return json.dumps({"success": True, "item": notebook.resolve(cfg, str(params.get("id", "")),
+                                                                         str(params.get("outcome", "")))})
+        return json.dumps({"success": True, "open": notebook.open_items(cfg)})
+    except Exception as e:
+        return json.dumps({"success": False, "error": f"{type(e).__name__}: {e}"})
+
+
 def register(ctx):
+    ctx.register_tool(
+        name="rose_notebook",
+        toolset="rose_journal",
+        schema=NOTEBOOK_SCHEMA,
+        handler=rose_notebook,
+        description="Rose's private notebook of threads to pick up later.",
+        emoji="📓",
+    )
     ctx.register_command("j", _j_usage, description="Save a note to today's journal: /j <text>")
     for kind in ("morning", "evening", "midweek", "weekly"):
         ctx.register_command(kind, _trigger(kind), description=f"Send the {kind} journal now")

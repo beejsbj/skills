@@ -14,7 +14,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from . import agent, compose, context, entries, ledger, prompts, schedule, telegram, validate
+from . import agent, compose, context, entries, ledger, notebook, prompts, schedule, telegram, validate
 from .config import Config, load
 from .questions import bank_with_ids
 
@@ -55,7 +55,8 @@ def send_due(cfg: Config, now_local: datetime, log: list[str], only: str | None 
         opener, source, cites, asked = _opener(cfg, kind, now_local, pid)
         html = compose.telegram_html(kind, now_local, opener)
         record = {
-            "id": pid, "kind": kind, "local_date": local_date, "scheduled": at.isoformat(),
+            "id": pid, "stem": entries.stem_for(local_date, kind), "kind": kind, "local_date": local_date,
+            "scheduled": at.isoformat(),
             "chat_id": cfg.chat_id, "opener": opener, "opener_source": source, "citations": cites, "asked": asked,
             "plain_text": compose.plain_text(kind, now_local, opener), "html": html,
         }
@@ -171,14 +172,16 @@ def annotate(cfg: Config, now: datetime, log: list[str]) -> None:
         if now - first < timedelta(minutes=cfg.annotate_after_minutes):
             continue
         body = path.read_text(encoding="utf-8")
-        if not entries.annotations_pending(body, p["kind"]):
+        if not entries.annotations_pending(body):
             continue
-        section = entries.section(body, p["kind"])
-        text = agent.ask(cfg, prompts.annotation_request(section, _rose_reply_after(first)), 180, toolsets="none")
+        text = agent.ask(cfg, prompts.annotation_request(body, _rose_reply_after(first)), 180, toolsets="none")
         ok = bool(text) and len(text) < 5000 and not text.lstrip().startswith("{")
         if ok:
-            entries.write_annotations(path, p["kind"], text)
-            log.append(f"annotated {p['id']}")
+            text, followups = notebook.split_followups(text)
+            entries.write_annotations(path, text)
+            for f in followups:
+                notebook.add(cfg, f, source=path.stem)
+            log.append(f"annotated {p['id']}" + (f" (+{len(followups)} notebook)" if followups else ""))
         with ledger.locked(cfg.ledger_path) as data:
             q = ledger.find(data, p["id"])
             if q is not None:
@@ -211,7 +214,8 @@ def main(argv: list[str] | None = None) -> int:
         dry = "--dry-run" in argv
         steps = [lambda: send_due(cfg, now_local, log, only, dry)]
         if not dry and not only:
-            steps += [lambda: fold(cfg, now, log), lambda: annotate(cfg, now, log), lambda: prune(cfg, now)]
+            steps += [lambda: fold(cfg, now, log), lambda: annotate(cfg, now, log), lambda: prune(cfg, now),
+                      lambda: notebook.sweep(cfg, now)]
         for step in steps:
             try:
                 step()

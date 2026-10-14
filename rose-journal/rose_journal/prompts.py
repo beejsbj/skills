@@ -64,7 +64,9 @@ def annotation_request(entry_body: str, rose_reply: str | None) -> str:
 - Your chat reply below is only for aligning your reading. Don't import anything from it, or from any other
   record, that isn't in the entry — especially health, clinical, financial or relationship details.
 - Ignore the orientation prompt's opener text; it may be outdated.
-- Reply with ONLY the bullets.
+- Optionally, after the bullets, add up to two lines starting `FOLLOW-UP:` for threads worth picking up with
+  him later (they go to your private notebook, not the journal). Only when genuinely worth it.
+- Reply with ONLY the bullets (and any FOLLOW-UP lines).
 
 ## Your chat reply to him (for alignment only)
 {reply}
