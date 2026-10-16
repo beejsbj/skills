@@ -1,11 +1,17 @@
 ---
 name: cockpit-agents
-description: Delegate work, create or continue agent sessions, and verify model receipts through cockpit agents. Use for T3 threads and native Hermes, Codex, or Claude sessions; environment installation and upgrades follow the Cockpit handbook.
+description: Delegate work through cockpit agents - run a one-shot native job for a review, consult, or other bounded judgment, create or continue a T3 thread for work to watch or steer, and verify model receipts. Use for native Codex, Claude, or Hermes jobs and T3 threads; environment installation and upgrades follow the Cockpit handbook.
 ---
 
 # Cockpit agents
 
-Use `cockpit agents` as the session surface. A request to create or message a session authorizes that operation within the stated scope; skill discovery alone does not authorize new work. Resolve `cockpit handbook agents` for command details and recovery guidance. Inspect `cockpit agents --help` on the target machine before using a newly deployed command; if it is missing, report the deployment gap.
+Use `cockpit agents` as the delegation surface. A request to run, create, or message a session authorizes that operation within the stated scope; skill discovery alone does not authorize new work. Resolve `cockpit handbook agents` for command details and recovery guidance. Inspect `cockpit agents --help` on the target machine before using a newly deployed command; if it is missing, report the deployment gap.
+
+## Job or thread
+
+Decide the shape before the route. A **job** (`cockpit agents run`) runs the route's native CLI once, holds no T3 thread, shows nothing in the sidebar, and leaves an answer file plus a native session id that `receipt` proves. A **thread** (`cockpit agents create`) is a T3 thread: visible, steerable, kept in history, and holding a provider process until archived.
+
+Reviews, consults, second opinions, scouts, and anything with a single answer are jobs; so is every `--intent judgment` dispatch. Open a thread only when the user wants to watch or steer the work, the work is long and iterative, or its history belongs in T3. `options` shows each route's shape in its `via` column (`run`, `run+create`, `native`); `create` nudges toward `run` when a thread reads as a review, and never refuses.
 
 ## Select the environment and route
 
@@ -19,15 +25,28 @@ cockpit agents threads --project PROJECT_ID
 cockpit agents sessions --harness all --json
 ```
 
-Use live `options` for route availability, account limits, and fallback order. Preserve requested models and effort; use [model-taste](../model-taste/SKILL.md) for unspecified choices. For independent judgment, use `--intent judgment` and [consult](../consult/SKILL.md). A catalog model is not necessarily an allowed native subagent override: check the tool's advertised choices.
+Use live `options` for route availability, account limits, and fallback order. Preserve requested models and effort; use [model-taste](../model-taste/SKILL.md) for unspecified choices. For independent judgment, use `--intent judgment` and [consult](../consult/SKILL.md); those routes run as jobs. A `native` route is your own subagent tool (Agent tool, `spawn_agent`, `delegate_task`), used from inside your session, not through Cockpit; a catalog model is not necessarily an allowed override there, so check the tool's advertised choices.
+
+## Run a job
+
+Write the exact brief to a file. Pick a `run` route from `options`, pass the checkout as `--cwd`, and make a review `--read-only`:
+
+```bash
+cockpit agents run codex:gpt-6-astra --message-file /absolute/path/brief.md \
+  --cwd /absolute/path/worktree --effort high --read-only [--background]
+cockpit agents run --status RUN_ID
+cockpit agents run --resume codex:SESSION_ID --message-file /absolute/path/followup.md
+```
+
+The receipt names the output file, the native session (`codex:…`, `claude:…`, `hermes:…`), the exact `receipt` command, and the exit status. `--background` returns at once; read `--status` until it is `done`, `failed`, `timeout`, or `lost`. `--resume` asks a second question in the same context through the harness's own resume, under the same checkout and ownership checks as `send`. `--read-only` maps to `codex exec -s read-only` and to denied edits for Claude; Hermes has none and refuses it. Read the answer from `output.md`; the record in `run.json` carries no credentials.
 
 Resolve a T3 project by workspace path and full ID, since grouped titles can repeat. Inspect model slugs and option descriptors on that server; `--instance` selects its configured provider instance. Native sessions use their own harness records. Keep the harness, exact session ID, and Hermes profile together when selecting a target; bare IDs retain T3 compatibility.
 
 T3 commands discover the local server and use temporary authentication that is revoked on exit. `--base-dir` selects another T3 home. An explicit `--origin` needs that server's caller-owned `T3_AUTH_TOKEN`; pair it with `--expect-environment ID`. Keep tokens out of arguments and receipts. Remote T3 reads belong to the target server, not a local database substitute.
 
-## Create or continue work
+## Create or continue a thread
 
-Write the exact prompt to a file. Choose access mode deliberately: automatic invocation does not imply `full-access`. T3 also supports `approval-required`, `auto-accept-edits`, and `auto`; choose from the authorized scope and provider policy.
+For work the user will watch or steer, write the exact prompt to a file. Choose access mode deliberately: automatic invocation does not imply `full-access`. T3 also supports `approval-required`, `auto-accept-edits`, and `auto`; choose from the authorized scope and provider policy.
 
 ```bash
 cockpit agents create --project PROJECT_ID --title "Investigate the failing build" \
@@ -66,6 +85,6 @@ Verify the actual model from its harness record, not the agent's self-report:
 cockpit agents receipt codex HARNESS_SESSION_ID --json
 ```
 
-Use the underlying harness session ID, which may differ from the T3 thread ID. For an authorized issue receipt, refresh its full body/comments through `cockpit linear issue ISSUE --json`, then use `receipt` with `--issue`, `--role`, and `--outcome`. Report verified target, IDs, model evidence, and work outcome separately; an absent harness record means model unknown. Keep credentials and prompt/transcript bodies out of receipts.
+Use the underlying harness session ID, which may differ from the T3 thread ID; a job's receipt prints it ready to paste. For an authorized issue receipt, refresh its full body/comments through `cockpit linear issue ISSUE --json`, then use `receipt` with `--issue`, `--role`, and `--outcome`. Report verified target, IDs, model evidence, and work outcome separately; an absent harness record means model unknown. Keep credentials and prompt/transcript bodies out of receipts.
 
 <!-- Adapted from Burooj's September 2026 T3 orchestration skill and local t3ctl workflow; Cockpit now owns the session interface and transport. -->

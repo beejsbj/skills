@@ -17,11 +17,13 @@ The brief is ready when a fresh model can locate the evidence, investigate the q
 
 ## Route the consultation
 
-An explicitly requested model and effort win, including when that model matches the root. Otherwise, use [`../model-taste/SKILL.md`](../model-taste/SKILL.md) and its [roster](../model-taste/references/roster.md): inspect the live tool or harness catalog first, then apply the roster's model taste. Availability is environment truth; the roster is not an availability cache. Use `cockpit agents options --intent judgment --json` for live consultation routes and [cockpit-agents](../cockpit-agents/SKILL.md) for session dispatch.
+An explicitly requested model and effort win, including when that model matches the root. Otherwise, use [`../model-taste/SKILL.md`](../model-taste/SKILL.md) and its [roster](../model-taste/references/roster.md): inspect the live tool or harness catalog first, then apply the roster's model taste. Availability is environment truth; the roster is not an availability cache.
+
+A consultation is a bounded judgment, so it runs as a one-shot job, not a session. Where `cockpit agents` is available, take the route from `cockpit agents options --intent judgment --json` and dispatch it with `cockpit agents run ROUTE --message-file brief.md --cwd CHECKOUT --read-only [--effort LEVEL]`; the receipt names the answer file and the native session id for the model receipt, and `run --resume` carries a follow-up question into the same context. Open a T3 thread (`cockpit agents create`) for a consultation only when the user asks for one to watch or steer. [cockpit-agents](../cockpit-agents/SKILL.md) has the command details.
 
 Choose model class and reasoning effort separately. Default a bounded consultation to an available frontier judgment model at low effort. Raise effort when the ambiguity or stakes require deeper reasoning. Answer a request for another or smarter model with a qualifying model distinct from the root; report the limitation when none is available. Same-model consultation still uses a fresh context and discloses the overlap. Use a small or standard worker for extraction and mechanical execution, which is delegation rather than consultation.
 
-Prefer the environment's native subagent mechanism when it advertises the requested model. When it does not, try one appropriate authorized fallback and follow its governing skill or handbook.
+Without `cockpit agents`, prefer the environment's native subagent mechanism when it advertises the requested model, with a fresh context and read-only access. When neither is available, try one appropriate authorized fallback and follow its governing skill or handbook.
 
 The dispatch is complete when the requested model and effort, fresh context, access to the essential evidence, independent checks, and an answer to the question are all present. When a delivery surface was named, the judgment must also be visible there with its authorship clear. Otherwise report the concrete inability to obtain the requested consultation after the preferred route and appropriate fallback. Do not recurse into consultations about the consultation.
 
