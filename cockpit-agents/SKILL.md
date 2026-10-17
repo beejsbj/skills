@@ -1,6 +1,6 @@
 ---
 name: cockpit-agents
-description: Delegate work through cockpit agents - run a one-shot native job as a cross-provider subagent for work that is part of your task but needs another provider or model (read-only for a review or consult, --write for an implementation piece); create or continue a T3 thread only for an independent workstream to watch or steer; verify model receipts. Use for native Codex, Claude, or Hermes jobs and T3 threads; environment installation and upgrades follow the Cockpit handbook.
+description: Delegate work through cockpit agents - run a one-shot native job as a cross-provider subagent for work that is part of your task but needs another provider or model (it writes in your work branch by default; --read-only for a review, consult, or scout); create or continue a T3 thread only for an independent workstream to watch or steer; verify model receipts. Use for native Codex, Claude, or Hermes jobs and T3 threads; environment installation and upgrades follow the Cockpit handbook.
 ---
 
 # Cockpit agents
@@ -12,7 +12,7 @@ Use `cockpit agents` as the delegation surface. A request to run, create, or mes
 Decide the shape before the route:
 
 - **Your own subagent tool** (Claude's Agent tool, Codex `spawn_agent`, Hermes `delegate_task`) when the work is part of your task and your own harness and model are right for it.
-- **A job** (`cockpit agents run`) when the work is still part of your task but needs another provider or model: Cockpit's cross-provider subagent. It runs the route's native CLI once, holds no T3 thread, shows nothing in the sidebar, and leaves an answer file plus a native session id that `receipt` proves. Judgments (reviews, consults, second opinions, scouts; every `--intent judgment` dispatch) run `--read-only`; implementation pieces run `--write`.
+- **A job** (`cockpit agents run`) when the work is still part of your task but needs another provider or model: Cockpit's cross-provider subagent. It runs the route's native CLI once, holds no T3 thread, shows nothing in the sidebar, and leaves an answer file plus a native session id that `receipt` proves. Like a subagent it writes in your checkout by default; judgments (reviews, consults, second opinions, scouts; every `--intent judgment` dispatch) pass `--read-only`.
 - **A T3 thread or session** (`cockpit agents create`) only for an independent workstream Burooj may want to watch, steer, or keep in his sidebar: visible, steerable, kept in history, and holding a provider process until archived.
 
 `options` shows each route's shape in its `via` column (`run`, `run+create`, `native`); `create` nudges toward `run` when a thread reads as a review, and never refuses.
@@ -33,28 +33,29 @@ Use live `options` for route availability, account limits, and fallback order. P
 
 ## Run a job
 
-Write the exact brief to a file. Pick a `run` route from `options`, pass the checkout as `--cwd`, and make a review `--read-only`:
+Write the exact brief to a file, pick a `run` route from `options`, and pass the checkout as `--cwd`. A job has two modes.
+
+**Write, the default**, for an implementation piece of your task, briefed like a subagent and run in your own work branch:
 
 ```bash
-cockpit agents run codex:gpt-6-astra --message-file /absolute/path/brief.md \
-  --cwd /absolute/path/worktree --effort high --read-only [--background]
-cockpit agents run --status RUN_ID
-cockpit agents run --resume codex:SESSION_ID --message-file /absolute/path/followup.md
-```
-
-The receipt names the output file, the native session (`codex:…`, `claude:…`, `hermes:…`), the exact `receipt` command, and the exit status. `--background` returns at once; read `--status` until it is `done`, `failed`, `timeout`, `deferred`, or `lost` (`queued` and `running` are still on their way). `--resume` asks a second question in the same context through the harness's own resume, under the same checkout and ownership checks as `send`. `--read-only` maps to `codex exec -s read-only` and to denied edits for Claude; Hermes has none and refuses it, and Codex refuses it on a host that denies unprivileged user namespaces (bjslab), where the receipt then names the config sandbox that applied and the brief must forbid edits. Read the answer from `output.md`; the record in `run.json` carries no credentials.
-
-## Run a write job
-
-For an implementation piece of your task that needs another provider or model, brief it like a subagent and run it with `--write` in your own checkout:
-
-```bash
-cockpit agents run claude:claude-sonnet-5-5 --write --cwd /absolute/path/your-worktree \
+cockpit agents run claude:claude-sonnet-5-5 --cwd /absolute/path/your-worktree \
   --message-file /absolute/path/brief.md
 cockpit agents run --status RUN_ID        # mode, branch, tree before and after, files touched, commits, diff summary
 ```
 
-`--write` gives Claude `--permission-mode bypassPermissions` and Codex `-s danger-full-access` (the only sandbox that runs on bjslab); Hermes has no switch, its toolsets decide and the receipt says whether they write. Your feature worktree may be dirty with your own work: the receipt records the tree before and after and lists the files the job `touched`, comparing dirty files by content. `run` refuses `--write` only outside Git, in the canonical cockpit checkout, on a detached HEAD, and on the default branch; read a refusal as an instruction. Brief the files, the change, and what done looks like; leave those files alone until the job finishes, since anything written to the tree meanwhile counts as touched; then review its piece before building on it.
+Claude gets `--permission-mode bypassPermissions` and Codex `-s danger-full-access` (the only sandbox that runs on bjslab); Hermes has no switch, its toolsets decide and the receipt says whether they write. `--write` is accepted as an explicit alias. Your feature worktree may be dirty with your own work: the receipt records the tree before and after and lists the files the job `touched`, comparing dirty files by content. A write job is refused only in the canonical cockpit checkout, on a detached HEAD, and on the default branch; the refusal names both ways out (a work branch, or `--read-only`). Brief the files, the change, and what done looks like; leave those files alone until the job finishes, since anything written to the tree meanwhile counts as touched; then review its piece before building on it.
+
+**`--read-only`, for every judgment** (review, consult, second opinion, scout). It skips the checkout guard, so a review may run against any checkout or branch, the canonical one included:
+
+```bash
+cockpit agents run codex:gpt-6-astra --read-only --message-file /absolute/path/brief.md \
+  --cwd /absolute/path/checkout --effort high [--background]
+cockpit agents run --resume codex:SESSION_ID --read-only --message-file /absolute/path/followup.md
+```
+
+Pass `--read-only` on a judgment's `--resume` too: the mode is per run. Claude enforces it with denied edits; Codex with `-s read-only` where user namespaces work. Elsewhere (Codex on bjslab, Hermes, OpenCode, agy) Cockpit prepends a read-only preamble to the brief, and the receipt's `mode` row says `by brief only`. In a Git checkout the receipt compares the tree and shows a `VIOLATION` row if anything git can see changed while the job ran (ignored paths and files outside the checkout are not seen; outside Git nothing is checked). Cloud routes take no `--read-only`: a cloud job is a writing agent, so pick a local route for a judgment.
+
+The receipt names the output file, the native session (`codex:…`, `claude:…`, `hermes:…`), the exact `receipt` command, and the exit status. `--background` returns at once; read `--status` until it is `done`, `failed`, `timeout`, `deferred`, or `lost` (`queued` and `running` are still on their way). `--resume` continues in the same context through the harness's own resume, under the same checkout and ownership checks as `send`. Read the answer from `output.md`; the record in `run.json` carries no credentials.
 
 Where `cockpit agents run --status` with no run id prints a `jobs` line (the agent guard is deployed; older builds reject the bare flag), every job is bounded and counted. On bjslab it runs in its own scope under `app-t3agents.slice` (2G per job, no swap; the receipt's `scope` line names it), and at most four jobs run on the host at once, yours and every other session's, background ones included. Over the limit your run waits its turn (`queued`, with its position) and after `--wait` seconds (default 900) is `deferred`, exit 75, with nothing started: wait and retry, or raise `--wait`; do not reach for `--unbounded` to jump the queue. If the run refuses because the slice has no finite budget or the user bus is unreachable, report that as an environment gap; `--unbounded` runs in your own cgroup and the receipt says so, so use it only when the user accepts that. `cockpit agents run --status` with no id shows the slots, holders and waiters. The four slots also bound your fan-out: extra jobs queue rather than fail, so launch the jobs a pass needs, collect them, then launch more; two reviewers per pass already take half the host's slots. Each bounded job is told the bjslab heavy-work rule at launch (the same text T3 sessions get), so a job that needs a build or test suite routes it through `cockpit resources run`.
 
