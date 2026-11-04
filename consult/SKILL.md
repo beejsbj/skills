@@ -23,7 +23,7 @@ A consultation is part of the caller's task, so it runs as a subagent. When your
 
 Choose model class and reasoning effort separately. Default a bounded consultation to an available frontier judgment model at low effort. Raise effort when the ambiguity or stakes require deeper reasoning. Answer a request for another or smarter model with a qualifying model distinct from the root; report the limitation when none is available. Same-model consultation still uses a fresh context and discloses the overlap. Use a small or standard worker for extraction and mechanical execution, which is delegation rather than consultation.
 
-Outside T3, use the native subagent mechanism when it advertises the requested model, or `cockpit agents run ROUTE --read-only` for a model it lacks. When neither is available, try one appropriate authorized fallback and follow its governing skill or handbook.
+Outside T3, use the native subagent mechanism when it advertises the requested model. When it is not available, try one appropriate authorized fallback and follow its governing skill or handbook.
 
 The dispatch is complete when the requested model and effort, fresh context, access to the essential evidence, independent checks, and an answer to the question are all present. When a delivery surface was named, the judgment must also be visible there with its authorship clear. Otherwise report the concrete inability to obtain the requested consultation after the preferred route and appropriate fallback. Do not recurse into consultations about the consultation.
 
