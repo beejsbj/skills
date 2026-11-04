@@ -1,6 +1,6 @@
 ---
 name: cockpit-agents
-description: Delegate to another agent or model under one rule - T3 is the orchestrator, so use its MCP tools (delegate_task for a piece of your task, including a review; T3 threads for an independent workstream) or `t3 thread` and T3's MCP sign-in from outside a T3 session. Use `cockpit agents` only for what T3 lacks - live availability, model receipts for the Linear work log, and persona sessions. Environment installation and upgrades follow the Cockpit handbook.
+description: Delegate to another agent or model under one rule - T3 is the orchestrator, so use its MCP tools (delegate_task for a piece of your task, including a review; T3 threads for an independent workstream) or `t3 thread` and T3's MCP sign-in from outside a T3 session. Use `cockpit agents` only for what T3 lacks - live availability, and native, persona and cloud sessions. Environment installation and upgrades follow the Cockpit handbook.
 ---
 
 # Cockpit agents
@@ -19,7 +19,7 @@ T3 is the orchestrator.
 - **Hermes:** the `hermes-klaw` and `hermes-otto` T3 instances run them as `delegate_task` children. Always pass a model.
 - **From outside a T3 session:** scripts use `t3 thread start|send|show|list`; agents that speak MCP over HTTP with OAuth can sign in to T3's `/mcp`, and Klaw and Otto are signed in. Start a thread from outside with `t3_thread_launch`, passing `message` and `modelSelection`; `create_threads` fails there.
 
-Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, and persona sessions. `cockpit agents run`, `create`, `resume-limited`, `projects`, `models`, and `threads` were removed on 2026-11-04, and `show`, `send`, and `resume` no longer take T3 threads, which use `t3 thread` or T3's MCP tools.
+Everything below is for what T3 lacks: `options` when choosing a model, and native, persona and cloud sessions. `cockpit agents run`, `create`, `receipt`, `resume-limited`, `projects`, `models`, and `threads` were removed on 2026-11-04, and `show`, `send`, and `resume` no longer take T3 threads, which use `t3 thread` or T3's MCP tools.
 
 ## Select the environment and route
 
@@ -45,18 +45,14 @@ cockpit agents resume codex:SESSION_ID        # interactive, in the recorded cwd
 
 Keep the harness, exact session ID, and Hermes profile together when selecting a target. Cockpit refuses a bare ID or `t3:` ID as a T3 thread. `show` returns metadata only; keep raw personal transcripts out of output and saved artifacts. Resolve refusals from observed state rather than bypassing guards.
 
-## Cloud work
+## Cloud sessions
 
-Codex Cloud and Claude cloud sessions are dispatched by hand, not through `cockpit agents`. Resolve `cockpit handbook bjslab/capabilities/harness-cloud`. For portable heavy commands, `cockpit resources run` still has a Codex Cloud route.
+`show`, `send`, `resume`, and `sessions --harness` also take `codex-cloud:task_…` and `claude-cloud:session_…` ids. A Codex Cloud task takes no follow-up, so `send` refuses it. Starting cloud work is by hand, and `claude --cloud` needs a real terminal; `cockpit handbook agents` has the commands. For portable heavy commands, `cockpit resources run` still has a Codex Cloud route.
 
 ## Verify the result
 
-For a T3 child or thread, read the thread: it records the provider and model. For a session T3 did not start, or for the Linear work-log line, read the harness record, not the agent's self-report:
+For a T3 child or thread, read the thread: it records the provider and model. For a session T3 did not start, read the harness record, not the agent's self-report; `cockpit handbook linear/session-discipline` lists where each harness keeps it. An absent record means model unknown.
 
-```bash
-cockpit agents receipt HARNESS SESSION_ID --json   # codex, claude, opencode or hermes
-```
-
-Use the harness's own session ID, which may differ from the T3 thread ID. For an authorized issue receipt, refresh its full body and comments through `cockpit linear issue ISSUE --json`, then use `receipt` with `--issue`, `--role`, and `--outcome`. Report the target, IDs, model evidence, and work outcome separately; an absent harness record means model unknown. Keep credentials and prompt or transcript bodies out of receipts.
+For an authorized issue receipt, refresh the issue's full body and comments through `cockpit linear issue ISSUE --json`, then post the work-log line with `cockpit linear comment`, in the format `session-discipline` gives. Keep credentials and prompt or transcript bodies out of receipts.
 
 <!-- Adapted from Burooj's September 2026 T3 orchestration skill and local t3ctl workflow; T3's MCP tools now own delegation. -->

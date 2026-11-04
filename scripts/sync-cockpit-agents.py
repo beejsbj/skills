@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 
-REQUIRED_COMMANDS = ('show', 'send', 'sessions', 'resume', 'options', 'receipt')
+REQUIRED_COMMANDS = ('show', 'send', 'sessions', 'resume', 'options')
 
 
 def main():
