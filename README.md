@@ -33,7 +33,7 @@ Bundled skills maintained by an agent framework remain upstream-owned. Add a ski
 
 **`model-taste/`** — reusable model/provider judgment and dated roster, separate from dispatch mechanics and transport.
 
-**`cockpit-agents/`** — agent delegation and session operations through `cockpit agents`: T3 threads, native Hermes/Codex/Claude sessions, live route selection, and harness-backed model receipts. Replaces the `t3-code` skill. The old helper remains temporarily under `t3-code/scripts/` for callers awaiting CLI deployment; it is no longer a discoverable skill. See [the cutover procedure](scripts/cockpit-agents-cutover.md) before refreshing installations.
+**`cockpit-agents/`** — the delegation rule (T3 is the orchestrator) and what `cockpit agents` keeps: live route selection, harness-backed model receipts, and persona sessions. Replaces the `t3-code` skill. The old helper remains temporarily under `t3-code/scripts/` for callers awaiting CLI deployment; it is no longer a discoverable skill. See [the cutover procedure](scripts/cockpit-agents-cutover.md) before refreshing installations.
 
 **`consult/`** — independent model judgment: frame a neutral evidence packet, select a live frontier route and effort, and reconcile the consultant's verdict without surrendering the root decision.
 
