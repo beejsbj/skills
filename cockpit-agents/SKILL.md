@@ -1,21 +1,24 @@
 ---
 name: cockpit-agents
-description: Delegate work through cockpit agents - run a one-shot native job as a cross-provider subagent for work that is part of your task but needs another provider or model (it writes in your work branch by default; --read-only for a review, consult, or scout); create or continue a T3 thread only for an independent workstream to watch or steer; verify model receipts. Use for native Codex, Claude, or Hermes jobs and T3 threads; environment installation and upgrades follow the Cockpit handbook.
+description: Delegate to another agent or model under one rule - T3 is the orchestrator, so use its MCP tools (delegate_task for a piece of your task, including a review; T3 threads for an independent workstream) or `t3 thread` from outside a T3 session. Use `cockpit agents` only for what T3 lacks - live availability, model receipts for the Linear work log, cloud and Hermes routes, and persona sessions. Environment installation and upgrades follow the Cockpit handbook.
 ---
 
 # Cockpit agents
 
-Use `cockpit agents` as the delegation surface. A request to run, create, or message a session authorizes that operation within the stated scope; skill discovery alone does not authorize new work. Resolve `cockpit handbook agents` for command details and recovery guidance. Inspect `cockpit agents --help` on the target machine before using a newly deployed command; if it is missing, report the deployment gap.
+A request to run, create, or message a session authorizes that operation within the stated scope; skill discovery alone does not authorize new work. Resolve `cockpit handbook agents` for the rule and command details.
 
-## Subagent, job, or thread
+## The rule
 
-Decide the shape before the route:
+T3 is the orchestrator.
 
-- **Your own subagent tool** (Claude's Agent tool, Codex `spawn_agent`, Hermes `delegate_task`) when the work is part of your task and your own harness and model are right for it.
-- **A job** (`cockpit agents run`) when the work is still part of your task but needs another provider or model: Cockpit's cross-provider subagent. It runs the route's native CLI once, holds no T3 thread, shows nothing in the sidebar, and leaves an answer file plus a native session id that `receipt` proves. Like a subagent it writes in your checkout by default; judgments (reviews, consults, second opinions, scouts; every `--intent judgment` dispatch) pass `--read-only`.
-- **A T3 thread or session** (`cockpit agents create`) only for an independent workstream Burooj may want to watch, steer, or keep in his sidebar: visible, steerable, kept in history, and holding a provider process until archived.
+- **A piece of your task:** your own subagent tool when your harness and model are right; otherwise `delegate_task` on any provider and model T3 lists.
+- **An independent workstream Burooj may want to watch or steer:** a T3 thread (`t3_thread_launch`, `create_threads`).
+- **A review, consult, or scout:** `delegate_task` whose brief says to only read, then `git status` in that checkout afterwards. T3 does not enforce this: `role: review` and Codex plan mode both wrote in tests. Point it where a stray write is cheap to undo, and never at the canonical cockpit checkout.
+- **Which model ran:** read the child's T3 thread.
+- **Limits:** there is no job count. Memory caps are the limit, and past one the kernel kills a process, so route heavy commands through `cockpit resources run`.
+- **From outside a T3 session** (Klaw, Otto, cron): `t3 thread start|send|show|list`.
 
-`options` shows each route's shape in its `via` column (`run`, `run+create`, `native`); `create` nudges toward `run` when a thread reads as a review, and never refuses.
+Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, `run` on cloud and Hermes routes, and persona sessions. The other commands still work, but they are no longer how to delegate. `create`'s nudge toward `run` and the `via` column in `options` predate this rule, so follow the rule.
 
 ## Select the environment and route
 
@@ -29,11 +32,11 @@ cockpit agents threads --project PROJECT_ID
 cockpit agents sessions --harness all --json
 ```
 
-Use live `options` for route availability, account limits, and fallback order. Preserve requested models and effort; use [model-taste](../model-taste/SKILL.md) for unspecified choices. For independent judgment, use `--intent judgment` and [consult](../consult/SKILL.md); those routes run as jobs. A `native` route is your own subagent tool (Agent tool, `spawn_agent`, `delegate_task`), used from inside your session, not through Cockpit; a catalog model is not necessarily an allowed override there, so check the tool's advertised choices.
+Use live `options` for route availability, account limits, and fallback order when choosing a model. Preserve requested models and effort; use [model-taste](../model-taste/SKILL.md) for unspecified choices. For independent judgment, see [consult](../consult/SKILL.md). A `native` route is your own subagent tool (Agent tool, `spawn_agent`, `delegate_task`), used from inside your session, not through Cockpit; a catalog model is not necessarily an allowed override there, so check the tool's advertised choices.
 
 ## Run a job
 
-Write the exact brief to a file, pick a `run` route from `options`, and pass the checkout as `--cwd`. A job has two modes.
+For routes T3 lacks. Write the exact brief to a file, pick a `run` route from `options`, and pass the checkout as `--cwd`. A job has two modes.
 
 **Write, the default**, for an implementation piece of your task, briefed like a subagent and run in your own work branch:
 
@@ -65,7 +68,7 @@ T3 commands discover the local server and use temporary authentication that is r
 
 ## Create or continue a thread
 
-For work the user will watch or steer, write the exact prompt to a file. Choose access mode deliberately: automatic invocation does not imply `full-access`. T3 also supports `approval-required`, `auto-accept-edits`, and `auto`; choose from the authorized scope and provider policy.
+Inside T3 use its MCP tools, and from outside use `t3 thread`. These commands remain for persona sessions and for flags `t3 thread` lacks. Write the exact prompt to a file. Choose access mode deliberately: automatic invocation does not imply `full-access`. T3 also supports `approval-required`, `auto-accept-edits`, and `auto`; choose from the authorized scope and provider policy.
 
 ```bash
 cockpit agents create --project PROJECT_ID --title "Investigate the failing build" \
