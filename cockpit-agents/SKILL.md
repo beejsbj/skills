@@ -43,7 +43,7 @@ cockpit agents send hermes:SESSION_ID --profile PROFILE \
 cockpit agents resume codex:SESSION_ID        # interactive, in the recorded cwd
 ```
 
-Keep the harness, exact session ID, and Hermes profile together when selecting a target. Cockpit refuses a bare ID or `t3:` ID as a T3 thread. Use `show --messages` only when transcript access is needed and authorized; keep raw personal transcripts out of output and saved artifacts. Resolve refusals from observed state rather than bypassing guards.
+Keep the harness, exact session ID, and Hermes profile together when selecting a target. Cockpit refuses a bare ID or `t3:` ID as a T3 thread. `show` returns metadata only; keep raw personal transcripts out of output and saved artifacts. Resolve refusals from observed state rather than bypassing guards.
 
 ## Cloud work
 
