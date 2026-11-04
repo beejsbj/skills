@@ -1,6 +1,6 @@
 ---
 name: cockpit-agents
-description: Delegate to another agent or model under one rule - T3 is the orchestrator, so use its MCP tools (delegate_task for a piece of your task, including a review; T3 threads for an independent workstream) or `t3 thread` from outside a T3 session. Use `cockpit agents` only for what T3 lacks - live availability, model receipts for the Linear work log, cloud and Hermes routes, and persona sessions. Environment installation and upgrades follow the Cockpit handbook.
+description: Delegate to another agent or model under one rule - T3 is the orchestrator, so use its MCP tools (delegate_task for a piece of your task, including a review; T3 threads for an independent workstream) or `t3 thread` and T3's MCP sign-in from outside a T3 session. Use `cockpit agents` only for what T3 lacks - live availability, model receipts for the Linear work log, cloud routes, and persona sessions. Environment installation and upgrades follow the Cockpit handbook.
 ---
 
 # Cockpit agents
@@ -16,9 +16,10 @@ T3 is the orchestrator.
 - **A review, consult, or scout:** `delegate_task` whose brief says to only read, then `git status` in that checkout afterwards. T3 does not enforce this: `role: review` and Codex plan mode both wrote in tests. Point it where a stray write is cheap to undo, and never at the canonical cockpit checkout.
 - **Which model ran:** read the child's T3 thread.
 - **Limits:** there is no job count. Memory caps are the limit, and past one the kernel kills a process, so route heavy commands through `cockpit resources run`.
-- **From outside a T3 session** (Klaw, Otto, cron): `t3 thread start|send|show|list`.
+- **Hermes:** the `hermes-klaw` T3 instance runs Klaw as a `delegate_task` child. Always pass a model.
+- **From outside a T3 session:** scripts use `t3 thread start|send|show|list`; agents that speak MCP over HTTP with OAuth can sign in to T3's `/mcp`.
 
-Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, `run` on cloud and Hermes routes, and persona sessions. The other commands still work, but they are no longer how to delegate. `create`'s nudge toward `run` and the `via` column in `options` predate this rule, so follow the rule.
+Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, `run` on cloud routes, and persona sessions. The other commands still work, but they are no longer how to delegate. `create`'s nudge toward `run` and the `via` column in `options` predate this rule, so follow the rule.
 
 ## Select the environment and route
 
