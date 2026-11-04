@@ -16,8 +16,8 @@ T3 is the orchestrator.
 - **A review, consult, or scout:** `delegate_task` whose brief says to only read, then `git status` in that checkout afterwards. T3 does not enforce this: `role: review` and Codex plan mode both wrote in tests. Point it where a stray write is cheap to undo, and never at the canonical cockpit checkout.
 - **Which model ran:** read the child's T3 thread.
 - **Limits:** there is no job count. Memory caps are the limit, and past one the kernel kills a process, so route heavy commands through `cockpit resources run`.
-- **Hermes:** the `hermes-klaw` T3 instance runs Klaw as a `delegate_task` child. Always pass a model.
-- **From outside a T3 session:** scripts use `t3 thread start|send|show|list`; agents that speak MCP over HTTP with OAuth can sign in to T3's `/mcp`.
+- **Hermes:** the `hermes-klaw` and `hermes-otto` T3 instances run them as `delegate_task` children. Always pass a model.
+- **From outside a T3 session:** scripts use `t3 thread start|send|show|list`; agents that speak MCP over HTTP with OAuth can sign in to T3's `/mcp`, and Klaw and Otto are signed in. Start a thread from outside with `t3_thread_launch`, passing `message` and `modelSelection`; `create_threads` fails there.
 
 Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, `run` on cloud routes, and persona sessions. The other commands still work, but they are no longer how to delegate. `create`'s nudge toward `run` and the `via` column in `options` predate this rule, so follow the rule.
 
