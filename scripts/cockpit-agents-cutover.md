@@ -53,6 +53,6 @@ After the coordinator arranges Mac CLI deployment and skills checkout update, us
 
 ## Verify and recover
 
-Read the installed skill through each native root and confirm fresh agent discovery includes `cockpit-agents` and excludes `t3-code`. Existing sessions can retain their previously loaded catalog until restarted. Check `cockpit agents options` and `models` read-only on the owning machine; inspect only metadata for any existing session. Verify dispatch separately on an authorized new test session, never by sending to a user's unrelated thread.
+Read the installed skill through each native root and confirm fresh agent discovery includes `cockpit-agents` and excludes `t3-code`. Existing sessions can retain their previously loaded catalog until restarted. Check `cockpit agents options` and `sessions` read-only on the owning machine; inspect only metadata for any existing session. Verify dispatch separately on an authorized new test session, never by sending to a user's unrelated thread.
 
 For rollback, compare each backup entry with the current link before changing it. Remove a newly added link only if it still matches `after`; recreate a removed link using its recorded `before` text only if the path is still absent. Restore the prior skills commit through the coordinator's normal revert path before expecting the old `t3-code` skill to reappear: the old symlink alone cannot restore the removed `SKILL.md`. Keep the canonical checkout on `main`. The retained helper needs no rollback.
