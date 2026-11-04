@@ -19,7 +19,7 @@ T3 is the orchestrator.
 - **Hermes:** the `hermes-klaw` and `hermes-otto` T3 instances run them as `delegate_task` children. Always pass a model.
 - **From outside a T3 session:** scripts use `t3 thread start|send|show|list`; agents that speak MCP over HTTP with OAuth can sign in to T3's `/mcp`, and Klaw and Otto are signed in. Start a thread from outside with `t3_thread_launch`, passing `message` and `modelSelection`; `create_threads` fails there.
 
-Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, and persona sessions. `cockpit agents run`, `create`, and `resume-limited` were removed on 2026-11-04, and `cockpit agents send` no longer takes T3 threads, which use `t3 thread send` or T3's MCP tools.
+Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, and persona sessions. `cockpit agents run`, `create`, `resume-limited`, `projects`, `models`, and `threads` were removed on 2026-11-04, and `show`, `send`, and `resume` no longer take T3 threads, which use `t3 thread` or T3's MCP tools.
 
 ## Select the environment and route
 
@@ -27,9 +27,6 @@ Run Cockpit on the machine that owns the project files, harness credentials, and
 
 ```bash
 cockpit agents options --intent work --json
-cockpit agents projects
-cockpit agents models --instance codex
-cockpit agents threads --project PROJECT_ID
 cockpit agents sessions --harness all --json
 ```
 
@@ -46,7 +43,7 @@ cockpit agents send hermes:SESSION_ID --profile PROFILE \
 cockpit agents resume codex:SESSION_ID        # interactive, in the recorded cwd
 ```
 
-Keep the harness, exact session ID, and Hermes profile together when selecting a target. Bare IDs mean T3 threads. Use `show --messages` only when transcript access is needed and authorized; keep raw personal transcripts out of output and saved artifacts. Resolve refusals from observed state rather than bypassing guards.
+Keep the harness, exact session ID, and Hermes profile together when selecting a target. Cockpit refuses a bare ID or `t3:` ID as a T3 thread. `show` returns metadata only; keep raw personal transcripts out of output and saved artifacts. Resolve refusals from observed state rather than bypassing guards.
 
 ## Cloud work
 
@@ -57,9 +54,9 @@ Codex Cloud and Claude cloud sessions are dispatched by hand, not through `cockp
 For a T3 child or thread, read the thread: it records the provider and model. For a session T3 did not start, or for the Linear work-log line, read the harness record, not the agent's self-report:
 
 ```bash
-cockpit agents receipt codex HARNESS_SESSION_ID --json
+cockpit agents receipt HARNESS SESSION_ID --json   # codex, claude, opencode or hermes
 ```
 
-Use the underlying harness session ID, which may differ from the T3 thread ID. For an authorized issue receipt, refresh its full body and comments through `cockpit linear issue ISSUE --json`, then use `receipt` with `--issue`, `--role`, and `--outcome`. Report the target, IDs, model evidence, and work outcome separately; an absent harness record means model unknown. Keep credentials and prompt or transcript bodies out of receipts.
+Use the harness's own session ID, which may differ from the T3 thread ID. For an authorized issue receipt, refresh its full body and comments through `cockpit linear issue ISSUE --json`, then use `receipt` with `--issue`, `--role`, and `--outcome`. Report the target, IDs, model evidence, and work outcome separately; an absent harness record means model unknown. Keep credentials and prompt or transcript bodies out of receipts.
 
 <!-- Adapted from Burooj's September 2026 T3 orchestration skill and local t3ctl workflow; T3's MCP tools now own delegation. -->

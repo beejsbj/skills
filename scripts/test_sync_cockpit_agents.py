@@ -30,7 +30,7 @@ class CutoverTests(unittest.TestCase):
         self.bin = self.base / 'bin'
         self.bin.mkdir()
         self.cli = self.bin / 'cockpit'
-        self.cli.write_text('#!/bin/sh\necho "{projects,models,threads,show,create,send,sessions,resume,options,receipt}"\n')
+        self.cli.write_text('#!/bin/sh\necho "{show,send,sessions,resume,options,receipt}"\n')
         self.cli.chmod(0o755)
         self.backup = self.base / 'before.json'
 
@@ -89,7 +89,7 @@ class CutoverTests(unittest.TestCase):
         self.assert_untouched()
 
     def test_missing_options_blocks_check_and_apply(self):
-        self.cli.write_text('#!/bin/sh\necho "{projects,models,threads,show,create,send,sessions,resume,receipt}"\n')
+        self.cli.write_text('#!/bin/sh\necho "{show,send,sessions,resume,receipt}"\n')
         for args in [('--check',), ('--apply', '--backup', str(self.backup))]:
             with self.subTest(mode=args[0]):
                 result = self.run_linker(*args)
