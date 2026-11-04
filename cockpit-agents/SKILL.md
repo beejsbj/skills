@@ -12,14 +12,14 @@ A request to run, create, or message a session authorizes that operation within 
 T3 is the orchestrator.
 
 - **A piece of your task:** your own subagent tool when your harness and model are right; otherwise `delegate_task` on any provider and model T3 lists.
-- **An independent workstream Burooj may want to watch or steer:** a T3 thread (`t3_thread_launch`, `create_threads`).
-- **A review, consult, or scout:** `delegate_task` whose brief says to only read, then `git status` in that checkout afterwards. T3 does not enforce this: `role: review` and Codex plan mode both wrote in tests. Point it where a stray write is cheap to undo, and never at the canonical cockpit checkout.
+- **An independent workstream Burooj may want to watch or steer:** a T3 thread. For one that writes, use `t3_thread_launch` with a `worktree` workspace strategy, because `create_threads` shares the parent's branch and checkout.
+- **A review, consult, or scout:** `delegate_task` whose brief says to only read. Run `git status` in that checkout before and after, and compare them. That sees only what git sees: not ignored paths or writes outside the checkout. T3 does not enforce this: `role: review` and Codex plan mode both wrote in tests. Point it where a stray write is cheap to undo, and never at the canonical cockpit checkout.
 - **Which model ran:** read the child's T3 thread.
 - **Limits:** there is no job count. Memory caps are the limit, and past one the kernel kills a process, so route heavy commands through `cockpit resources run`.
 - **Hermes:** the `hermes-klaw` and `hermes-otto` T3 instances run them as `delegate_task` children. Always pass a model.
 - **From outside a T3 session:** scripts use `t3 thread start|send|show|list`; agents that speak MCP over HTTP with OAuth can sign in to T3's `/mcp`, and Klaw and Otto are signed in. Start a thread from outside with `t3_thread_launch`, passing `message` and `modelSelection`; `create_threads` fails there.
 
-Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, and persona sessions. `run`, `create`, `resume-limited`, and `send` on T3 threads were removed on 2026-11-04.
+Everything below is for what T3 lacks: `options` when choosing a model, `receipt` for the Linear work-log line, and persona sessions. `cockpit agents run`, `create`, and `resume-limited` were removed on 2026-11-04, and `cockpit agents send` no longer takes T3 threads, which use `t3 thread send` or T3's MCP tools.
 
 ## Select the environment and route
 
