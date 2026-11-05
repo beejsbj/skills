@@ -1,6 +1,6 @@
 ---
 name: cockpit-agents
-description: Delegate to another agent or model under one rule - T3 is the orchestrator, so use its MCP tools (delegate_task for a piece of your task, including a review; T3 threads for an independent workstream) or `t3 thread` and T3's MCP sign-in from outside a T3 session. Use `cockpit agents` only for what T3 lacks - live availability, and native, persona and cloud sessions. Environment installation and upgrades follow the Cockpit handbook.
+description: Delegate to another agent or model under one rule - T3 is the orchestrator, so use its MCP tools (delegate_task for a piece of your task, including a review; T3 threads for an independent workstream) or `t3 thread` and T3's MCP sign-in from outside a T3 session. Use `cockpit agents` only for what T3 lacks - live availability; native and persona sessions; and handing off or moving work to the cloud (Claude cloud sessions, Codex Cloud). Environment installation and upgrades follow the Cockpit handbook.
 ---
 
 # Cockpit agents
@@ -19,7 +19,7 @@ T3 is the orchestrator.
 - **Hermes:** the `hermes-klaw` and `hermes-otto` T3 instances run them as `delegate_task` children. Always pass a model.
 - **From outside a T3 session:** scripts use `t3 thread start|send|show|list`; agents that speak MCP over HTTP with OAuth can sign in to T3's `/mcp`, and Klaw and Otto are signed in. Start a thread from outside with `t3_thread_launch`, passing `message` and `modelSelection`; `create_threads` fails there.
 
-Everything below is for what T3 lacks: `options` when choosing a model, and native, persona and cloud sessions. `cockpit agents run`, `create`, `receipt`, `resume-limited`, `projects`, `models`, and `threads` were removed on 2026-11-04, and `show`, `send`, and `resume` no longer take T3 threads, which use `t3 thread` or T3's MCP tools.
+Everything below is for what T3 lacks: `options` when choosing a model, native and persona sessions, and cloud handoff. `cockpit agents run`, `create`, `receipt`, `resume-limited`, `projects`, `models`, and `threads` were removed on 2026-11-04, and `show`, `send`, and `resume` no longer take T3 threads, which use `t3 thread` or T3's MCP tools.
 
 ## Select the environment and route
 
@@ -45,9 +45,18 @@ cockpit agents resume codex:SESSION_ID        # interactive, in the recorded cwd
 
 Keep the harness, exact session ID, and Hermes profile together when selecting a target. Cockpit refuses a bare ID or `t3:` ID as a T3 thread. `show` returns metadata only; keep raw personal transcripts out of output and saved artifacts. Resolve refusals from observed state rather than bypassing guards.
 
-## Cloud sessions
+## Hand off to the cloud
 
-`show`, `send`, `resume`, and `sessions --harness` also take `codex-cloud:task_…` and `claude-cloud:session_…` ids. A Codex Cloud task takes no follow-up, so `send` refuses it. Starting cloud work is by hand, and `claude --cloud` needs a real terminal; `cockpit handbook agents` has the commands. For portable heavy commands, `cockpit resources run` still has a Codex Cloud route.
+When asked to hand off, move, or continue work in the cloud, commit and push first: the cloud sees only the pushed branch, so uncommitted work does not travel. Write a brief a fresh agent can start from, then run:
+
+```bash
+cockpit agents cloud claude --message-file /absolute/path/brief.md --cwd /absolute/path/checkout [--model MODEL] [--trust-cwd] [--dry-run]
+cockpit agents cloud codex --message-file /absolute/path/brief.md --cwd /absolute/path/checkout [--dry-run]
+```
+
+It refuses an unpushed branch and warns about uncommitted changes. Codex also needs a one-time environment per repository; the refusal prints the setup steps, which only Burooj can complete in the web UI. Run it directly rather than `claude --cloud`, which needs a real terminal. `--trust-cwd` lets a folder's hooks and MCP servers load in later local `claude` runs, so pass it only when the command reports `folder not trusted by the Claude CLI` and the user's handoff request covers that checkout. Exit 1 means refused and nothing started, so report why. Exit 3 means `uncertain`: a session may exist, so check before retrying. The brief is visible in the host's process list while `claude` starts, so keep secrets out of it.
+
+Report the `claude-cloud:…` or `codex-cloud:…` id and URL it prints. `show`, `send`, `resume`, and `sessions --harness` take those ids. A Codex Cloud task takes no follow-up, so `send` refuses it. `cockpit handbook agents` has environment setup and failures. For portable heavy commands, `cockpit resources run` has its own Codex Cloud route.
 
 ## Verify the result
 
